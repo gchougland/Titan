@@ -2,12 +2,13 @@
   "Skeleton": "Stone_Talus",
   "DisplayName": "Adamantite Talus",
   "BodyScale": 1.35,
+  "RockType": "Magma",
 
   "WeakpointModel": "Titan_OreNode_Adamantite",
-  "WeakpointScale": 1.5,
+  "WeakpointScale": 3.0,
   "WeakpointCountMin": 2,
   "WeakpointCountMax": 4,
-  "WeakpointEmbed": 0.25,
+  "WeakpointEmbed": -0.25,
   "WeakpointHealth": 500,
 
   "MoveSpeed": 1.5,
@@ -17,10 +18,14 @@
 
   "AttackRange": 6.7,
   "AttackDamage": 38,
-  "AttackRadius": 6.2,
-  "AttackKnockback": 19,
+  "AttackRadius": 1.9,
+  "AttackKnockback": 9.5,
   "AttackCooldown": 4.2,
   "StunSeconds": 4.2,
+
+  "SlamChance": 0.35,
+  "SlamRadius": 4.1,
+  "SlamProneSeconds": 7.2,
 
   "DropList": "Drop_Talus_Adamantite",
   "DropItem": "Ore_Adamantite",

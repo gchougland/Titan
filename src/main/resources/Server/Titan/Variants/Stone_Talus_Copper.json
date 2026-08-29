@@ -5,10 +5,10 @@
   "BodyScale": 1.0,
 
   "WeakpointModel": "Titan_OreNode_Copper",
-  "WeakpointScale": 1.25,
+  "WeakpointScale": 2.5,
   "WeakpointCountMin": 2,
   "WeakpointCountMax": 4,
-  "WeakpointEmbed": 0.25,
+  "WeakpointEmbed": -0.25,
   "WeakpointHealth": 120,
 
   "MoveSpeed": 1.8,
@@ -18,10 +18,14 @@
 
   "AttackRange": 5.0,
   "AttackDamage": 14,
-  "AttackRadius": 4.5,
-  "AttackKnockback": 12,
+  "AttackRadius": 1.4,
+  "AttackKnockback": 6,
   "AttackCooldown": 5.0,
   "StunSeconds": 3.5,
+
+  "SlamChance": 0.35,
+  "SlamRadius": 3.0,
+  "SlamProneSeconds": 6.0,
 
   "DropList": "Drop_Talus_Copper",
   "DropItem": "Ore_Copper",

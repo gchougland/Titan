@@ -4,6 +4,7 @@ import com.hexvane.titan.asset.TitanSkeletonAsset;
 import com.hypixel.hytale.math.vector.Rotation3f;
 import org.joml.Matrix4d;
 import org.joml.Quaterniond;
+import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
@@ -166,6 +167,14 @@ public final class TitanPose {
     public Rotation3f getWorldRotation(final int bone, @Nonnull final Rotation3f dest) {
         world[bone].getNormalizedRotation(scratchQuat);
         scratchQuat.getEulerAnglesYXZ(scratchVec);
+        return dest.set((float) scratchVec.x, (float) scratchVec.y, (float) scratchVec.z);
+    }
+
+    /** As {@link #getWorldRotation(int, Rotation3f)}, with {@code local} applied on top of the bone. */
+    @Nonnull
+    public Rotation3f getWorldRotation(final int bone, @Nonnull final Quaterniondc local, @Nonnull final Rotation3f dest) {
+        world[bone].getNormalizedRotation(scratchQuat);
+        scratchQuat.mul(local).getEulerAnglesYXZ(scratchVec);
         return dest.set((float) scratchVec.x, (float) scratchVec.y, (float) scratchVec.z);
     }
 }

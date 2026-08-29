@@ -2,12 +2,13 @@
   "Skeleton": "Stone_Talus",
   "DisplayName": "Thorium Talus",
   "BodyScale": 1.2,
+  "RockType": "Sandstone",
 
   "WeakpointModel": "Titan_OreNode_Thorium",
-  "WeakpointScale": 1.37,
+  "WeakpointScale": 2.74,
   "WeakpointCountMin": 2,
   "WeakpointCountMax": 4,
-  "WeakpointEmbed": 0.25,
+  "WeakpointEmbed": -0.25,
   "WeakpointHealth": 300,
 
   "MoveSpeed": 1.6,
@@ -17,10 +18,14 @@
 
   "AttackRange": 6.0,
   "AttackDamage": 26,
-  "AttackRadius": 5.5,
-  "AttackKnockback": 16,
+  "AttackRadius": 1.7,
+  "AttackKnockback": 8,
   "AttackCooldown": 4.6,
   "StunSeconds": 3.9,
+
+  "SlamChance": 0.35,
+  "SlamRadius": 3.6,
+  "SlamProneSeconds": 6.6,
 
   "DropList": "Drop_Talus_Thorium",
   "DropItem": "Ore_Thorium",

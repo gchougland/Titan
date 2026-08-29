@@ -5,6 +5,8 @@ import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import org.joml.Quaterniond;
+import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
@@ -25,15 +27,21 @@ public final class TitanWeakpointComponent implements Component<EntityStore> {
     private int boneIndex;
     @Nonnull
     private final Vector3d localOffset = new Vector3d();
+    @Nonnull
+    private final Quaterniond localRotation = new Quaterniond();
     private boolean broken;
 
     public TitanWeakpointComponent() {
     }
 
-    public TitanWeakpointComponent(@Nonnull final Ref<EntityStore> owner, final int boneIndex, @Nonnull final Vector3d localOffset) {
+    public TitanWeakpointComponent(@Nonnull final Ref<EntityStore> owner,
+                                   final int boneIndex,
+                                   @Nonnull final Vector3d localOffset,
+                                   @Nonnull final Quaterniondc localRotation) {
         this.owner = owner;
         this.boneIndex = boneIndex;
         this.localOffset.set(localOffset);
+        this.localRotation.set(localRotation);
     }
 
     @Nullable
@@ -49,6 +57,16 @@ public final class TitanWeakpointComponent implements Component<EntityStore> {
     @Nonnull
     public Vector3d getLocalOffset() {
         return localOffset;
+    }
+
+    /**
+     * Orientation relative to the bone, tilting the ore's growth axis along the socket's outward normal so
+     * a node on the chest juts forwards and one on the back juts backwards instead of all of them standing
+     * upright.
+     */
+    @Nonnull
+    public Quaterniondc getLocalRotation() {
+        return localRotation;
     }
 
     public boolean isBroken() {
@@ -73,6 +91,7 @@ public final class TitanWeakpointComponent implements Component<EntityStore> {
         copy.owner = owner;
         copy.boneIndex = boneIndex;
         copy.localOffset.set(localOffset);
+        copy.localRotation.set(localRotation);
         copy.broken = broken;
         return copy;
     }

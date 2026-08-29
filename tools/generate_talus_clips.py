@@ -31,6 +31,8 @@ HIP = (2.2, -2.0)
 UPPER_ARM, LOWER_ARM = 3.4, 3.4
 UPPER_LEG, LOWER_LEG = 1.8, 1.8
 BODY_HEIGHT = 5.0
+# The back slab reaches this far up and forward of the Body node, per the skeleton's socket comment.
+BACK_HALF_HEIGHT, BACK_HALF_DEPTH = 2.0, 2.0
 
 ARMS = ['Arm_L_Upper', 'Arm_L_Lower', 'Hand_L', 'Arm_R_Upper', 'Arm_R_Lower', 'Hand_R']
 LEGS = ['Leg_L_Upper', 'Leg_L_Lower', 'Foot_L', 'Leg_R_Upper', 'Leg_R_Lower', 'Foot_R']
@@ -77,17 +79,35 @@ def rotate(q, v):
 # A pose maps a bone name to XYZ Euler degrees. Bones left out hold their bind rotation, which for the
 # arms means hanging straight down through the floor, so every pose states the arms explicitly.
 #
-# The arms are deliberately long (9.5 units against a 6.3 shoulder) because they double as the ramp the
-# player climbs after a smash. That length forces a heavily bent resting elbow, which is what gives the
-# Talus its hunched knuckle-walker silhouette.
+# The arms are long relative to the shoulder height (6.8 units against 6.3) because they double as the
+# ramp the player climbs after a smash. That length forces a heavily bent resting elbow, which is what
+# gives the Talus its hunched knuckle-walker silhouette.
+
+def elbow_back(upper_x, lower_x):
+    """Re-solves an arm so the elbow bends backwards without moving the hand.
+
+    Arm poses are far easier to author as "swing the whole arm forward, then fold the forearm back under
+    it", but that leaves the elbow ahead of the shoulder-to-hand line, which reads as a joint bending the
+    wrong way. Both arm segments are the same length, so the shoulder-to-hand chord bisects the elbow
+    angle, and reflecting the bend across that chord is just this swap: same hand position, elbow behind.
+    """
+    return upper_x + lower_x, -lower_x
+
+
+def one_arm(side, upper_x, upper_z, lower_x):
+    """One arm's angles. `upper_z` is the outward splay, already signed for the side."""
+    upper_x, lower_x = elbow_back(upper_x, lower_x)
+    return {
+        f'Arm_{side}_Upper': (upper_x, 0, upper_z),
+        f'Arm_{side}_Lower': (lower_x, 0, 0),
+    }
+
 
 def arm_pose(upper_x, upper_z, lower_x):
     """Symmetric arm angles, mirrored across the centreline."""
     return {
-        'Arm_L_Upper': (upper_x, 0, -upper_z),
-        'Arm_L_Lower': (lower_x, 0, 0),
-        'Arm_R_Upper': (upper_x, 0, upper_z),
-        'Arm_R_Lower': (lower_x, 0, 0),
+        **one_arm('L', upper_x, -upper_z, lower_x),
+        **one_arm('R', upper_x, upper_z, lower_x),
     }
 
 
@@ -102,10 +122,13 @@ def leg_pose(upper_x, lower_x, foot_x):
     }
 
 
-# Awake resting stance: knuckles down and slightly out, elbows forward.
+# Awake resting stance: knuckles down and slightly out, elbows flared back.
 REST = {**arm_pose(42, 10, -100), **leg_pose(10, -20, 10)}
 
 # Curled up: body dropped, elbows out, hands tucked under the chest, legs folded beneath.
+#
+# Note every arm angle here is stated elbow-forward and converted by elbow_back(), so the numbers read as
+# "how far the arm swings and how far the forearm folds under it", not as final bone rotations.
 SLEEP = {**arm_pose(70, 35, -140), **leg_pose(70, -140, 60)}
 
 
@@ -218,14 +241,8 @@ def build_idle():
 def build_walk():
     # Legs are driven by the gait planner, so this is the upper-body half of the cycle: arms swinging in
     # counter-phase with a heavy roll onto whichever foot is planted.
-    left_forward = {
-        'Arm_L_Upper': (60, 0, -10), 'Arm_L_Lower': (-105, 0, 0),
-        'Arm_R_Upper': (24, 0, 10), 'Arm_R_Lower': (-95, 0, 0),
-    }
-    right_forward = {
-        'Arm_L_Upper': (24, 0, -10), 'Arm_L_Lower': (-95, 0, 0),
-        'Arm_R_Upper': (60, 0, 10), 'Arm_R_Lower': (-105, 0, 0),
-    }
+    left_forward = {**one_arm('L', 60, -10, -105), **one_arm('R', 24, 10, -95)}
+    right_forward = {**one_arm('L', 24, -10, -95), **one_arm('R', 60, 10, -105)}
     legs = leg_pose(10, -20, 10)
 
     return clip(100, False,
@@ -248,10 +265,7 @@ def build_attack(side):
     other = 'R' if side == 'L' else 'L'
 
     def counterweight(upper_x, lower_x):
-        return {
-            f'Arm_{other}_Upper': (upper_x, 0, sign * -14),
-            f'Arm_{other}_Lower': (lower_x, 0, 0),
-        }
+        return one_arm(other, upper_x, sign * -14, lower_x)
 
     legs = leg_pose(14, -26, 12)
 
@@ -267,14 +281,64 @@ def build_attack(side):
                 body_keys([(0, (0, 0, 0)), (35, (0, 0.5, 0)), (65, (0, -0.9, 0)), (110, (0, -0.7, 0))]))
 
 
+# --- Body slam -------------------------------------------------------------------------------------
+#
+# Both arms are pinned by IK for the whole move, so what these clips actually control is the Body node.
+# A negative X tips the slab's top towards -Z, and at -40 with the body dropped 2.2 the leading underside
+# sits right on the floor while the front lip of the back comes down to about 3.0 — low enough to step onto
+# from a braced forearm, which is the entire point of the move. See the climb_check output.
+
+SLAM_PITCH = -40
+SLAM_DROP = -2.2
+
+REARED = merge(arm_pose(-15, 20, -60), **leg_pose(-10, -30, 4), Body=(26, 0, 0))
+FLOORED = merge(arm_pose(35, 12, -70), **leg_pose(45, -85, 20), Body=(SLAM_PITCH, 0, 0))
+
+
+def build_slam_windup():
+    # Rocks back onto the hind legs. Deliberately slow and large: it is the tell that the slam is coming.
+    return clip(66, True,
+                poses_to_keys([(0, merge(REST, Body=(0, 0, 0))), (40, blend(REST, REARED, 0.7)), (66, REARED)]),
+                body_keys([(0, (0, 0, 0)), (40, (0, 0.8, 0)), (66, (0, 1.1, 0))]))
+
+
+def build_slam():
+    # Everything comes down at once. The AOE fires at frame 18, which is where the body bottoms out.
+    return clip(30, True,
+                poses_to_keys([(0, REARED), (18, FLOORED), (30, FLOORED)]),
+                body_keys([(0, (0, 1.1, 0)), (18, (0, SLAM_DROP, 0)), (30, (0, SLAM_DROP, 0))]))
+
+
+def build_prone():
+    # Face down, heaving. This is the window the player climbs, so it barely moves.
+    heave = merge(arm_pose(37, 12, -68), **leg_pose(47, -87, 20), Body=(SLAM_PITCH - 1, 0, 0))
+    return clip(150, False,
+                poses_to_keys([(0, FLOORED), (60, heave), (110, FLOORED), (150, heave)]),
+                body_keys([(0, (0, SLAM_DROP, 0)), (60, (0, SLAM_DROP + 0.15, 0)),
+                           (110, (0, SLAM_DROP, 0)), (150, (0, SLAM_DROP + 0.15, 0))]))
+
+
+def build_rise():
+    # Shoves back up onto its feet and settles into the resting stance.
+    return clip(96, True,
+                poses_to_keys([(0, FLOORED), (48, blend(FLOORED, REST, 0.6)), (96, merge(REST, Body=(0, 0, 0)))]),
+                body_keys([(0, (0, SLAM_DROP, 0)), (48, (0, -1.0, 0)), (96, (0, 0, 0))]))
+
+
 def build_stunned():
     # Hunched over the buried fist, straining to pull it free. This is the window the player climbs, so the
     # pose barely moves.
-    hunched = merge(arm_pose(50, 6, -95), **leg_pose(20, -34, 14), Body=(20, 0, 0))
-    strain = merge(arm_pose(52, 6, -93), **leg_pose(22, -36, 14), Body=(23, 2, 0))
+    #
+    # The pitch is what makes the climb work. A negative Body X tips the slab's top towards -Z, which drops
+    # the front lip of the back from 7.0 to 4.1 and pulls it forward to meet the planted arm, taking the
+    # arm from a 52-degree wall down to a 39-degree ramp. See the climb_check output. Crouching further
+    # would flatten it more, but at this pitch the slab's leading underside is only 0.74 off the ground and
+    # any more would have it ploughing through rises in the terrain.
+    hunched = merge(arm_pose(50, 6, -95), **leg_pose(20, -34, 14), Body=(-32, 0, 0))
+    strain = merge(arm_pose(52, 6, -93), **leg_pose(22, -36, 14), Body=(-34, 2, 0))
     return clip(120, False,
                 poses_to_keys([(0, hunched), (45, strain), (85, hunched), (120, strain)]),
-                body_keys([(0, (0, -0.8, 0)), (45, (0, -0.95, 0)), (85, (0, -0.8, 0)), (120, (0, -0.95, 0))]))
+                body_keys([(0, (0, -1.5, 0)), (45, (0, -1.65, 0)), (85, (0, -1.5, 0)), (120, (0, -1.65, 0))]))
 
 
 def build_death():
@@ -300,6 +364,10 @@ CLIPS = {
     'Attack_Arm_L': lambda: build_attack('L'),
     'Attack_Arm_R': lambda: build_attack('R'),
     'Stunned': build_stunned,
+    'Slam_Windup': build_slam_windup,
+    'Slam': build_slam,
+    'Prone': build_prone,
+    'Rise': build_rise,
     'Death': build_death,
 }
 
@@ -330,6 +398,33 @@ def check(pose_name, pose, body_dy=0.0):
     print(f'  {pose_name:8} ' + '  '.join(out))
 
 
+def climb_check(pose_name, body_euler, body_dy, reach=5.0):
+    """Reports the geometry a player has to climb during a pose.
+
+    The attacking arm is fully IK-driven onto the impact point, so its clip angles say nothing about what
+    the arm looks like — the shoulder is what sets the slope. This walks the Body node's own rotation and
+    translation to find the shoulder and the front lip of the back slab, then prints the slope of the line
+    from the planted fist up to the shoulder. Anything much past 45 degrees is a wall, not a ramp.
+    """
+    q_body = euler_to_quat(*body_euler)
+    origin_y = BODY_HEIGHT + body_dy
+
+    def place(local):
+        v = rotate(q_body, local)
+        return (v[0], origin_y + v[1], v[2])
+
+    shoulder = place((SHOULDER[0], SHOULDER[1], 0))
+    # Front lip of the back slab, the edge stepped onto from the arm.
+    lip = place((0, BACK_HALF_HEIGHT, -BACK_HALF_DEPTH))
+    # Front underside, which must stay clear of the ground.
+    chin = place((0, -BACK_HALF_HEIGHT, -BACK_HALF_DEPTH))
+
+    run = reach - shoulder[2]
+    slope = math.degrees(math.atan2(shoulder[1], run)) if run > 0 else 90.0
+    print(f'  {pose_name:9} shoulder={shoulder[1]:5.2f} high  back lip={lip[1]:5.2f} high at z{lip[2]:6.2f}  '
+          f'underside={chin[1]:5.2f}  arm slope={slope:5.1f} deg')
+
+
 def quat_mul(a, b):
     ax, ay, az, aw = a
     bx, by, bz, bw = b
@@ -347,6 +442,11 @@ def main():
     print('Effector positions for the base poses (model units, ground at y=0):')
     check('REST', REST)
     check('SLEEP', SLEEP, body_dy=-2.2)
+
+    print('Climb geometry (ground at y=0, titan facing -Z, fist planted 5.0 ahead):')
+    climb_check('STAND', (0, 0, 0), 0.0)
+    climb_check('STUNNED', (-32, 0, 0), -1.5)
+    climb_check('PRONE', (SLAM_PITCH, 0, 0), SLAM_DROP)
 
     for name, build in CLIPS.items():
         document = build()

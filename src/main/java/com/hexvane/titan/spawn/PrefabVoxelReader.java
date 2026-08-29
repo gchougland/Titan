@@ -49,6 +49,24 @@ public final class PrefabVoxelReader {
         return CACHE.computeIfAbsent(prefabKey, PrefabVoxelReader::load);
     }
 
+    /**
+     * Reads the rock-type variant of a prefab: {@code Talus_Body} with a suffix of {@code Basalt} reads
+     * {@code Talus_Body_Basalt}.
+     *
+     * <p>A rock type only has to ship the parts it changes; anything it leaves out silently falls back to
+     * the unsuffixed prefab rather than leaving that bone with no geometry.
+     */
+    @Nonnull
+    public static PrefabVoxels read(@Nullable final String prefabKey, @Nullable final String suffix) {
+        if (prefabKey == null || prefabKey.isEmpty() || suffix == null || suffix.isEmpty()) return read(prefabKey);
+
+        final String suffixed = prefabKey + '_' + suffix;
+        if (!CACHE.containsKey(suffixed) && PrefabStore.get().findBrowsablePrefabPath(suffixed) == null) {
+            return read(prefabKey);
+        }
+        return read(suffixed);
+    }
+
     /** Drops the cache so edited prefabs are picked up on the next spawn. */
     public static void invalidate() {
         CACHE.clear();

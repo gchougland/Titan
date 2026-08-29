@@ -28,6 +28,7 @@ import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
 import com.hypixel.hytale.server.core.modules.entityui.UIComponentList;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
@@ -104,8 +105,10 @@ public final class TitanPartBuilder {
                                                      final float modelScale,
                                                      final float health,
                                                      @Nonnull final Vector3d worldPosition,
+                                                     @Nonnull final Rotation3f worldRotation,
                                                      final int boneIndex,
-                                                     @Nonnull final Vector3d localOffset) {
+                                                     @Nonnull final Vector3d localOffset,
+                                                     @Nonnull final Quaterniondc localRotation) {
 
         final ModelAsset modelAsset = ModelAsset.getAssetMap().getAsset(modelAssetId);
         if (modelAsset == null) return null;
@@ -113,13 +116,14 @@ public final class TitanPartBuilder {
         final Model model = Model.createStaticScaledModel(modelAsset, modelScale);
 
         final var holder = EntityStore.REGISTRY.newHolder();
-        holder.addComponent(TransformComponent.getComponentType(), new TransformComponent(new Vector3d(worldPosition), Rotation3f.IDENTITY));
+        holder.addComponent(TransformComponent.getComponentType(), new TransformComponent(new Vector3d(worldPosition), new Rotation3f(worldRotation)));
         holder.addComponent(HeadRotation.getComponentType(), new HeadRotation(Rotation3f.IDENTITY));
         holder.addComponent(UUIDComponent.getComponentType(), new UUIDComponent(UUID.randomUUID()));
         holder.addComponent(ModelComponent.getComponentType(), new ModelComponent(model));
         holder.addComponent(PersistentModel.getComponentType(), new PersistentModel(model.toReference()));
         holder.addComponent(BoundingBox.getComponentType(), new BoundingBox(model.getBoundingBox()));
-        holder.addComponent(TitanWeakpointComponent.getComponentType(), new TitanWeakpointComponent(owner, boneIndex, localOffset));
+        holder.addComponent(TitanWeakpointComponent.getComponentType(),
+            new TitanWeakpointComponent(owner, boneIndex, localOffset, localRotation));
 
         holder.addComponent(NetworkId.getComponentType(), new NetworkId(store.getExternalData().takeNextNetworkId()));
         holder.ensureComponent(EntityModule.get().getVisibleComponentType());

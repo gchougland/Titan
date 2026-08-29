@@ -2,12 +2,13 @@
   "Skeleton": "Stone_Talus",
   "DisplayName": "Iron Talus",
   "BodyScale": 1.1,
+  "RockType": "Basalt",
 
   "WeakpointModel": "Titan_OreNode_Iron",
-  "WeakpointScale": 1.3,
+  "WeakpointScale": 2.6,
   "WeakpointCountMin": 2,
   "WeakpointCountMax": 4,
-  "WeakpointEmbed": 0.25,
+  "WeakpointEmbed": -0.25,
   "WeakpointHealth": 200,
 
   "MoveSpeed": 1.7,
@@ -17,10 +18,14 @@
 
   "AttackRange": 5.5,
   "AttackDamage": 20,
-  "AttackRadius": 5.0,
-  "AttackKnockback": 14,
+  "AttackRadius": 1.6,
+  "AttackKnockback": 7,
   "AttackCooldown": 4.8,
   "StunSeconds": 3.7,
+
+  "SlamChance": 0.35,
+  "SlamRadius": 3.3,
+  "SlamProneSeconds": 6.3,
 
   "DropList": "Drop_Talus_Iron",
   "DropItem": "Ore_Iron",

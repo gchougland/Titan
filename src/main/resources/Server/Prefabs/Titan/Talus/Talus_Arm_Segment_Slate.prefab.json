@@ -1,0 +1,167 @@
+{
+    "version":  8,
+    "blockIdVersion":  11,
+    "anchorX":  0,
+    "anchorY":  0,
+    "anchorZ":  0,
+    "blocks":  [
+                   {
+                       "x":  0,
+                       "y":  0,
+                       "z":  1,
+                       "name":  "Rock_Slate"
+                   },
+                   {
+                       "x":  0,
+                       "y":  1,
+                       "z":  0,
+                       "name":  "Rock_Slate"
+                   },
+                   {
+                       "x":  0,
+                       "y":  1,
+                       "z":  1,
+                       "name":  "Rock_Slate_Cobble"
+                   },
+                   {
+                       "x":  0,
+                       "y":  2,
+                       "z":  0,
+                       "name":  "Rock_Slate"
+                   },
+                   {
+                       "x":  0,
+                       "y":  2,
+                       "z":  1,
+                       "name":  "Rock_Slate"
+                   },
+                   {
+                       "x":  0,
+                       "y":  3,
+                       "z":  0,
+                       "name":  "Rock_Slate"
+                   },
+                   {
+                       "x":  1,
+                       "y":  0,
+                       "z":  0,
+                       "name":  "Rock_Slate"
+                   },
+                   {
+                       "x":  1,
+                       "y":  1,
+                       "z":  0,
+                       "name":  "Rock_Slate"
+                   },
+                   {
+                       "x":  1,
+                       "y":  1,
+                       "z":  1,
+                       "name":  "Rock_Slate"
+                   },
+                   {
+                       "x":  1,
+                       "y":  2,
+                       "z":  0,
+                       "name":  "Rock_Slate"
+                   },
+                   {
+                       "x":  1,
+                       "y":  2,
+                       "z":  1,
+                       "name":  "Rock_Slate"
+                   },
+                   {
+                       "x":  1,
+                       "y":  3,
+                       "z":  1,
+                       "name":  "Rock_Slate"
+                   }
+               ],
+    "fluids":  [
+                   {
+                       "x":  0,
+                       "y":  0,
+                       "z":  1,
+                       "name":  "Empty",
+                       "level":  0
+                   },
+                   {
+                       "x":  0,
+                       "y":  1,
+                       "z":  0,
+                       "name":  "Empty",
+                       "level":  0
+                   },
+                   {
+                       "x":  0,
+                       "y":  1,
+                       "z":  1,
+                       "name":  "Empty",
+                       "level":  0
+                   },
+                   {
+                       "x":  0,
+                       "y":  2,
+                       "z":  0,
+                       "name":  "Empty",
+                       "level":  0
+                   },
+                   {
+                       "x":  0,
+                       "y":  2,
+                       "z":  1,
+                       "name":  "Empty",
+                       "level":  0
+                   },
+                   {
+                       "x":  0,
+                       "y":  3,
+                       "z":  0,
+                       "name":  "Empty",
+                       "level":  0
+                   },
+                   {
+                       "x":  1,
+                       "y":  0,
+                       "z":  0,
+                       "name":  "Empty",
+                       "level":  0
+                   },
+                   {
+                       "x":  1,
+                       "y":  1,
+                       "z":  0,
+                       "name":  "Empty",
+                       "level":  0
+                   },
+                   {
+                       "x":  1,
+                       "y":  1,
+                       "z":  1,
+                       "name":  "Empty",
+                       "level":  0
+                   },
+                   {
+                       "x":  1,
+                       "y":  2,
+                       "z":  0,
+                       "name":  "Empty",
+                       "level":  0
+                   },
+                   {
+                       "x":  1,
+                       "y":  2,
+                       "z":  1,
+                       "name":  "Empty",
+                       "level":  0
+                   },
+                   {
+                       "x":  1,
+                       "y":  3,
+                       "z":  1,
+                       "name":  "Empty",
+                       "level":  0
+                   }
+               ]
+}

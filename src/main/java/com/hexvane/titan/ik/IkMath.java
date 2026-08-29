@@ -13,6 +13,9 @@ public final class IkMath {
 
     public static final double EPSILON = 1.0e-6;
 
+    /** Squared sine of 15 degrees: below this a bone counts as vertical for {@link #uprightTwist}. */
+    private static final double UPRIGHT_MIN_LENGTH_SQ = 0.067;
+
     private IkMath() {
     }
 
@@ -65,8 +68,32 @@ public final class IkMath {
     }
 
     /**
-     * Builds the world rotation that points a bone's local axis along {@code worldDir}, twisted so the
-     * bone's bend reference faces {@code worldPole}.
+     * Reference direction for rolling a bone about its own axis so that a flat face of its square
+     * cross-section ends up on top, rather than an edge.
+     *
+     * <p>The bend pole is the wrong reference for this. It lies in the plane the joint bends through, so on
+     * a limb held out at a slant the projected pole tips well away from horizontal and drags the
+     * cross-section round with it, leaving a ridge where the player wants a walkable face. World up
+     * projects cleanly out of any limb that is not close to vertical.
+     *
+     * @param pole fallback for a near-vertical bone, where up carries no roll information and normalising
+     *             the little that is left of it would make the bone spin on the spot
+     */
+    @Nonnull
+    public static Vector3d uprightTwist(@Nonnull final Vector3dc direction,
+                                        @Nonnull final Vector3dc pole,
+                                        @Nonnull final Vector3d dest) {
+        // World up with the component along the bone removed. Its length is the sine of the bone's angle
+        // off vertical, which is exactly the quantity the fallback threshold is about.
+        final double along = direction.y();
+        dest.set(-direction.x() * along, 1 - along * along, -direction.z() * along);
+        if (dest.lengthSquared() < UPRIGHT_MIN_LENGTH_SQ) return dest.set(pole);
+        return dest.normalize();
+    }
+
+    /**
+     * Builds the world rotation that points a bone's local axis along {@code worldDir}, rolled about that
+     * axis so the bone's reference side faces {@code worldTwist}.
      *
      * <p>Without the twist term a swing-only solve leaves elbows and knees free to spin around the limb,
      * which reads as the leg popping between frames.
@@ -74,7 +101,7 @@ public final class IkMath {
     public static void alignAxis(@Nonnull final Quaterniond dest,
                                  @Nonnull final Vector3dc localAxis,
                                  @Nonnull final Vector3dc worldDir,
-                                 @Nonnull final Vector3dc worldPole,
+                                 @Nonnull final Vector3dc worldTwist,
                                  @Nonnull final Scratch scratch) {
         final Vector3d a = scratch.a.set(localAxis);
         final Vector3d u = scratch.u.set(worldDir);
@@ -87,7 +114,7 @@ public final class IkMath {
 
         dest.identity().rotationTo(a, u);
 
-        if (!perpendicular(worldPole, u, scratch.poleP)) return;
+        if (!perpendicular(worldTwist, u, scratch.poleP)) return;
 
         anyPerpendicular(a, scratch.bend);
         dest.transform(scratch.bend);

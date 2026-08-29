@@ -84,7 +84,7 @@ public final class TitanWeakpointSystem extends EntityTickingSystem<EntityStore>
 
         pose.transformLocal(weakpoint.getBoneIndex(), weakpoint.getLocalOffset(), worldPosition);
         transform.getPosition().set(worldPosition);
-        pose.getWorldRotation(weakpoint.getBoneIndex(), transform.getRotation());
+        pose.getWorldRotation(weakpoint.getBoneIndex(), weakpoint.getLocalRotation(), transform.getRotation());
     }
 
 }

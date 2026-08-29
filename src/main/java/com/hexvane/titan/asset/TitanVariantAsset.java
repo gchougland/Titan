@@ -45,6 +45,11 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
             a -> a.bodyScale
         ).add()
         .append(
+            new KeyedCodec<>("RockType", Codec.STRING),
+            (a, v) -> a.rockType = v,
+            a -> a.rockType
+        ).add()
+        .append(
             new KeyedCodec<>("WeakpointModel", Codec.STRING),
             (a, v) -> a.weakpointModel = v,
             a -> a.weakpointModel
@@ -125,6 +130,21 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
             a -> a.stunSeconds
         ).add()
         .append(
+            new KeyedCodec<>("SlamChance", Codec.FLOAT),
+            (a, v) -> a.slamChance = v,
+            a -> a.slamChance
+        ).add()
+        .append(
+            new KeyedCodec<>("SlamRadius", Codec.FLOAT),
+            (a, v) -> a.slamRadius = v,
+            a -> a.slamRadius
+        ).add()
+        .append(
+            new KeyedCodec<>("SlamProneSeconds", Codec.FLOAT),
+            (a, v) -> a.slamProneSeconds = v,
+            a -> a.slamProneSeconds
+        ).add()
+        .append(
             new KeyedCodec<>("DropList", Codec.STRING),
             (a, v) -> a.dropList = v,
             a -> a.dropList
@@ -174,6 +194,8 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     private String displayName;
     private float bodyScale = 1f;
     @Nullable
+    private String rockType;
+    @Nullable
     private String weakpointModel;
     private float weakpointScale = 1f;
     private int weakpointCountMin = 2;
@@ -190,6 +212,9 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     private float attackKnockback = 14f;
     private float attackCooldown = 4.5f;
     private float stunSeconds = 3.5f;
+    private float slamChance = 0.35f;
+    private float slamRadius = 6f;
+    private float slamProneSeconds = 6f;
     @Nullable
     private String dropList;
     @Nullable
@@ -226,6 +251,19 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return bodyScale;
     }
 
+    /**
+     * Rock the titan is carved from, as a suffix appended to every bone's prefab: a {@code RockType} of
+     * {@code Basalt} turns {@code Titan/Talus/Talus_Body} into {@code Titan/Talus/Talus_Body_Basalt}.
+     *
+     * <p>Unset means the skeleton's own prefabs are used as authored, which is the plain stone look. A
+     * variant whose suffixed prefab is missing falls back to the unsuffixed one, so a rock type only has to
+     * ship the parts it actually changes.
+     */
+    @Nullable
+    public String getRockType() {
+        return rockType;
+    }
+
     /** {@code ModelAsset} id rendered for each ore weakpoint. */
     @Nullable
     public String getWeakpointModel() {
@@ -250,8 +288,9 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
      * How far past the body surface an ore node's centre is pushed, in model units.
      *
      * <p>Sockets are authored on the surface and a node is centred on its socket, so zero already buries
-     * half of it. This sinks it further, which is what makes a node read as growing out of the rock rather
-     * than resting on it.
+     * half of it. Positive values sink it further; negative values leave it standing proud, which is what
+     * the variants use to keep a doubled-size node reading as a cluster growing out of the rock rather than
+     * a lump swallowed by it.
      */
     public float getWeakpointEmbed() {
         return weakpointEmbed;
@@ -302,6 +341,24 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     /** How long the hand stays embedded after a smash — the window in which the arm is climbable. */
     public float getStunSeconds() {
         return stunSeconds;
+    }
+
+    /** Odds of answering an attack opportunity with a body slam rather than an arm smash, {@code 0} to {@code 1}. */
+    public float getSlamChance() {
+        return slamChance;
+    }
+
+    /**
+     * Blast radius of a body slam. Wider than the arm smash because the whole creature lands, and the
+     * price of that reach is how long it then spends face down.
+     */
+    public float getSlamRadius() {
+        return slamRadius;
+    }
+
+    /** How long the titan lies face down after a slam — the window in which its back is within jumping range. */
+    public float getSlamProneSeconds() {
+        return slamProneSeconds;
     }
 
     @Nullable

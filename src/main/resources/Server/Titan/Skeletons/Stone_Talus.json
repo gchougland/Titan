@@ -22,18 +22,19 @@
       "Prefab": "Titan/Talus/Talus_Body",
       "Pivot": { "X": 1.0, "Y": 2.0, "Z": 0.5 },
       "Scale": 1.0,
-      "ColliderStride": 3
+      "ColliderStride": 1
     },
 
     {
-      "$Comment": "Arm segments are a 2x4x2 prefab. A bone's Scale sets both its thickness and its length, so the segment is authored long and narrow: at 0.85 it is 1.7 blocks thick and spans the 3.4 to the next joint. Shoulder (6.3) to wrist is 6.8, enough for the smash to plant a fist on the ground with the elbow still bent.",
+      "$Comment": "Arm segments are a 2x4x2 prefab. A bone's Scale sets both its thickness and its length, so the segment is authored long and narrow: at 0.85 it is 1.7 blocks thick and spans the 3.4 to the next joint. Shoulder (6.3) to wrist is 6.8, enough for the smash to plant a fist on the ground with the elbow still bent. The arms are the way up onto the back, so they run ColliderAllFaces with no thinning: an arm held out at an angle has no upward-facing voxels in its own prefab space, and anything less than every segment leaves a gap the player cannot cross.",
       "Name": "Arm_L_Upper",
       "Parent": "Body",
       "Offset": { "X": -4.0, "Y": 1.3, "Z": 0 },
       "Prefab": "Titan/Talus/Talus_Arm_Segment",
       "Pivot": { "X": 1.0, "Y": 4.0, "Z": 1.0 },
       "Scale": 0.85,
-      "ColliderStride": 2
+      "ColliderStride": 1,
+      "ColliderAllFaces": true
     },
     {
       "Name": "Arm_L_Lower",
@@ -42,7 +43,8 @@
       "Prefab": "Titan/Talus/Talus_Arm_Segment",
       "Pivot": { "X": 1.0, "Y": 4.0, "Z": 1.0 },
       "Scale": 0.85,
-      "ColliderStride": 2
+      "ColliderStride": 1,
+      "ColliderAllFaces": true
     },
     {
       "$Comment": "Pivot is the middle of the fist rather than the wrist, because the smash drives this bone's pivot to the impact point and a fist centred there reads as embedded in the ground. MirrorX reflects the shared hand prefab so the pair are opposite hands rather than two right ones.",
@@ -53,7 +55,8 @@
       "Pivot": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
       "Scale": 1.0,
       "MirrorX": true,
-      "ColliderStride": 1
+      "ColliderStride": 1,
+      "ColliderAllFaces": true
     },
 
     {
@@ -63,7 +66,8 @@
       "Prefab": "Titan/Talus/Talus_Arm_Segment",
       "Pivot": { "X": 1.0, "Y": 4.0, "Z": 1.0 },
       "Scale": 0.85,
-      "ColliderStride": 2
+      "ColliderStride": 1,
+      "ColliderAllFaces": true
     },
     {
       "Name": "Arm_R_Lower",
@@ -72,7 +76,8 @@
       "Prefab": "Titan/Talus/Talus_Arm_Segment",
       "Pivot": { "X": 1.0, "Y": 4.0, "Z": 1.0 },
       "Scale": 0.85,
-      "ColliderStride": 2
+      "ColliderStride": 1,
+      "ColliderAllFaces": true
     },
     {
       "Name": "Hand_R",
@@ -81,11 +86,12 @@
       "Prefab": "Titan/Talus/Talus_Hand",
       "Pivot": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
       "Scale": 1.0,
-      "ColliderStride": 1
+      "ColliderStride": 1,
+      "ColliderAllFaces": true
     },
 
     {
-      "$Comment": "Legs carry no colliders: they swing fastest and a player anchored to one would be flung around.",
+      "$Comment": "Legs carry no colliders: they swing fastest and a player anchored to one would be flung around. It also leaves the gap between them open, so a player can run under the body to escape a smash and come up behind.",
       "Name": "Leg_L_Upper",
       "Parent": "Body",
       "Offset": { "X": -2.2, "Y": -2.0, "Z": 0 },

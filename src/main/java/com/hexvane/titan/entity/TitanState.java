@@ -6,12 +6,17 @@ import javax.annotation.Nonnull;
  * The titan behaviour state machine.
  *
  * <pre>
- * SLEEPING --player nearby--&gt; WAKING --clip ends--&gt; IDLE &lt;--&gt; CHASE --in range--&gt; WINDUP
- *                                                                                    |
- *                                     CHASE &lt;-- RECOVER &lt;-- STUNNED &lt;-- SMASH &lt;------+
+ * SLEEPING --player nearby--&gt; WAKING --clip ends--&gt; IDLE &lt;--&gt; CHASE --in range--+
+ *                                                                               |
+ *                    CHASE &lt;-- RECOVER &lt;-- STUNNED &lt;-- SMASH &lt;-- WINDUP &lt;-------+
+ *                    CHASE &lt;-- RISING  &lt;-- PRONE   &lt;-- SLAM  &lt;-- SLAM_WINDUP &lt;--+
  * </pre>
  *
- * Losing all weakpoints jumps straight to {@link #DYING} from anywhere.
+ * <p>The two attacks are both a hit followed by a window where the titan cannot defend itself. The arm
+ * smash buries one fist and leaves that arm as a ramp; the body slam puts the whole creature on the floor,
+ * which is slower to recover from and drops the back within reach.
+ *
+ * <p>Losing all weakpoints jumps straight to {@link #DYING} from anywhere.
  */
 public enum TitanState {
     /** Curled into a boulder. No clip plays and no transforms are sent. */
@@ -30,6 +35,14 @@ public enum TitanState {
     STUNNED("Stunned"),
     /** Pulling the arm free. */
     RECOVER("Idle"),
+    /** Reared back on the hind legs, about to throw the whole body forward. */
+    SLAM_WINDUP("Slam_Windup"),
+    /** Body pitching down onto the ground; the impact fires partway through. */
+    SLAM("Slam"),
+    /** Chest down, both forearms out front — the long climbing window. */
+    PRONE("Prone"),
+    /** Pushing back up off the floor. */
+    RISING("Rise"),
     /** Falling apart. */
     DYING("Death");
 
@@ -49,8 +62,18 @@ public enum TitanState {
         return defaultClip;
     }
 
-    public boolean isAttacking() {
+    /** Whether one arm is under IK, driving a fist to the impact point. */
+    public boolean isArmSmash() {
         return this == WINDUP || this == SMASH || this == STUNNED || this == RECOVER;
+    }
+
+    /** Whether both arms are under IK, bracing the body against the floor. */
+    public boolean isBodySlam() {
+        return this == SLAM_WINDUP || this == SLAM || this == PRONE || this == RISING;
+    }
+
+    public boolean isAttacking() {
+        return isArmSmash() || isBodySlam();
     }
 
     public boolean isAlive() {

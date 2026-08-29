@@ -3,12 +3,13 @@
   "Skeleton": "Stone_Talus",
   "DisplayName": "Cobalt Talus",
   "BodyScale": 1.25,
+  "RockType": "Slate",
 
   "WeakpointModel": "Titan_OreNode_Cobalt",
-  "WeakpointScale": 1.42,
+  "WeakpointScale": 2.84,
   "WeakpointCountMin": 2,
   "WeakpointCountMax": 4,
-  "WeakpointEmbed": 0.25,
+  "WeakpointEmbed": -0.25,
   "WeakpointHealth": 380,
 
   "MoveSpeed": 1.6,
@@ -18,10 +19,14 @@
 
   "AttackRange": 6.2,
   "AttackDamage": 30,
-  "AttackRadius": 5.8,
-  "AttackKnockback": 17,
+  "AttackRadius": 1.8,
+  "AttackKnockback": 8.5,
   "AttackCooldown": 4.5,
   "StunSeconds": 4.0,
+
+  "SlamChance": 0.35,
+  "SlamRadius": 3.8,
+  "SlamProneSeconds": 6.9,
 
   "DropList": "Drop_Talus_Cobalt",
   "DropItem": "Ore_Cobalt",

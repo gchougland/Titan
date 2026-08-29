@@ -36,6 +36,26 @@
       "Looping": true,
       "BlendingDuration": 0.25
     },
+    "Slam_Windup": {
+      "File": "Titan/Talus/Animations/Slam_Windup.blockyanim",
+      "Looping": false,
+      "BlendingDuration": 0.25
+    },
+    "Slam": {
+      "File": "Titan/Talus/Animations/Slam.blockyanim",
+      "Looping": false,
+      "BlendingDuration": 0.1
+    },
+    "Prone": {
+      "File": "Titan/Talus/Animations/Prone.blockyanim",
+      "Looping": true,
+      "BlendingDuration": 0.2
+    },
+    "Rise": {
+      "File": "Titan/Talus/Animations/Rise.blockyanim",
+      "Looping": false,
+      "BlendingDuration": 0.2
+    },
     "Death": {
       "File": "Titan/Talus/Animations/Death.blockyanim",
       "Looping": false,

@@ -17,6 +17,7 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.modules.entity.hitboxcollision.HitboxCollisionConfig;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Matrix4d;
+import org.joml.Quaterniond;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
@@ -39,6 +40,13 @@ public final class TitanSpawner {
 
     /** Radius of the root's bounding box, in blocks. Only used for spatial queries; nothing renders it. */
     private static final double ROOT_BOX_RADIUS = 1.0;
+
+    /**
+     * How far apart two ore nodes must sit, as a fraction of a node's own width. Well under 1 on purpose:
+     * the body is only a few nodes wide, so demanding no contact at all would reject most of the socket
+     * list and push the picker into its unspaced fallback. Letting neighbours graze keeps the spread.
+     */
+    private static final double SOCKET_SPACING = 0.6;
 
     private TitanSpawner() {
     }
@@ -102,7 +110,7 @@ public final class TitanSpawner {
         pose.resetToBind(skeleton);
         pose.computeWorld(skeleton, TitanPose.rootMatrix(position, yaw, titan.getScale(), new Matrix4d()));
 
-        final Counts counts = spawnParts(store, root, titan, skeleton, colliderMode);
+        final Counts counts = spawnParts(store, root, titan, variant, skeleton, colliderMode);
         final int weakpoints = spawnWeakpoints(store, root, titan, variant, skeleton);
         titan.setWeakpointCount(weakpoints);
 
@@ -121,6 +129,7 @@ public final class TitanSpawner {
     private static Counts spawnParts(@Nonnull final Store<EntityStore> store,
                                      @Nonnull final Ref<EntityStore> root,
                                      @Nonnull final TitanComponent titan,
+                                     @Nonnull final TitanVariantAsset variant,
                                      @Nonnull final TitanSkeletonAsset skeleton,
                                      @Nonnull final ColliderMode colliderMode) {
 
@@ -141,7 +150,7 @@ public final class TitanSpawner {
         final var counts = new Counts();
 
         for (final TitanBoneDef bone : skeleton.getBones()) {
-            final PrefabVoxels voxels = PrefabVoxelReader.read(bone.getPrefab());
+            final PrefabVoxels voxels = PrefabVoxelReader.read(bone.getPrefab(), variant.getRockType());
             if (voxels.isEmpty()) continue;
 
             final Vector3d pivot = bone.getPivot() != null ? new Vector3d(bone.getPivot()) : voxels.defaultPivot();
@@ -171,7 +180,7 @@ public final class TitanSpawner {
                 pose.transformLocal(bone.getIndex(), local, worldPos);
 
                 boolean collider = false;
-                if (boneWantsColliders && colliderMode.accepts(voxel)) {
+                if (boneWantsColliders && colliderMode.accepts(voxel, bone)) {
                     colliderCandidate++;
                     collider = colliderCandidate % bone.getColliderStride() == 0;
                 }
@@ -205,38 +214,47 @@ public final class TitanSpawner {
 
         // Socket offsets are model units, so the model's world-block measurements are converted before use.
         final Box nodeBox = TitanPartBuilder.weakpointBox(modelId, variant.getWeakpointScale());
-        // The model draws around its own centre rather than its origin, so every node hangs above its socket
-        // unless that lift is taken back out of the offset.
+        // The ore is modelled growing up from an origin at its base, so its visual centre sits this far
+        // along its own axis. Without taking it back out every node hangs off the surface it is bolted to.
         final double centreCorrection = nodeBox == null
             ? 0
             : (nodeBox.getMin().y + nodeBox.getMax().y) * 0.5 / titan.getScale();
         final double nodeWidth = nodeBox == null ? 0 : nodeBox.getMaximumThickness() / titan.getScale();
+        final double sink = centreCorrection + variant.getWeakpointEmbed();
 
         final var worldPos = new Vector3d();
+        final var worldRotation = new Rotation3f();
         final var local = new Vector3d();
-        final var inward = new Vector3d();
+        final var outward = new Vector3d();
+        final var localRotation = new Quaterniond();
         int spawned = 0;
 
-        for (final int socketIndex : chooseSockets(variant, sockets, nodeWidth * 0.8)) {
+        for (final int socketIndex : chooseSockets(variant, sockets, nodeWidth * SOCKET_SPACING)) {
             final TitanSocketDef socket = sockets[socketIndex];
             final int bone = socket.getBoneIndex();
             if (bone < 0) continue;
 
+            // Sockets are authored on the body surface, so the direction from the bone's pivot out to one
+            // is the surface normal there. Aiming the ore's growth axis along it makes a node on the chest
+            // jut forwards and one on the flank jut sideways, and backing the node down that same axis
+            // beds it into the rock whichever face it landed on.
             local.set(socket.getOffset());
-
-            // Sockets sit on the body surface. Pulling the node towards the bone pivot sinks it into the
-            // rock along whichever face it was authored on, so one number covers top, back, front and sides.
-            inward.set(local);
-            if (inward.lengthSquared() > 1.0e-6) {
-                local.fma(-variant.getWeakpointEmbed(), inward.normalize());
+            outward.set(local);
+            if (outward.lengthSquared() > 1.0e-6) {
+                outward.normalize();
+                local.fma(-sink, outward);
+                localRotation.identity().rotationTo(0, 1, 0, outward.x, outward.y, outward.z);
+            } else {
+                local.y -= sink;
+                localRotation.identity();
             }
-            local.y -= centreCorrection;
 
             pose.transformLocal(bone, local, worldPos);
+            pose.getWorldRotation(bone, localRotation, worldRotation);
 
             final var holder = TitanPartBuilder.buildWeakpoint(
                 store, root, modelId, variant.getWeakpointScale(), variant.getWeakpointHealth(),
-                worldPos, bone, new Vector3d(local));
+                worldPos, worldRotation, bone, new Vector3d(local), localRotation);
             if (holder == null) {
                 LOGGER.at(Level.WARNING).log("Titan variant '%s' references unknown ModelAsset '%s'", variant.getId(), modelId);
                 break;

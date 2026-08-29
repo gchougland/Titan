@@ -26,6 +26,7 @@ import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Drives the titan state machine, its body movement and its attacks.
@@ -42,6 +43,20 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
     private static final float IMPACT_SECONDS = 0.35f;
     /** Seconds spent pulling the hand back out of the ground. */
     private static final float RECOVER_SECONDS = 0.8f;
+    /** Seconds spent reared back before a body slam. Longer than an arm windup: it is a bigger tell. */
+    private static final float SLAM_WINDUP_SECONDS = 1.1f;
+    /** Seconds the body takes to come down. */
+    private static final float SLAM_SECONDS = 0.5f;
+    /** Point in the slam at which the AOE fires. */
+    private static final float SLAM_IMPACT_SECONDS = 0.3f;
+    /** Seconds spent shoving back up off the floor. */
+    private static final float RISE_SECONDS = 1.6f;
+    /** How far ahead of the root the chest comes down, in blocks. */
+    private static final double SLAM_REACH = 3.0;
+    /** How far ahead of the root a braced forearm plants, in blocks. */
+    private static final double SLAM_HAND_REACH = 5.0;
+    /** Sideways spread of the two braced forearms, in blocks. */
+    private static final double SLAM_HAND_SPREAD = 4.0;
     /** How fast the body settles onto new terrain height, in blocks per second. */
     private static final double BODY_HEIGHT_FOLLOW = 4.0;
     /** Seconds an idle arm takes to hand control back to the clip pose. */
@@ -115,6 +130,10 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
             case SMASH -> tickSmash(store, commandBuffer, self, titan, variant);
             case STUNNED -> tickStunned(titan, variant);
             case RECOVER -> tickRecover(titan, variant);
+            case SLAM_WINDUP -> tickSlamWindup(titan, variant, transform, dt);
+            case SLAM -> tickSlam(store, commandBuffer, self, titan, variant);
+            case PRONE -> tickProne(titan, variant);
+            case RISING -> tickRising(titan, variant);
             default -> {
             }
         }
@@ -125,17 +144,20 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Drives the arm IK goal through the swing: up during the windup, down into the ground over the smash,
-     * held there while stunned, then released.
-     *
-     * <p>Non-attacking arms fade their weight out so the clip pose takes back over smoothly.
+     * Points the arm IK goals at whatever the current attack needs, and fades every arm the attack is not
+     * using back to its clip pose.
      */
     private void updateHandGoals(@Nonnull final TitanComponent titan,
                                  @Nonnull final TitanSkeletonAsset skeleton,
                                  final float dt) {
 
+        if (titan.getState().isBodySlam()) {
+            updateBraceGoals(titan, skeleton);
+            return;
+        }
+
         final float[] weights = titan.getHandWeights();
-        final int active = titan.getState().isAttacking()
+        final int active = titan.getState().isArmSmash()
             ? titan.findHandChainForSide(skeleton, titan.getAttackSide())
             : -1;
 
@@ -172,6 +194,53 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
             }
             default -> {
             }
+        }
+    }
+
+    /**
+     * Plants both forearms on the floor ahead of the titan through a body slam.
+     *
+     * <p>The braced arms are what make the slam climbable: the back settles too high to jump onto from flat
+     * ground, so the arms have to lie there as a pair of ramps up to it. They are held out through the
+     * windup as well, since the titan is already tipping forward onto them by then.
+     */
+    private void updateBraceGoals(@Nonnull final TitanComponent titan, @Nonnull final TitanSkeletonAsset skeleton) {
+        final float[] weights = titan.getHandWeights();
+        final var goals = titan.getHandGoals();
+        final var chains = skeleton.getIkChains();
+        final int[] handChains = titan.getHandChains();
+
+        final double scale = titan.getScale();
+        final double reach = SLAM_HAND_REACH * scale;
+        final double spread = SLAM_HAND_SPREAD * scale * 0.5;
+        final double raise = skeleton.getHipHeight() * scale * RAISED_HAND_HEIGHT_FACTOR;
+
+        // How far off the floor the hands still are. They come down with the body and stay down until it
+        // starts to push back up.
+        final double lift = switch (titan.getState()) {
+            case SLAM_WINDUP -> raise * 0.6 * Math.min(1.0, titan.getStateTime() / SLAM_WINDUP_SECONDS);
+            case SLAM -> {
+                final double t = Math.min(1.0, titan.getStateTime() / SLAM_IMPACT_SECONDS);
+                yield raise * 0.6 * (1.0 - t * t);
+            }
+            case RISING -> raise * 0.5 * Math.min(1.0, titan.getStateTime() / RISE_SECONDS);
+            default -> 0.0;
+        };
+
+        final var origin = titan.getAttackPoint();
+        final double forwardX = -Math.sin(titan.getYaw());
+        final double forwardZ = -Math.cos(titan.getYaw());
+        final double rightX = Math.cos(titan.getYaw());
+        final double rightZ = -Math.sin(titan.getYaw());
+
+        for (int i = 0; i < weights.length; i++) {
+            final double side = Math.signum(chains[handChains[i]].getSide()) * spread;
+            goals[i].set(
+                origin.x + forwardX * reach + rightX * side,
+                origin.y + lift,
+                origin.z + forwardZ * reach + rightZ * side
+            );
+            weights[i] = 1f;
         }
     }
 
@@ -280,8 +349,12 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
 
         final double distance = horizontalDistance(position, targetPosition);
         if (distance <= variant.getAttackRange() && titan.getAttackCooldown() <= 0f) {
-            titan.setAttackSide(chooseAttackSide(titan, position));
-            titan.setState(TitanState.WINDUP);
+            if (ThreadLocalRandom.current().nextFloat() < variant.getSlamChance()) {
+                titan.setState(TitanState.SLAM_WINDUP);
+            } else {
+                titan.setAttackSide(chooseAttackSide(titan, position));
+                titan.setState(TitanState.WINDUP);
+            }
             titan.getVelocity().set(0);
             return;
         }
@@ -334,6 +407,59 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
     private void tickStunned(@Nonnull final TitanComponent titan, @Nonnull final TitanVariantAsset variant) {
         if (titan.getStateTime() >= variant.getStunSeconds()) {
             titan.setState(TitanState.RECOVER);
+        }
+    }
+
+    /**
+     * Rears back, then throws the whole body forward onto the floor.
+     *
+     * <p>The impact point is fixed here rather than tracked through the drop, so the slam is dodgeable in
+     * the same way the arm smash is: commit to a spot, and the target has the fall to get out of it.
+     */
+    private void tickSlamWindup(@Nonnull final TitanComponent titan,
+                                @Nonnull final TitanVariantAsset variant,
+                                @Nonnull final TransformComponent transform,
+                                final float dt) {
+        turnTowards(titan, transform.getPosition(), targetPosition, variant.getTurnSpeed() * 1.5f, dt);
+
+        // Lands under the chest rather than on the target: the titan is falling on its own front, and
+        // aiming the blast at the player would let it belly-flop sideways onto someone stood beside it.
+        // Tracked through the windup so the braced arms follow the turn, and frozen once SLAM begins.
+        TitanSmashAttack.resolveImpactPoint(
+            transform.getPosition(), null, titan.getYaw(), SLAM_REACH, titan.getAttackPoint());
+
+        if (titan.getStateTime() >= SLAM_WINDUP_SECONDS) {
+            titan.setState(TitanState.SLAM);
+        }
+    }
+
+    private void tickSlam(@Nonnull final Store<EntityStore> store,
+                          @Nonnull final CommandBuffer<EntityStore> commandBuffer,
+                          @Nonnull final Ref<EntityStore> self,
+                          @Nonnull final TitanComponent titan,
+                          @Nonnull final TitanVariantAsset variant) {
+
+        if (!titan.isImpactFired() && titan.getStateTime() >= SLAM_IMPACT_SECONDS) {
+            titan.setImpactFired(true);
+            TitanSmashAttack.execute(store, commandBuffer, self, variant, titan.getAttackPoint(),
+                variant.getSlamRadius());
+        }
+
+        if (titan.getStateTime() >= SLAM_SECONDS) {
+            titan.setState(TitanState.PRONE);
+        }
+    }
+
+    private void tickProne(@Nonnull final TitanComponent titan, @Nonnull final TitanVariantAsset variant) {
+        if (titan.getStateTime() >= variant.getSlamProneSeconds()) {
+            titan.setState(TitanState.RISING);
+        }
+    }
+
+    private void tickRising(@Nonnull final TitanComponent titan, @Nonnull final TitanVariantAsset variant) {
+        if (titan.getStateTime() >= RISE_SECONDS) {
+            titan.setAttackCooldown(variant.getAttackCooldown());
+            titan.setState(TitanState.CHASE);
         }
     }
 

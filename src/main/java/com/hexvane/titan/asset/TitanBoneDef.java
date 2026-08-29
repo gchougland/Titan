@@ -67,6 +67,11 @@ public final class TitanBoneDef {
             o -> o.colliderStride
         ).add()
         .append(
+            new KeyedCodec<>("ColliderAllFaces", Codec.BOOLEAN),
+            (o, v) -> o.colliderAllFaces = v,
+            o -> o.colliderAllFaces
+        ).add()
+        .append(
             new KeyedCodec<>("MaxParts", Codec.INTEGER),
             (o, v) -> o.maxParts = v,
             o -> o.maxParts
@@ -92,6 +97,7 @@ public final class TitanBoneDef {
     private float scale = 1f;
     private boolean mirrorX;
     private int colliderStride;
+    private boolean colliderAllFaces;
     private int maxParts;
     private boolean detachable = true;
 
@@ -150,9 +156,21 @@ public final class TitanBoneDef {
         return mirrorX;
     }
 
-    /** Every n-th surface voxel becomes a hard-collision climbable block. {@code 0} disables collision. */
+    /** Every n-th eligible voxel becomes a hard-collision climbable block. {@code 0} disables collision. */
     public int getColliderStride() {
         return colliderStride;
+    }
+
+    /**
+     * Whether every exposed voxel is collider-eligible, rather than only those with an exposed top face.
+     *
+     * <p>Top-faces-only is much cheaper and is what a bone that stays roughly level wants. It is useless on
+     * a bone that swings, though: "top" is measured in the prefab's own space, so on an arm held out at an
+     * angle the eligible voxels are the handful capping the segment at its joint, and the whole length of
+     * the limb — the part a player would actually walk up — gets no collision at all.
+     */
+    public boolean isColliderAllFaces() {
+        return colliderAllFaces;
     }
 
     /** Upper bound on spawned voxel entities for this bone; {@code 0} means unlimited. */

@@ -50,8 +50,17 @@ public final class TitanSmashAttack {
                               @Nonnull final Ref<EntityStore> titanRef,
                               @Nonnull final TitanVariantAsset variant,
                               @Nonnull final Vector3d impactPoint) {
+        return execute(store, commandBuffer, titanRef, variant, impactPoint, variant.getAttackRadius());
+    }
 
-        final double radius = variant.getAttackRadius();
+    /** As {@link #execute}, with the blast radius overridden — a body slam covers more ground than a fist. */
+    public static int execute(@Nonnull final Store<EntityStore> store,
+                              @Nonnull final CommandBuffer<EntityStore> commandBuffer,
+                              @Nonnull final Ref<EntityStore> titanRef,
+                              @Nonnull final TitanVariantAsset variant,
+                              @Nonnull final Vector3d impactPoint,
+                              final double radius) {
+
         final int damageCauseIndex = DamageCause.getAssetMap().getIndex("Physical");
 
         // The spatial query hands back a shared thread-local list, and dealing damage can run queries of its

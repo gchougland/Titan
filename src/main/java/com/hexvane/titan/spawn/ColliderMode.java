@@ -1,5 +1,6 @@
 package com.hexvane.titan.spawn;
 
+import com.hexvane.titan.asset.TitanBoneDef;
 import com.hexvane.titan.spawn.PrefabVoxels.Voxel;
 
 import javax.annotation.Nonnull;
@@ -18,22 +19,26 @@ public enum ColliderMode {
     /** No hard collision at all: the titan is scenery you walk through. Diagnostic setting. */
     NONE,
 
+    /** Each bone picks its own face set, per {@link TitanBoneDef#isColliderAllFaces()}. */
+    AUTO,
+
     /**
-     * Only blocks whose top face is exposed. Those are the only ones a player can actually stand on, and
-     * leaving the sides and undersides off keeps a swinging limb from shoving anyone stood beside it.
+     * Force top-faces-only on every bone. Diagnostic: this is what a bone that never leaves the horizontal
+     * wants, and seeing a limb become unclimbable under it confirms the limb is being rotated.
      */
     TOP,
 
-    /** Every exposed block, sides and undersides included. Solid, but the most expensive. */
+    /** Force every exposed face on every bone. Solid, and the most expensive. Diagnostic. */
     ALL;
 
     /** Default for spawns that do not ask for anything else. */
     @Nonnull
-    public static final ColliderMode DEFAULT = TOP;
+    public static final ColliderMode DEFAULT = AUTO;
 
-    public boolean accepts(@Nonnull final Voxel voxel) {
+    public boolean accepts(@Nonnull final Voxel voxel, @Nonnull final TitanBoneDef bone) {
         return switch (this) {
             case NONE -> false;
+            case AUTO -> bone.isColliderAllFaces() ? voxel.surface() : voxel.standable();
             case TOP -> voxel.standable();
             case ALL -> voxel.surface();
         };

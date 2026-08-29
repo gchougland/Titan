@@ -65,6 +65,8 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
     @Nonnull
     private final Vector3d poleWorld = new Vector3d();
     @Nonnull
+    private final Vector3d twistWorld = new Vector3d();
+    @Nonnull
     private final Vector3d chainRoot = new Vector3d();
     @Nonnull
     private final Vector3d chainMid = new Vector3d();
@@ -263,8 +265,10 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         TwoBoneIkSolver.solve(chainRoot, goal, upperLength, lowerLength, poleWorld, ikResult);
 
         final var boneDefs = skeleton.getBones();
-        IkMath.alignAxis(upperWorld, boneDefs[lower].getOffset(), ikResult.upperDirection, poleWorld, ikScratch);
-        IkMath.alignAxis(lowerWorld, boneDefs[end].getOffset(), ikResult.lowerDirection, poleWorld, ikScratch);
+        IkMath.alignAxis(upperWorld, boneDefs[lower].getOffset(), ikResult.upperDirection,
+            IkMath.uprightTwist(ikResult.upperDirection, poleWorld, twistWorld), ikScratch);
+        IkMath.alignAxis(lowerWorld, boneDefs[end].getOffset(), ikResult.lowerDirection,
+            IkMath.uprightTwist(ikResult.lowerDirection, poleWorld, twistWorld), ikScratch);
 
         worldRotationOfParent(pose, skeleton, upper, parentRotation);
         blendLocal(pose, upper, parentRotation, upperWorld, weight);
@@ -304,7 +308,8 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
             if (chainEnd.lengthSquared() < IkMath.EPSILON) continue;
             chainEnd.normalize();
 
-            IkMath.alignAxis(fabrikWorld[i], boneDefs[bones[i + 1]].getOffset(), chainEnd, poleWorld, ikScratch);
+            IkMath.alignAxis(fabrikWorld[i], boneDefs[bones[i + 1]].getOffset(), chainEnd,
+                IkMath.uprightTwist(chainEnd, poleWorld, twistWorld), ikScratch);
             blendLocal(pose, bones[i], i == 0 ? parentRotation : fabrikWorld[i - 1], fabrikWorld[i], weight);
         }
     }

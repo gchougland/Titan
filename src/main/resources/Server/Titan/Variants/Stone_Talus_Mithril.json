@@ -5,10 +5,10 @@
   "BodyScale": 1.5,
 
   "WeakpointModel": "Titan_OreNode_Mithril",
-  "WeakpointScale": 1.67,
+  "WeakpointScale": 3.34,
   "WeakpointCountMin": 2,
   "WeakpointCountMax": 4,
-  "WeakpointEmbed": 0.25,
+  "WeakpointEmbed": -0.25,
   "WeakpointHealth": 700,
 
   "MoveSpeed": 1.4,
@@ -18,10 +18,14 @@
 
   "AttackRange": 7.5,
   "AttackDamage": 48,
-  "AttackRadius": 7.0,
-  "AttackKnockback": 22,
+  "AttackRadius": 2.15,
+  "AttackKnockback": 11,
   "AttackCooldown": 4.0,
   "StunSeconds": 4.5,
+
+  "SlamChance": 0.35,
+  "SlamRadius": 4.6,
+  "SlamProneSeconds": 7.6,
 
   "DropList": "Drop_Talus_Mithril",
   "DropItem": "Ore_Mithril",
