@@ -1,10 +1,11 @@
 {
+  "$Comment": "Weakpoint node. Renders the ore item's own model and texture but is a real damageable entity, which a dropped item entity cannot be because those are intangible. The model and textures are bundled copies under Items/ because ModelAsset only accepts Characters/, NPC/, Items/ and VFX/ as roots, and the vanilla ore art lives under Resources/. HitBox is the mesh's own bounds measured by tools/measure_ore_model.py at the 32 units/block grid that block art uses, authored at unit scale; the variant's WeakpointScale grows it, and the spawner reads its centre back so a node sits on its socket instead of hovering above it.",
   "Model": "Items/Titan/OreNode/Ore_Large.blockymodel",
   "Texture": "Items/Titan/OreNode/Textures/Thorium.png",
-  "EyeHeight": 0.35,
+  "EyeHeight": 0.55,
   "HitBox": {
-    "Min": { "X": -0.35, "Y": 0, "Z": -0.35 },
-    "Max": { "X": 0.35, "Y": 0.7, "Z": 0.35 }
+    "Min": { "X": -0.71, "Y": -0.15, "Z": -0.64 },
+    "Max": { "X": 0.73, "Y": 1.25, "Z": 0.84 }
   },
   "MinScale": 1,
   "MaxScale": 8

@@ -28,7 +28,7 @@ OUT_DIR = os.path.join(os.path.dirname(__file__), '..', 'src', 'main', 'resource
 # can report where a pose actually puts the hands and feet.
 SHOULDER = (4.0, 1.3)     # x offset from the centreline, y relative to the Body bone
 HIP = (2.2, -2.0)
-UPPER_ARM, LOWER_ARM = 5.0, 4.5
+UPPER_ARM, LOWER_ARM = 3.4, 3.4
 UPPER_LEG, LOWER_LEG = 1.8, 1.8
 BODY_HEIGHT = 5.0
 

@@ -5,8 +5,10 @@
   "BodyScale": 1.5,
 
   "WeakpointModel": "Titan_OreNode_Mithril",
-  "WeakpointScale": 4.0,
-  "WeakpointCount": 6,
+  "WeakpointScale": 1.67,
+  "WeakpointCountMin": 2,
+  "WeakpointCountMax": 4,
+  "WeakpointEmbed": 0.25,
   "WeakpointHealth": 700,
 
   "MoveSpeed": 1.4,

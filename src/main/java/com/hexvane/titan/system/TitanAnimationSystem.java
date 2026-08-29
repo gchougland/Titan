@@ -78,6 +78,8 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
     private final Quaterniond lowerWorld = new Quaterniond();
     @Nonnull
     private final Quaterniond localRotation = new Quaterniond();
+    @Nonnull
+    private final Quaterniond levelRotation = new Quaterniond();
 
     @Nonnull
     private final Vector3d[] fabrikJoints = new Vector3d[MAX_CHAIN_BONES];
@@ -229,8 +231,11 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
             poleWorld.normalize();
         }
 
+        // Only feet are levelled: a hand should follow the arm into the ground on a smash.
+        final boolean levelEnd = chain.getRole() == TitanIkChainDef.Role.FOOT;
+
         if (chain.getKind() == TitanIkChainDef.Kind.TWO_BONE && bones.length >= 3) {
-            solveTwoBone(skeleton, pose, bones, goal, weight);
+            solveTwoBone(skeleton, pose, bones, goal, weight, levelEnd);
         } else {
             solveFabrik(skeleton, pose, bones, goal, weight);
         }
@@ -240,7 +245,8 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
                               @Nonnull final TitanPose pose,
                               @Nonnull final int[] bones,
                               @Nonnull final Vector3d goal,
-                              final float weight) {
+                              final float weight,
+                              final boolean levelEnd) {
 
         final int upper = bones[0];
         final int lower = bones[1];
@@ -263,6 +269,14 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         worldRotationOfParent(pose, skeleton, upper, parentRotation);
         blendLocal(pose, upper, parentRotation, upperWorld, weight);
         blendLocal(pose, lower, upperWorld, lowerWorld, weight);
+
+        // The solve only orients the thigh and shin. Left alone the foot inherits the shin, so a bent knee
+        // tips the sole up off the ground at whatever angle the leg happens to be folded to. Overriding it
+        // with the body's own rotation — which carries the yaw and nothing else — keeps the sole flat.
+        if (levelEnd) {
+            rootMatrix.getNormalizedRotation(levelRotation);
+            blendLocal(pose, end, lowerWorld, levelRotation, weight);
+        }
     }
 
     private void solveFabrik(@Nonnull final TitanSkeletonAsset skeleton,

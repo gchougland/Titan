@@ -21,6 +21,8 @@ import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 
 /**
@@ -144,6 +146,7 @@ public final class TitanSpawner {
 
             final Vector3d pivot = bone.getPivot() != null ? new Vector3d(bone.getPivot()) : voxels.defaultPivot();
             final float boneScale = voxelScale * bone.getScale();
+            final double mirror = bone.isMirrorX() ? -1.0 : 1.0;
             final int stride = decimationStride(voxels.size(), bone.getMaxParts());
             final boolean boneWantsColliders = colliderConfig != null && bone.getColliderStride() > 0;
 
@@ -158,8 +161,10 @@ public final class TitanSpawner {
                 index++;
                 if (stride > 1 && index % stride != 0) continue;
 
+                // Reflecting after the pivot subtraction mirrors about the bone's axis rather than the
+                // prefab's origin, so a mirrored limb still hangs off its joint in the same place.
                 final var local = new Vector3d(
-                    (voxel.x() + 0.5 - pivot.x) * bone.getScale(),
+                    (voxel.x() + 0.5 - pivot.x) * bone.getScale() * mirror,
                     (voxel.y() + 0.5 - pivot.y) * bone.getScale(),
                     (voxel.z() + 0.5 - pivot.z) * bone.getScale()
                 );
@@ -198,19 +203,40 @@ public final class TitanSpawner {
         final TitanPose pose = titan.getPose();
         assert pose != null;
 
+        // Socket offsets are model units, so the model's world-block measurements are converted before use.
+        final Box nodeBox = TitanPartBuilder.weakpointBox(modelId, variant.getWeakpointScale());
+        // The model draws around its own centre rather than its origin, so every node hangs above its socket
+        // unless that lift is taken back out of the offset.
+        final double centreCorrection = nodeBox == null
+            ? 0
+            : (nodeBox.getMin().y + nodeBox.getMax().y) * 0.5 / titan.getScale();
+        final double nodeWidth = nodeBox == null ? 0 : nodeBox.getMaximumThickness() / titan.getScale();
+
         final var worldPos = new Vector3d();
+        final var local = new Vector3d();
+        final var inward = new Vector3d();
         int spawned = 0;
 
-        for (int i = 0; i < variant.getWeakpointCount(); i++) {
-            final TitanSocketDef socket = sockets[i % sockets.length];
+        for (final int socketIndex : chooseSockets(variant, sockets, nodeWidth * 0.8)) {
+            final TitanSocketDef socket = sockets[socketIndex];
             final int bone = socket.getBoneIndex();
             if (bone < 0) continue;
 
-            final var local = new Vector3d(socket.getOffset());
+            local.set(socket.getOffset());
+
+            // Sockets sit on the body surface. Pulling the node towards the bone pivot sinks it into the
+            // rock along whichever face it was authored on, so one number covers top, back, front and sides.
+            inward.set(local);
+            if (inward.lengthSquared() > 1.0e-6) {
+                local.fma(-variant.getWeakpointEmbed(), inward.normalize());
+            }
+            local.y -= centreCorrection;
+
             pose.transformLocal(bone, local, worldPos);
 
             final var holder = TitanPartBuilder.buildWeakpoint(
-                store, root, modelId, variant.getWeakpointScale(), variant.getWeakpointHealth(), worldPos, bone, local);
+                store, root, modelId, variant.getWeakpointScale(), variant.getWeakpointHealth(),
+                worldPos, bone, new Vector3d(local));
             if (holder == null) {
                 LOGGER.at(Level.WARNING).log("Titan variant '%s' references unknown ModelAsset '%s'", variant.getId(), modelId);
                 break;
@@ -220,6 +246,70 @@ public final class TitanSpawner {
             spawned++;
         }
         return spawned;
+    }
+
+    /**
+     * Rolls how many ore nodes this titan gets and which sockets they land on.
+     *
+     * <p>Sockets are authored all over the body — back, top, front and flanks — so shuffling them and taking
+     * a handful means two titans of the same variant are climbed and attacked differently. Picks closer
+     * together than {@code minSeparation} model units are skipped on the first pass so the ore clusters do
+     * not grow through each other; a second pass without that rule guarantees the quota is still met on a
+     * skeleton whose sockets are all crowded together.
+     */
+    @Nonnull
+    private static int[] chooseSockets(@Nonnull final TitanVariantAsset variant,
+                                       @Nonnull final TitanSocketDef[] sockets,
+                                       final double minSeparation) {
+
+        final var random = ThreadLocalRandom.current();
+
+        final int min = Math.max(1, variant.getWeakpointCountMin());
+        final int max = Math.max(min, variant.getWeakpointCountMax());
+        final int wanted = Math.min(sockets.length, random.nextInt(min, max + 1));
+
+        final int[] order = new int[sockets.length];
+        for (int i = 0; i < sockets.length; i++) order[i] = i;
+        for (int i = sockets.length - 1; i > 0; i--) {
+            final int j = random.nextInt(i + 1);
+            final int swap = order[i];
+            order[i] = order[j];
+            order[j] = swap;
+        }
+
+        final double minSq = minSeparation * minSeparation;
+        final int[] chosen = new int[wanted];
+        int count = 0;
+
+        for (int pass = 0; pass < 2 && count < wanted; pass++) {
+            for (final int candidate : order) {
+                if (count == wanted) break;
+                if (contains(chosen, count, candidate)) continue;
+                if (pass == 0 && !isClearOf(sockets, chosen, count, candidate, minSq)) continue;
+                chosen[count++] = candidate;
+            }
+        }
+        return Arrays.copyOf(chosen, count);
+    }
+
+    private static boolean contains(@Nonnull final int[] values, final int count, final int value) {
+        for (int i = 0; i < count; i++) {
+            if (values[i] == value) return true;
+        }
+        return false;
+    }
+
+    private static boolean isClearOf(@Nonnull final TitanSocketDef[] sockets,
+                                     @Nonnull final int[] chosen,
+                                     final int count,
+                                     final int candidate,
+                                     final double minSq) {
+
+        final var offset = sockets[candidate].getOffset();
+        for (int i = 0; i < count; i++) {
+            if (sockets[chosen[i]].getOffset().distanceSquared(offset) < minSq) return false;
+        }
+        return true;
     }
 
     /**

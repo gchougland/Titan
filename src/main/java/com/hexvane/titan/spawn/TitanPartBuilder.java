@@ -136,6 +136,23 @@ public final class TitanPartBuilder {
     }
 
     /**
+     * The space a weakpoint occupies at {@code modelScale}, in world blocks relative to its entity position.
+     *
+     * <p>Needed because a blockymodel's origin is wherever the artist left it — for the ore cluster it is
+     * down at the base, so an entity placed on a socket draws its ore hanging in the air above it. The
+     * spawner reads the box back to seat the node on its socket and to space nodes apart.
+     *
+     * @return {@code null} when the model or its hitbox is missing
+     */
+    @Nullable
+    public static Box weakpointBox(@Nonnull final String modelAssetId, final float modelScale) {
+        final ModelAsset modelAsset = ModelAsset.getAssetMap().getAsset(modelAssetId);
+        if (modelAsset == null) return null;
+
+        return Model.createStaticScaledModel(modelAsset, modelScale).getBoundingBox();
+    }
+
+    /**
      * Raises the node's health ceiling to {@code health} and fills it. Health is expressed as a modifier
      * because {@code EntityStatType} assets own the base range.
      */

@@ -54,13 +54,19 @@ function New-Prefab {
     $path = Join-Path $outDir "$Name.prefab.json"
     # Must be BOM-less: the prefab loader parses the file as raw JSON and a BOM makes it throw at position 1.
     # Set-Content -Encoding UTF8 emits a BOM on Windows PowerShell, so write the bytes ourselves.
-    $json = $prefab | ConvertTo-Json -Depth 6
+    $json = ($prefab | ConvertTo-Json -Depth 6) + "`n"
     [System.IO.File]::WriteAllText($path, $json, (New-Object System.Text.UTF8Encoding($false)))
     Write-Host "$Name : $($blocks.Count) blocks -> $path"
 }
 
-# Upper/lower arm: a 2x3x2 column with the two lower diagonal corners knocked off so the limb tapers.
-New-Prefab -Name 'Talus_Arm_Segment' -SizeX 2 -SizeY 3 -SizeZ 2 -Skip @('0,0,0', '1,0,1')
+# Limb segments are deliberately long and only 2 blocks across. The bone scale that makes a segment span
+# the gap to its child also sets its thickness, so a short stubby prefab can only be lengthened by making
+# it fat. Four blocks of length against two of cross-section is what keeps the arms looking like arms next
+# to a body that is 4 blocks tall.
 
-# Upper/lower leg: a stubby 2x2x2 block. Legs are short and thick on a Talus.
+# Upper/lower arm: diagonal corners knocked off each end so the limb tapers at both joints.
+New-Prefab -Name 'Talus_Arm_Segment' -SizeX 2 -SizeY 4 -SizeZ 2 -Skip @('0,0,0', '1,0,1', '0,3,1', '1,3,0')
+
+# Upper/lower leg: a stubby 2x2x2 block. Legs are short and thick on a Talus, and their length is what the
+# gait was tuned against, so this one stays as it is.
 New-Prefab -Name 'Talus_Leg_Segment' -SizeX 2 -SizeY 2 -SizeZ 2 -Skip @()

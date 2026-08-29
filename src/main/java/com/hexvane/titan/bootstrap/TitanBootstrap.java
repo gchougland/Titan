@@ -11,6 +11,7 @@ import com.hexvane.titan.system.TitanAiSystem;
 import com.hexvane.titan.system.TitanAnimationSystem;
 import com.hexvane.titan.system.TitanPartSyncSystem;
 import com.hexvane.titan.system.TitanRagdollSystem;
+import com.hexvane.titan.system.TitanWeakpointDeathSystem;
 import com.hexvane.titan.system.TitanWeakpointSystem;
 import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
@@ -82,6 +83,7 @@ public final class TitanBootstrap {
         registry.registerSystem(new TitanAnimationSystem());
         registry.registerSystem(new TitanPartSyncSystem());
         registry.registerSystem(new TitanWeakpointSystem());
+        registry.registerSystem(new TitanWeakpointDeathSystem());
         registry.registerSystem(new TitanRagdollSystem());
     }
 }

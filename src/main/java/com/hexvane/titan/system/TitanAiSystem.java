@@ -95,6 +95,15 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
+        // Checked before anything else can change the state, so a titan whose last ore node just broke
+        // cannot slip in another attack on the way down.
+        if (titan.auditWeakpoints(store)) {
+            titan.getVelocity().set(0);
+            titan.setState(TitanState.DYING);
+            playSound(commandBuffer, variant.getDeathSound(), transform.getPosition());
+            return;
+        }
+
         final boolean hasTarget = resolveTarget(store, titan, variant, transform.getPosition());
 
         switch (titan.getState()) {
@@ -231,15 +240,16 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
         if (targetPosition.distance(transform.getPosition()) > variant.getWakeRadius()) return;
 
         titan.setState(TitanState.WAKING);
+        playSound(commandBuffer, variant.getWakeSound(), transform.getPosition());
+    }
 
-        final String sound = variant.getWakeSound();
-        if (sound != null && !sound.isEmpty()) {
-            final int soundIndex = SoundEvent.getAssetMap().getIndex(sound);
-            if (soundIndex != SoundEvent.EMPTY_ID) {
-                final var position = transform.getPosition();
-                SoundUtil.playSoundEvent3d(null, soundIndex, position.x, position.y, position.z, commandBuffer);
-            }
-        }
+    private static void playSound(@Nonnull final CommandBuffer<EntityStore> commandBuffer,
+                                  @Nullable final String sound,
+                                  @Nonnull final Vector3d position) {
+        if (sound == null || sound.isEmpty()) return;
+        final int soundIndex = SoundEvent.getAssetMap().getIndex(sound);
+        if (soundIndex == SoundEvent.EMPTY_ID) return;
+        SoundUtil.playSoundEvent3d(null, soundIndex, position.x, position.y, position.z, commandBuffer);
     }
 
     private void tickWaking(@Nonnull final TitanComponent titan) {

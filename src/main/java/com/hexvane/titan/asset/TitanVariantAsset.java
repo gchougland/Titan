@@ -55,9 +55,19 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
             a -> a.weakpointScale
         ).add()
         .append(
-            new KeyedCodec<>("WeakpointCount", Codec.INTEGER),
-            (a, v) -> a.weakpointCount = v,
-            a -> a.weakpointCount
+            new KeyedCodec<>("WeakpointCountMin", Codec.INTEGER),
+            (a, v) -> a.weakpointCountMin = v,
+            a -> a.weakpointCountMin
+        ).add()
+        .append(
+            new KeyedCodec<>("WeakpointCountMax", Codec.INTEGER),
+            (a, v) -> a.weakpointCountMax = v,
+            a -> a.weakpointCountMax
+        ).add()
+        .append(
+            new KeyedCodec<>("WeakpointEmbed", Codec.FLOAT),
+            (a, v) -> a.weakpointEmbed = v,
+            a -> a.weakpointEmbed
         ).add()
         .append(
             new KeyedCodec<>("WeakpointHealth", Codec.FLOAT),
@@ -166,7 +176,9 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     @Nullable
     private String weakpointModel;
     private float weakpointScale = 1f;
-    private int weakpointCount = 3;
+    private int weakpointCountMin = 2;
+    private int weakpointCountMax = 4;
+    private float weakpointEmbed = 0.25f;
     private float weakpointHealth = 100f;
     private float moveSpeed = 1.6f;
     private float turnSpeed = 0.9f;
@@ -224,8 +236,25 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return weakpointScale;
     }
 
-    public int getWeakpointCount() {
-        return weakpointCount;
+    /** Fewest ore nodes a spawn may roll. */
+    public int getWeakpointCountMin() {
+        return weakpointCountMin;
+    }
+
+    /** Most ore nodes a spawn may roll; each titan picks that many sockets at random. */
+    public int getWeakpointCountMax() {
+        return weakpointCountMax;
+    }
+
+    /**
+     * How far past the body surface an ore node's centre is pushed, in model units.
+     *
+     * <p>Sockets are authored on the surface and a node is centred on its socket, so zero already buries
+     * half of it. This sinks it further, which is what makes a node read as growing out of the rock rather
+     * than resting on it.
+     */
+    public float getWeakpointEmbed() {
+        return weakpointEmbed;
     }
 
     public float getWeakpointHealth() {

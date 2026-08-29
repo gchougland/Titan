@@ -10,6 +10,7 @@ import com.hexvane.titan.ik.FootState;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Vector3d;
 
@@ -91,8 +92,8 @@ public final class TitanComponent implements Component<EntityStore> {
         this.pose = new TitanPose(skeleton.getBoneCount());
         this.animator = new TitanAnimator(skeleton.getBoneCount());
         this.pose.resetToBind(skeleton);
-        this.weakpointsTotal = variant.getWeakpointCount();
-        this.weakpointsRemaining = variant.getWeakpointCount();
+        // Left at zero until the spawner reports how many nodes it actually placed; the count is rolled at
+        // spawn time, so the variant cannot supply it here.
         initChains(skeleton);
     }
 
@@ -303,16 +304,31 @@ public final class TitanComponent implements Component<EntityStore> {
     }
 
     /**
-     * Records a destroyed ore node.
+     * Recounts the surviving ore nodes from their entity references, dropping any that are gone.
      *
-     * <p>Synchronised because ore nodes are separate entities and several can be ticked in parallel; an
-     * interleaved read-modify-write here would lose a decrement and leave the titan unkillable.
+     * <p>This is the authoritative kill condition rather than a decrement-on-damage counter. A node can
+     * leave the world several ways — the engine despawns it the tick after its health hits zero, and it can
+     * also be removed by a command or by its chunk going away — and a counter only ever sees the first of
+     * those. Counting what is actually still there means the titan dies whenever its nodes are all gone, no
+     * matter how they went.
      *
-     * @return {@code true} when that was the last one and the titan should die
+     * @return {@code true} when every node this titan spawned with is now destroyed
      */
-    public synchronized boolean consumeWeakpoint() {
-        if (weakpointsRemaining > 0) weakpointsRemaining--;
-        return weakpointsRemaining <= 0;
+    public boolean auditWeakpoints(@Nonnull final Store<EntityStore> store) {
+        // A titan that never managed to spawn a node is broken, not dead; killing it here would make the
+        // failure look like a working boss that dies on sight.
+        if (weakpointsTotal <= 0) return false;
+
+        for (int i = weakpoints.size() - 1; i >= 0; i--) {
+            final Ref<EntityStore> ref = weakpoints.get(i);
+            final boolean alive = ref != null
+                && ref.isValid()
+                && store.getComponent(ref, TitanWeakpointComponent.getComponentType()) != null;
+            if (!alive) weakpoints.remove(i);
+        }
+
+        weakpointsRemaining = weakpoints.size();
+        return weakpointsRemaining == 0;
     }
 
     @Nonnull

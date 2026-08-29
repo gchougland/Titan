@@ -5,8 +5,10 @@
   "BodyScale": 1.0,
 
   "WeakpointModel": "Titan_OreNode_Copper",
-  "WeakpointScale": 3.0,
-  "WeakpointCount": 3,
+  "WeakpointScale": 1.25,
+  "WeakpointCountMin": 2,
+  "WeakpointCountMax": 4,
+  "WeakpointEmbed": 0.25,
   "WeakpointHealth": 120,
 
   "MoveSpeed": 1.8,

@@ -4,8 +4,10 @@
   "BodyScale": 1.35,
 
   "WeakpointModel": "Titan_OreNode_Adamantite",
-  "WeakpointScale": 3.6,
-  "WeakpointCount": 5,
+  "WeakpointScale": 1.5,
+  "WeakpointCountMin": 2,
+  "WeakpointCountMax": 4,
+  "WeakpointEmbed": 0.25,
   "WeakpointHealth": 500,
 
   "MoveSpeed": 1.5,

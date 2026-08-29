@@ -57,6 +57,11 @@ public final class TitanBoneDef {
             o -> o.scale
         ).add()
         .append(
+            new KeyedCodec<>("MirrorX", Codec.BOOLEAN),
+            (o, v) -> o.mirrorX = v,
+            o -> o.mirrorX
+        ).add()
+        .append(
             new KeyedCodec<>("ColliderStride", Codec.INTEGER),
             (o, v) -> o.colliderStride = v,
             o -> o.colliderStride
@@ -85,6 +90,7 @@ public final class TitanBoneDef {
     @Nullable
     private Vector3d pivot;
     private float scale = 1f;
+    private boolean mirrorX;
     private int colliderStride;
     private int maxParts;
     private boolean detachable = true;
@@ -132,6 +138,16 @@ public final class TitanBoneDef {
 
     public float getScale() {
         return scale;
+    }
+
+    /**
+     * Reflects the prefab's voxels across the bone's own X axis.
+     *
+     * <p>Lets a limb pair share one prefab: authoring only the right hand and mirroring it for the left
+     * gives a matched pair, where reusing the prefab as-is would make both hands the same hand.
+     */
+    public boolean isMirrorX() {
+        return mirrorX;
     }
 
     /** Every n-th surface voxel becomes a hard-collision climbable block. {@code 0} disables collision. */

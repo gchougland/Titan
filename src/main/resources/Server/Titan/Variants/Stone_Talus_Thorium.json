@@ -4,8 +4,10 @@
   "BodyScale": 1.2,
 
   "WeakpointModel": "Titan_OreNode_Thorium",
-  "WeakpointScale": 3.3,
-  "WeakpointCount": 4,
+  "WeakpointScale": 1.37,
+  "WeakpointCountMin": 2,
+  "WeakpointCountMax": 4,
+  "WeakpointEmbed": 0.25,
   "WeakpointHealth": 300,
 
   "MoveSpeed": 1.6,

@@ -5,8 +5,10 @@
   "BodyScale": 1.25,
 
   "WeakpointModel": "Titan_OreNode_Cobalt",
-  "WeakpointScale": 3.4,
-  "WeakpointCount": 4,
+  "WeakpointScale": 1.42,
+  "WeakpointCountMin": 2,
+  "WeakpointCountMax": 4,
+  "WeakpointEmbed": 0.25,
   "WeakpointHealth": 380,
 
   "MoveSpeed": 1.6,
