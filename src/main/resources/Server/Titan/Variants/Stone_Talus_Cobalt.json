@@ -1,0 +1,33 @@
+{
+  "$Comment": "Shares Thorium's rung on the ore ladder, so it is tuned as a slightly meaner sibling rather than a full tier up.",
+  "Skeleton": "Stone_Talus",
+  "DisplayName": "Cobalt Talus",
+  "BodyScale": 1.25,
+
+  "WeakpointModel": "Titan_OreNode_Cobalt",
+  "WeakpointScale": 3.4,
+  "WeakpointCount": 4,
+  "WeakpointHealth": 380,
+
+  "MoveSpeed": 1.6,
+  "TurnSpeed": 0.9,
+  "WakeRadius": 16,
+  "LoseTargetRadius": 52,
+
+  "AttackRange": 6.2,
+  "AttackDamage": 30,
+  "AttackRadius": 5.8,
+  "AttackKnockback": 17,
+  "AttackCooldown": 4.5,
+  "StunSeconds": 4.0,
+
+  "DropList": "Drop_Talus_Cobalt",
+  "DropItem": "Ore_Cobalt",
+  "DropCountMin": 12,
+  "DropCountMax": 20,
+
+  "ImpactParticle": "Block_Land_Hard_Stone",
+  "ImpactSound": "SFX_Golem_Earth_Slam_Impact",
+  "WakeSound": "SFX_Golem_Earth_Wake",
+  "DeathSound": "SFX_Stone_Break"
+}

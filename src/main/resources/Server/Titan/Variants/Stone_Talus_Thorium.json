@@ -1,0 +1,32 @@
+{
+  "Skeleton": "Stone_Talus",
+  "DisplayName": "Thorium Talus",
+  "BodyScale": 1.2,
+
+  "WeakpointModel": "Titan_OreNode_Thorium",
+  "WeakpointScale": 3.3,
+  "WeakpointCount": 4,
+  "WeakpointHealth": 300,
+
+  "MoveSpeed": 1.6,
+  "TurnSpeed": 0.9,
+  "WakeRadius": 16,
+  "LoseTargetRadius": 52,
+
+  "AttackRange": 6.0,
+  "AttackDamage": 26,
+  "AttackRadius": 5.5,
+  "AttackKnockback": 16,
+  "AttackCooldown": 4.6,
+  "StunSeconds": 3.9,
+
+  "DropList": "Drop_Talus_Thorium",
+  "DropItem": "Ore_Thorium",
+  "DropCountMin": 10,
+  "DropCountMax": 18,
+
+  "ImpactParticle": "Block_Land_Hard_Stone",
+  "ImpactSound": "SFX_Golem_Earth_Slam_Impact",
+  "WakeSound": "SFX_Golem_Earth_Wake",
+  "DeathSound": "SFX_Stone_Break"
+}

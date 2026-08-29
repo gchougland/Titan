@@ -1,0 +1,22 @@
+{
+  "Container": {
+    "Type": "Multiple",
+    "Containers": [
+      {
+        "Type": "Single",
+        "Item": { "ItemId": "Rubble_Stone", "QuantityMin": 8, "QuantityMax": 16 }
+      },
+      {
+        "Type": "Choice",
+        "Containers": [
+          { "Type": "Empty", "Weight": 65 },
+          {
+            "Type": "Single",
+            "Weight": 35,
+            "Item": { "ItemId": "Ore_Thorium", "QuantityMin": 1, "QuantityMax": 3 }
+          }
+        ]
+      }
+    ]
+  }
+}

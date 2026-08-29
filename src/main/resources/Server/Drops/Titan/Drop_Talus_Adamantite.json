@@ -1,0 +1,22 @@
+{
+  "Container": {
+    "Type": "Multiple",
+    "Containers": [
+      {
+        "Type": "Single",
+        "Item": { "ItemId": "Rubble_Stone", "QuantityMin": 12, "QuantityMax": 22 }
+      },
+      {
+        "Type": "Choice",
+        "Containers": [
+          { "Type": "Empty", "Weight": 55 },
+          {
+            "Type": "Single",
+            "Weight": 45,
+            "Item": { "ItemId": "Ore_Mithril", "QuantityMin": 1, "QuantityMax": 4 }
+          }
+        ]
+      }
+    ]
+  }
+}

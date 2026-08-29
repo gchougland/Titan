@@ -1,0 +1,32 @@
+{
+  "Skeleton": "Stone_Talus",
+  "DisplayName": "Iron Talus",
+  "BodyScale": 1.1,
+
+  "WeakpointModel": "Titan_OreNode_Iron",
+  "WeakpointScale": 3.1,
+  "WeakpointCount": 3,
+  "WeakpointHealth": 200,
+
+  "MoveSpeed": 1.7,
+  "TurnSpeed": 0.95,
+  "WakeRadius": 15,
+  "LoseTargetRadius": 48,
+
+  "AttackRange": 5.5,
+  "AttackDamage": 20,
+  "AttackRadius": 5.0,
+  "AttackKnockback": 14,
+  "AttackCooldown": 4.8,
+  "StunSeconds": 3.7,
+
+  "DropList": "Drop_Talus_Iron",
+  "DropItem": "Ore_Iron",
+  "DropCountMin": 8,
+  "DropCountMax": 14,
+
+  "ImpactParticle": "Block_Land_Hard_Stone",
+  "ImpactSound": "SFX_Golem_Earth_Slam_Impact",
+  "WakeSound": "SFX_Golem_Earth_Wake",
+  "DeathSound": "SFX_Stone_Break"
+}

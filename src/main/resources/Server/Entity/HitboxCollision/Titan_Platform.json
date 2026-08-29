@@ -1,0 +1,6 @@
+{
+  "$Comment": "Climbable titan geometry: hard collision so players can stand on it, anchoring so they ride it as it moves. RotateAnchoredEntities is deliberately left off - no vanilla config enables it, and yanking a player's yaw around every tick from dozens of separate colliders is both disorienting and untested territory.",
+  "CollisionType": "Hard",
+  "RotateHitbox": true,
+  "AllowEntityAnchoring": true
+}

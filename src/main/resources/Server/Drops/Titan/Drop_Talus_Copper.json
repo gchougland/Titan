@@ -1,0 +1,23 @@
+{
+  "$Comment": "Bonus rubble plus a chance of the next tier up. The guaranteed ore payout comes from the variant's DropItem, not from here.",
+  "Container": {
+    "Type": "Multiple",
+    "Containers": [
+      {
+        "Type": "Single",
+        "Item": { "ItemId": "Rubble_Stone", "QuantityMin": 6, "QuantityMax": 12 }
+      },
+      {
+        "Type": "Choice",
+        "Containers": [
+          { "Type": "Empty", "Weight": 70 },
+          {
+            "Type": "Single",
+            "Weight": 30,
+            "Item": { "ItemId": "Ore_Iron", "QuantityMin": 1, "QuantityMax": 3 }
+          }
+        ]
+      }
+    ]
+  }
+}

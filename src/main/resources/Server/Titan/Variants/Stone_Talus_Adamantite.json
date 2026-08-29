@@ -1,0 +1,32 @@
+{
+  "Skeleton": "Stone_Talus",
+  "DisplayName": "Adamantite Talus",
+  "BodyScale": 1.35,
+
+  "WeakpointModel": "Titan_OreNode_Adamantite",
+  "WeakpointScale": 3.6,
+  "WeakpointCount": 5,
+  "WeakpointHealth": 500,
+
+  "MoveSpeed": 1.5,
+  "TurnSpeed": 0.85,
+  "WakeRadius": 18,
+  "LoseTargetRadius": 56,
+
+  "AttackRange": 6.7,
+  "AttackDamage": 38,
+  "AttackRadius": 6.2,
+  "AttackKnockback": 19,
+  "AttackCooldown": 4.2,
+  "StunSeconds": 4.2,
+
+  "DropList": "Drop_Talus_Adamantite",
+  "DropItem": "Ore_Adamantite",
+  "DropCountMin": 14,
+  "DropCountMax": 24,
+
+  "ImpactParticle": "Block_Land_Hard_Stone",
+  "ImpactSound": "SFX_Golem_Earth_Slam_Impact",
+  "WakeSound": "SFX_Golem_Earth_Wake",
+  "DeathSound": "SFX_Stone_Break"
+}

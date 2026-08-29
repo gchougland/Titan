@@ -1,0 +1,326 @@
+package com.hexvane.titan.system;
+
+import com.hexvane.titan.anim.TitanClipLibrary;
+import com.hexvane.titan.anim.TitanPose;
+import com.hexvane.titan.asset.TitanIkChainDef;
+import com.hexvane.titan.asset.TitanSkeletonAsset;
+import com.hexvane.titan.entity.TitanComponent;
+import com.hexvane.titan.entity.TitanState;
+import com.hexvane.titan.ik.FabrikSolver;
+import com.hexvane.titan.ik.FootState;
+import com.hexvane.titan.ik.IkMath;
+import com.hexvane.titan.ik.TitanFootPlanner;
+import com.hexvane.titan.ik.TwoBoneIkSolver;
+import com.hypixel.hytale.component.Archetype;
+import com.hypixel.hytale.component.ArchetypeChunk;
+import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.component.dependency.Dependency;
+import com.hypixel.hytale.component.dependency.Order;
+import com.hypixel.hytale.component.dependency.SystemDependency;
+import com.hypixel.hytale.component.query.Query;
+import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
+import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import org.joml.Matrix4d;
+import org.joml.Quaterniond;
+import org.joml.Vector3d;
+
+import javax.annotation.Nonnull;
+import java.util.Set;
+
+/**
+ * Turns titan state into bone matrices: play a clip, sample it, override the limbs with IK, then fold
+ * everything into world space.
+ *
+ * <p>{@link TitanPartSyncSystem} reads the result, so this must run first; the AI must run before both so
+ * the pose reflects the state decided this tick.
+ */
+public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore> {
+
+    /** Longest IK chain the pre-allocated FABRIK buffers support. */
+    private static final int MAX_CHAIN_BONES = 8;
+
+    @Nonnull
+    private final Query<EntityStore> query = Archetype.of(TitanComponent.getComponentType(), TransformComponent.getComponentType());
+    @Nonnull
+    private final Set<Dependency<EntityStore>> dependencies = Set.of(new SystemDependency<>(Order.AFTER, TitanAiSystem.class));
+
+    @Nonnull
+    private final Matrix4d rootMatrix = new Matrix4d();
+    @Nonnull
+    private final TwoBoneIkSolver.Result ikResult = new TwoBoneIkSolver.Result();
+    @Nonnull
+    private final IkMath.Scratch ikScratch = new IkMath.Scratch();
+    @Nonnull
+    private final TitanFootPlanner.Scratch gaitScratch = new TitanFootPlanner.Scratch();
+
+    @Nonnull
+    private final Vector3d bodyPosition = new Vector3d();
+    @Nonnull
+    private final Vector3d forward = new Vector3d();
+    @Nonnull
+    private final Vector3d right = new Vector3d();
+    @Nonnull
+    private final Vector3d poleWorld = new Vector3d();
+    @Nonnull
+    private final Vector3d chainRoot = new Vector3d();
+    @Nonnull
+    private final Vector3d chainMid = new Vector3d();
+    @Nonnull
+    private final Vector3d chainEnd = new Vector3d();
+    @Nonnull
+    private final Quaterniond parentRotation = new Quaterniond();
+    @Nonnull
+    private final Quaterniond upperWorld = new Quaterniond();
+    @Nonnull
+    private final Quaterniond lowerWorld = new Quaterniond();
+    @Nonnull
+    private final Quaterniond localRotation = new Quaterniond();
+
+    @Nonnull
+    private final Vector3d[] fabrikJoints = new Vector3d[MAX_CHAIN_BONES];
+    @Nonnull
+    private final double[] fabrikLengths = new double[MAX_CHAIN_BONES];
+    @Nonnull
+    private final Quaterniond[] fabrikWorld = new Quaterniond[MAX_CHAIN_BONES];
+
+    public TitanAnimationSystem() {
+        for (int i = 0; i < MAX_CHAIN_BONES; i++) {
+            fabrikJoints[i] = new Vector3d();
+            fabrikWorld[i] = new Quaterniond();
+        }
+    }
+
+    @Nonnull
+    @Override
+    public Query<EntityStore> getQuery() {
+        return query;
+    }
+
+    @Nonnull
+    @Override
+    public Set<Dependency<EntityStore>> getDependencies() {
+        return dependencies;
+    }
+
+    @Override
+    public void tick(final float dt,
+                     final int index,
+                     @Nonnull final ArchetypeChunk<EntityStore> archetypeChunk,
+                     @Nonnull final Store<EntityStore> store,
+                     @Nonnull final CommandBuffer<EntityStore> commandBuffer) {
+
+        final var titan = archetypeChunk.getComponent(index, TitanComponent.getComponentType());
+        final var transform = archetypeChunk.getComponent(index, TransformComponent.getComponentType());
+        if (titan == null || transform == null) return;
+
+        final TitanSkeletonAsset skeleton = titan.getSkeleton();
+        final TitanPose pose = titan.getPose();
+        final var animator = titan.getAnimator();
+        if (skeleton == null || pose == null || animator == null) return;
+
+        if (titan.consumeClipDirty()) {
+            animator.play(TitanClipLibrary.get(skeleton, resolveClipName(titan)), true);
+        }
+        animator.advance(dt);
+        animator.sampleInto(skeleton, pose);
+
+        final double scale = titan.getScale();
+        TitanPose.rootMatrix(transform.getPosition(), titan.getYaw(), scale, rootMatrix);
+        pose.computeWorld(skeleton, rootMatrix);
+
+        // A sleeping titan is a boulder and a dying one is loose rubble; neither wants planted feet.
+        if (titan.getState() == TitanState.SLEEPING || titan.getState() == TitanState.DYING) return;
+
+        forward.set(-Math.sin(titan.getYaw()), 0, -Math.cos(titan.getYaw()));
+        right.set(Math.cos(titan.getYaw()), 0, -Math.sin(titan.getYaw()));
+        pose.getWorldPosition(skeleton.getBodyBoneIndex(), bodyPosition);
+
+        updateFeet(dt, titan, skeleton, store, scale);
+        applyFootIk(titan, skeleton, pose);
+        applyHandIk(titan, skeleton, pose);
+
+        pose.computeWorld(skeleton, rootMatrix);
+    }
+
+    @Nonnull
+    private String resolveClipName(@Nonnull final TitanComponent titan) {
+        return switch (titan.getState()) {
+            case WINDUP, SMASH -> titan.getAttackSide() < 0 ? "Attack_Arm_L" : "Attack_Arm_R";
+            default -> titan.getState().getDefaultClip();
+        };
+    }
+
+    /**
+     * Steps the gait. Only one diagonal group may be airborne at a time, so the titan always has half its
+     * feet on the ground.
+     */
+    private void updateFeet(final float dt,
+                            @Nonnull final TitanComponent titan,
+                            @Nonnull final TitanSkeletonAsset skeleton,
+                            @Nonnull final Store<EntityStore> store,
+                            final double scale) {
+
+        final FootState[] feet = titan.getFeet();
+        if (feet.length == 0) return;
+
+        final ChunkStore chunkStore = store.getExternalData().getWorld().getChunkStore();
+        final int[] chains = titan.getFootChains();
+        final var ikChains = skeleton.getIkChains();
+
+        boolean groupZeroStepping = false;
+        boolean groupOneStepping = false;
+        for (final FootState foot : feet) {
+            if (!foot.stepping) continue;
+            if (foot.gaitGroup == 0) groupZeroStepping = true;
+            else groupOneStepping = true;
+        }
+
+        for (int i = 0; i < feet.length; i++) {
+            final var chain = ikChains[chains[i]];
+            final boolean blocked = feet[i].gaitGroup == 0 ? groupOneStepping : groupZeroStepping;
+            TitanFootPlanner.update(feet[i], chain, bodyPosition, forward, right,
+                titan.getVelocity(), scale, chunkStore, dt, !blocked, gaitScratch);
+        }
+    }
+
+    private void applyFootIk(@Nonnull final TitanComponent titan,
+                             @Nonnull final TitanSkeletonAsset skeleton,
+                             @Nonnull final TitanPose pose) {
+        final FootState[] feet = titan.getFeet();
+        final int[] chains = titan.getFootChains();
+        for (int i = 0; i < feet.length; i++) {
+            if (!feet[i].initialised) continue;
+            solveChain(skeleton, pose, skeleton.getIkChains()[chains[i]], feet[i].current, 1f);
+        }
+    }
+
+    private void applyHandIk(@Nonnull final TitanComponent titan,
+                             @Nonnull final TitanSkeletonAsset skeleton,
+                             @Nonnull final TitanPose pose) {
+        final float[] weights = titan.getHandWeights();
+        final var goals = titan.getHandGoals();
+        final int[] chains = titan.getHandChains();
+        for (int i = 0; i < weights.length; i++) {
+            if (weights[i] <= 0f) continue;
+            solveChain(skeleton, pose, skeleton.getIkChains()[chains[i]], goals[i], weights[i]);
+        }
+    }
+
+    /**
+     * Bends one limb towards {@code goal} and writes the result back as local bone rotations, blended
+     * against whatever the clip produced.
+     */
+    private void solveChain(@Nonnull final TitanSkeletonAsset skeleton,
+                            @Nonnull final TitanPose pose,
+                            @Nonnull final TitanIkChainDef chain,
+                            @Nonnull final Vector3d goal,
+                            final float weight) {
+
+        final int[] bones = chain.getBoneIndices();
+        if (bones.length < 2) return;
+
+        rootMatrix.transformDirection(poleWorld.set(chain.getPoleDirection()));
+        if (poleWorld.lengthSquared() < IkMath.EPSILON) {
+            poleWorld.set(forward);
+        } else {
+            poleWorld.normalize();
+        }
+
+        if (chain.getKind() == TitanIkChainDef.Kind.TWO_BONE && bones.length >= 3) {
+            solveTwoBone(skeleton, pose, bones, goal, weight);
+        } else {
+            solveFabrik(skeleton, pose, bones, goal, weight);
+        }
+    }
+
+    private void solveTwoBone(@Nonnull final TitanSkeletonAsset skeleton,
+                              @Nonnull final TitanPose pose,
+                              @Nonnull final int[] bones,
+                              @Nonnull final Vector3d goal,
+                              final float weight) {
+
+        final int upper = bones[0];
+        final int lower = bones[1];
+        final int end = bones[2];
+
+        pose.getWorldPosition(upper, chainRoot);
+        pose.getWorldPosition(lower, chainMid);
+        pose.getWorldPosition(end, chainEnd);
+
+        final double upperLength = chainRoot.distance(chainMid);
+        final double lowerLength = chainMid.distance(chainEnd);
+        if (upperLength < IkMath.EPSILON || lowerLength < IkMath.EPSILON) return;
+
+        TwoBoneIkSolver.solve(chainRoot, goal, upperLength, lowerLength, poleWorld, ikResult);
+
+        final var boneDefs = skeleton.getBones();
+        IkMath.alignAxis(upperWorld, boneDefs[lower].getOffset(), ikResult.upperDirection, poleWorld, ikScratch);
+        IkMath.alignAxis(lowerWorld, boneDefs[end].getOffset(), ikResult.lowerDirection, poleWorld, ikScratch);
+
+        worldRotationOfParent(pose, skeleton, upper, parentRotation);
+        blendLocal(pose, upper, parentRotation, upperWorld, weight);
+        blendLocal(pose, lower, upperWorld, lowerWorld, weight);
+    }
+
+    private void solveFabrik(@Nonnull final TitanSkeletonAsset skeleton,
+                             @Nonnull final TitanPose pose,
+                             @Nonnull final int[] bones,
+                             @Nonnull final Vector3d goal,
+                             final float weight) {
+
+        final int count = Math.min(bones.length, MAX_CHAIN_BONES);
+        for (int i = 0; i < count; i++) {
+            pose.getWorldPosition(bones[i], fabrikJoints[i]);
+        }
+        for (int i = 0; i < count - 1; i++) {
+            fabrikLengths[i] = fabrikJoints[i].distance(fabrikJoints[i + 1]);
+            if (fabrikLengths[i] < IkMath.EPSILON) return;
+        }
+
+        FabrikSolver.solve(fabrikJoints, fabrikLengths, goal, count);
+
+        final var boneDefs = skeleton.getBones();
+        worldRotationOfParent(pose, skeleton, bones[0], parentRotation);
+
+        for (int i = 0; i < count - 1; i++) {
+            chainEnd.set(fabrikJoints[i + 1]).sub(fabrikJoints[i]);
+            if (chainEnd.lengthSquared() < IkMath.EPSILON) continue;
+            chainEnd.normalize();
+
+            IkMath.alignAxis(fabrikWorld[i], boneDefs[bones[i + 1]].getOffset(), chainEnd, poleWorld, ikScratch);
+            blendLocal(pose, bones[i], i == 0 ? parentRotation : fabrikWorld[i - 1], fabrikWorld[i], weight);
+        }
+    }
+
+    /**
+     * Converts a desired world rotation into the bone's local space and eases the existing local rotation
+     * towards it.
+     */
+    private void blendLocal(@Nonnull final TitanPose pose,
+                            final int bone,
+                            @Nonnull final Quaterniond parentWorld,
+                            @Nonnull final Quaterniond desiredWorld,
+                            final float weight) {
+        parentWorld.invert(localRotation).mul(desiredWorld).normalize();
+        if (weight >= 1f) {
+            pose.getLocalRotation(bone).set(localRotation);
+        } else {
+            pose.getLocalRotation(bone).slerp(localRotation, weight).normalize();
+        }
+    }
+
+    private void worldRotationOfParent(@Nonnull final TitanPose pose,
+                                       @Nonnull final TitanSkeletonAsset skeleton,
+                                       final int bone,
+                                       @Nonnull final Quaterniond dest) {
+        final int parent = skeleton.getBones()[bone].getParentIndex();
+        if (parent < 0) {
+            rootMatrix.getNormalizedRotation(dest);
+        } else {
+            pose.getWorld(parent).getNormalizedRotation(dest);
+        }
+    }
+}

@@ -1,0 +1,40 @@
+commands.titan.root.desc=Titan commands (/ti)
+commands.titan.noneNearby=No titan found nearby.
+commands.titan.unknownVariant=Unknown titan variant "{variant}". Known variants: {known}
+
+commands.titan.spawn.desc=Spawn a titan
+commands.titan.spawn.variant.desc=The titan variant id, e.g. Stone_Talus_Iron
+commands.titan.spawn.position.desc=Where to spawn it; defaults to a spot ahead of you
+commands.titan.spawn.yaw.desc=Facing in degrees; defaults to your own facing
+commands.titan.spawn.colliders.desc=Which parts are solid: none, top (default) or all
+commands.titan.spawn.success=Spawned {variant} at ({x, number}, {y, number}, {z, number}) with {parts, number} parts, {weakpoints, number} ore nodes and {colliders} collision.
+commands.titan.spawn.failed=Could not spawn titan: {error}
+commands.titan.spawn.badColliders=Unknown collider mode '{value}'. Expected one of: {known}
+
+commands.titan.kill.desc=Kill nearby titans
+commands.titan.kill.radius.desc=Search radius in blocks
+commands.titan.kill.instant.desc=Delete outright instead of playing the fall-apart death
+commands.titan.kill.result=Killed {count, plural, one {1 titan} other {{count, number} titans}}.
+
+commands.titan.list.desc=List nearby titans and known variants
+commands.titan.list.radius.desc=Search radius in blocks
+commands.titan.list.variants=Known variants: {variants}
+commands.titan.list.entry={variant} - {state}, clip {clip}, {weakpoints, number}/{total, number} ore nodes, {distance, number} blocks away
+commands.titan.list.count={count, plural, one {1 titan} other {{count, number} titans}} nearby.
+
+commands.titan.anim.desc=Play an animation clip on the nearest titan
+commands.titan.anim.clip.desc=Clip name from the skeleton's clip set, e.g. Walk
+commands.titan.anim.state.desc=Also switch the titan to this state
+commands.titan.anim.radius.desc=Search radius in blocks
+commands.titan.anim.playing=Playing {clip} ({duration, number}s) on a titan in state {state}.
+commands.titan.anim.unknownClip=Unknown clip "{clip}". Known clips: {known}
+
+commands.titan.debug.desc=Inspect the nearest titan's rig
+commands.titan.debug.mode.desc=BONES, IK, COLLIDERS or STATE
+commands.titan.debug.particle.desc=Particle system to draw gizmos with
+commands.titan.debug.radius.desc=Search radius in blocks
+commands.titan.debug.bone={bone} at ({x, number}, {y, number}, {z, number})
+commands.titan.debug.foot=foot {chain}: stepping={stepping} progress={progress, number} at ({x, number}, {y, number}, {z, number})
+commands.titan.debug.hand=hand {chain}: weight={weight, number} goal ({x, number}, {y, number}, {z, number})
+commands.titan.debug.colliders={parts, number} parts, {colliders, number} of them climbable.
+commands.titan.debug.state={variant}: {state} for {stateTime, number}s, clip {clip}, yaw {yaw, number}, attack cooldown {cooldown, number}s, next arm {side}, {weakpoints, number}/{total, number} ore nodes

@@ -1,0 +1,33 @@
+{
+  "$Comment": "Bottom of the ore ladder: smallest, fastest, softest. AttackRange scales with BodyScale because it doubles as the arm's reach in world blocks.",
+  "Skeleton": "Stone_Talus",
+  "DisplayName": "Copper Talus",
+  "BodyScale": 1.0,
+
+  "WeakpointModel": "Titan_OreNode_Copper",
+  "WeakpointScale": 3.0,
+  "WeakpointCount": 3,
+  "WeakpointHealth": 120,
+
+  "MoveSpeed": 1.8,
+  "TurnSpeed": 1.0,
+  "WakeRadius": 14,
+  "LoseTargetRadius": 48,
+
+  "AttackRange": 5.0,
+  "AttackDamage": 14,
+  "AttackRadius": 4.5,
+  "AttackKnockback": 12,
+  "AttackCooldown": 5.0,
+  "StunSeconds": 3.5,
+
+  "DropList": "Drop_Talus_Copper",
+  "DropItem": "Ore_Copper",
+  "DropCountMin": 6,
+  "DropCountMax": 10,
+
+  "ImpactParticle": "Block_Land_Hard_Stone",
+  "ImpactSound": "SFX_Golem_Earth_Slam_Impact",
+  "WakeSound": "SFX_Golem_Earth_Wake",
+  "DeathSound": "SFX_Stone_Break"
+}

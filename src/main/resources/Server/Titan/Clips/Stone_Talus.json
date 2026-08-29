@@ -1,0 +1,45 @@
+{
+  "$Comment": "Logical clip names come from TitanState; Attack_Arm_L/R are picked by the attacking side. Files are paths under Common/, the same convention as ModelAsset animation sets.",
+  "Animations": {
+    "Sleep": {
+      "File": "Titan/Talus/Animations/Sleep.blockyanim",
+      "Looping": true,
+      "BlendingDuration": 0.8
+    },
+    "Wake": {
+      "File": "Titan/Talus/Animations/Wake.blockyanim",
+      "Looping": false,
+      "BlendingDuration": 0.35
+    },
+    "Idle": {
+      "File": "Titan/Talus/Animations/Idle.blockyanim",
+      "Looping": true,
+      "BlendingDuration": 0.5
+    },
+    "Walk": {
+      "File": "Titan/Talus/Animations/Walk.blockyanim",
+      "Looping": true,
+      "BlendingDuration": 0.4
+    },
+    "Attack_Arm_L": {
+      "File": "Titan/Talus/Animations/Attack_Arm_L.blockyanim",
+      "Looping": false,
+      "BlendingDuration": 0.2
+    },
+    "Attack_Arm_R": {
+      "File": "Titan/Talus/Animations/Attack_Arm_R.blockyanim",
+      "Looping": false,
+      "BlendingDuration": 0.2
+    },
+    "Stunned": {
+      "File": "Titan/Talus/Animations/Stunned.blockyanim",
+      "Looping": true,
+      "BlendingDuration": 0.25
+    },
+    "Death": {
+      "File": "Titan/Talus/Animations/Death.blockyanim",
+      "Looping": false,
+      "BlendingDuration": 0.15
+    }
+  }
+}

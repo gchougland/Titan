@@ -1,0 +1,30 @@
+{
+  "$Comment": "Top of the ladder, so the bonus roll reaches sideways into the exotic ores instead of a higher metal tier.",
+  "Container": {
+    "Type": "Multiple",
+    "Containers": [
+      {
+        "Type": "Single",
+        "Item": { "ItemId": "Rubble_Stone", "QuantityMin": 14, "QuantityMax": 26 }
+      },
+      {
+        "Type": "Choice",
+        "RollsMin": 1,
+        "RollsMax": 2,
+        "Containers": [
+          { "Type": "Empty", "Weight": 40 },
+          {
+            "Type": "Single",
+            "Weight": 35,
+            "Item": { "ItemId": "Ore_Prisma", "QuantityMin": 1, "QuantityMax": 3 }
+          },
+          {
+            "Type": "Single",
+            "Weight": 25,
+            "Item": { "ItemId": "Ore_Onyxium", "QuantityMin": 1, "QuantityMax": 3 }
+          }
+        ]
+      }
+    ]
+  }
+}
