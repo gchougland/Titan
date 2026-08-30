@@ -101,6 +101,10 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
             return;
         }
 
+        // Nothing moved, so the transform already holds the right answer. This is what keeps a sleeping
+        // titan cheap: it is the whole reason several of them can sit around the world at once.
+        if (!titan.isPoseDirty()) return;
+
         pose.transformLocal(part.getBoneIndex(), part.getLocalOffset(), worldPosition);
         pose.getWorldRotation(part.getBoneIndex(), scratchRotation);
 

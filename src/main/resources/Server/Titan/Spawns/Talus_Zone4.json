@@ -1,0 +1,16 @@
+{
+  "$Comment": "The wastes are the top of the ore ladder, so the sites here are denser than anywhere else. Mithril is the prize: one site in twenty-one, which over a stretch of wastes is a handful of adamantite kills between sightings.",
+
+  "Environments": [
+    "Env_Zone4_Wastes",
+    "Env_Zone4_Volcanoes",
+    "Env_Zone4_Encounters"
+  ],
+
+  "Chance": 0.4,
+
+  "Variants": [
+    { "Variant": "Stone_Talus_Adamantite", "Weight": 20 },
+    { "Variant": "Stone_Talus_Mithril", "Weight": 1 }
+  ]
+}

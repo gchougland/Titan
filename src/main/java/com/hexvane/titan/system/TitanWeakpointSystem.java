@@ -79,6 +79,8 @@ public final class TitanWeakpointSystem extends EntityTickingSystem<EntityStore>
             return;
         }
 
+        if (!titan.isPoseDirty()) return;
+
         final var pose = titan.getPose();
         if (pose == null || weakpoint.getBoneIndex() < 0 || weakpoint.getBoneIndex() >= pose.getBoneCount()) return;
 

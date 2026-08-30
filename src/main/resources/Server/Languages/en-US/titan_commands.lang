@@ -22,6 +22,11 @@ commands.titan.list.variants=Known variants: {variants}
 commands.titan.list.entry={variant} - {state}, clip {clip}, {weakpoints, number}/{total, number} ore nodes, {distance, number} blocks away
 commands.titan.list.count={count, plural, one {1 titan} other {{count, number} titans}} nearby.
 
+commands.titan.sites.desc=Show the natural spawn sites around you and why each is or is not occupied
+commands.titan.sites.cells.desc=How many grid cells to check in each direction
+commands.titan.sites.entry=({x, number}, {z, number}) {distance, number} blocks - {status}, {environment}, {variant}
+commands.titan.sites.count={cells, number} cells of {size, number} blocks checked. {sited, number} hold a titan, {ready, number} of those can be built right now.
+
 commands.titan.anim.desc=Play an animation clip on the nearest titan
 commands.titan.anim.clip.desc=Clip name from the skeleton's clip set, e.g. Walk
 commands.titan.anim.state.desc=Also switch the titan to this state

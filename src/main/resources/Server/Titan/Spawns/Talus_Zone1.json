@@ -1,0 +1,22 @@
+{
+  "$Comment": [
+    "Zone 1 is where a player meets their first talus, so the pair here are the two softest. Copper dominates; iron is the occasional nastier surprise on ground the player already thinks is safe.",
+    "Environments covers every open surface zone 1 has, not just the plains tiles. Gating on Env_Zone1_Plains alone catches only the handful of tiles literally named Plains, and the noise patches that overwrite the surface with Env_Zone1_Encounters punch holes even in those, so most of a walk through zone 1 matched nothing at all. Swamps and shores are left out: one is wet and the other is a beach."
+  ],
+
+  "Environments": [
+    "Env_Zone1_Plains",
+    "Env_Zone1_Forests",
+    "Env_Zone1_Autumn",
+    "Env_Zone1_Azure",
+    "Env_Zone1_Mountains",
+    "Env_Zone1_Encounters"
+  ],
+
+  "Chance": 0.35,
+
+  "Variants": [
+    { "Variant": "Stone_Talus_Copper", "Weight": 3 },
+    { "Variant": "Stone_Talus_Iron", "Weight": 1 }
+  ]
+}

@@ -13,7 +13,7 @@
 
   "MoveSpeed": 1.8,
   "TurnSpeed": 1.0,
-  "WakeRadius": 14,
+  "WakeRadius": 6,
   "LoseTargetRadius": 48,
 
   "AttackRange": 5.0,

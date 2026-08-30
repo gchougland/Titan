@@ -1,5 +1,5 @@
 {
-  "$Comment": "Top tier. Six ore nodes means every socket on the back is filled, so the whole climb has to be made twice over.",
+  "$Comment": "Top tier. The toughest ore nodes in the game on the largest body, so the climb has to be made several times over before it goes down.",
   "Skeleton": "Stone_Talus",
   "DisplayName": "Mithril Talus",
   "BodyScale": 1.5,
@@ -13,7 +13,7 @@
 
   "MoveSpeed": 1.4,
   "TurnSpeed": 0.8,
-  "WakeRadius": 20,
+  "WakeRadius": 6,
   "LoseTargetRadius": 60,
 
   "AttackRange": 7.5,

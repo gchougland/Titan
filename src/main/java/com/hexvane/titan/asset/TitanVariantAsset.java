@@ -310,6 +310,13 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return turnSpeed;
     }
 
+    /**
+     * How close a player must get before a sleeping titan stands up, in blocks from its root.
+     *
+     * <p>Deliberately short. Titans placed by world generation spend most of their life curled up looking
+     * like scenery, and the disguise only works if a player can walk past one at a distance and never learn
+     * it was a titan. Widening this turns them back into monsters that are visibly monsters.
+     */
     public float getWakeRadius() {
         return wakeRadius;
     }

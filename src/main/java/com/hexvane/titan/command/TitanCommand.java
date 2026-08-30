@@ -13,6 +13,7 @@ public final class TitanCommand extends AbstractCommandCollection {
         addSubCommand(new TitanSpawnCommand());
         addSubCommand(new TitanKillCommand());
         addSubCommand(new TitanListCommand());
+        addSubCommand(new TitanSitesCommand());
         addSubCommand(new TitanAnimCommand());
         addSubCommand(new TitanDebugCommand());
     }

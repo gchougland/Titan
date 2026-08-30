@@ -2,86 +2,56 @@
 
 A Hytale mod by Hexvane.
 
-## Prerequisites
+Titans are enormous creatures built out of thousands of real blocks. They are too big to trade blows with
+and their bodies are solid, so fighting one is really a climb: get onto the thing, stay on it, and break
+whatever it keeps up there before it shakes you off.
 
-- **Java 25** (JetBrains Runtime recommended for hot reload during development)
-- **IntelliJ IDEA** (Community Edition is fine) or another Java IDE
-- **Hytale** installed via the launcher (for `runServer`)
+This mod is a work in progress. The Stone Talus is the first titan in it, and more will be added over time.
 
-## Quick start
+## The Stone Talus
 
-1. Build:
+A Talus sleeps in the open, curled up and still, and looks like nothing more than a rock formation until you
+get within a few blocks of it. Then the rock stands up.
 
-```bat
-.\gradlew.bat build
-```
+The ore growing out of its back is the only part of it that can be hurt. Break every node and the whole
+thing comes apart, scattering a mining trip's worth of ore across the ground.
 
-2. Run the local dev server:
+Six kinds exist, each cut from a different rock and each tougher than the last. Copper and iron turn up in
+the zone 1 plains and forests, thorium in the zone 2 deserts, cobalt on the zone 3 ice, and adamantite out
+in the zone 4 wastes. Mithril is out there too, but you will walk a long way before you see one.
 
-```bat
-.\gradlew.bat runServer
-```
+## Fighting one
 
-On first run you may need to authorize the server. Use `runServerNoSync` when editing `src/main/resources` directly so post-exit asset sync does not overwrite your files:
+A Talus has two attacks and both of them are openings.
 
-```bat
-.\gradlew.bat runServerNoSync
-```
+When it smashes down with an arm, the hand sticks in the ground for a moment. That hand is a step. Run up
+the forearm and you are on its back.
 
-3. In-game, Titan registers `/titan` (alias `/ti`) as the command prefix.
+When it slams its whole body forward it lies there winded for several seconds, back low and completely
+exposed. This is the best opening in the fight.
 
-## Gradle tasks
+Both attacks hit hard and throw you a long way, so underneath it and behind it are the safe places. The legs
+are far enough apart to run between.
 
-| Task | Description |
-|------|-------------|
-| `build` | Compile and package the mod JAR |
-| `runServer` | Start dev server; syncs assets back to source on exit |
-| `runServerNoSync` | Same as `runServer` without post-exit asset sync |
-| `verifyReleaseJar` | Fail if HytaleServer was accidentally bundled |
-| `syncAssets` | Copy `build/resources/main` back to `src/main/resources` |
+## Worth knowing
 
-## Project layout
+No two are built the same. Each grows between two and four ore nodes, and where they sit is different every
+time, so some are an easy climb and some are not.
 
-```
-src/main/java/com/hexvane/titan/   Java plugin code
-src/main/resources/manifest.json     Mod manifest (Gradle token expansion)
-src/main/resources/Common/           Client/shared assets (models, UI, etc.)
-src/main/resources/Server/Titan/     Server-side mod data JSON
-src/main/resources/Server/Item/Items/  Item definitions (add as needed)
-src/main/resources/Server/Languages/ Localization (.lang files)
-```
+Titans do not wander. One has claimed its patch of ground and will be standing there whenever you come back. 
+Kill it and the spot stays empty for a while before another moves in. Wound it and
+walk away, though, and it will be whole again next time.
 
-See [Aetherhaven](../Aetherhaven) for a full-featured reference mod using the same patterns.
+## Commands
 
-## HStats setup
+`/titan spawn <variant>` places one in front of you, `/titan list` shows what is nearby, and `/titan kill`
+clears them out. `/ti` works as a shorthand.
 
-This project includes optional [hstats.dev](https://hstats.dev) metrics integration.
+## Installation
 
-1. Register your mod at [hstats.dev](https://hstats.dev).
-2. Set your mod UUID in `gradle.properties`:
+Drop the mod into your server's mods folder and restart. Titans start appearing on their own, in existing
+worlds as well as new ones.
 
-```properties
-hstats_mod_uuid=your-uuid-here
-```
+## License
 
-Or pass at build time:
-
-```bat
-set TITAN_HSTATS_MOD_UUID=your-uuid-here
-.\gradlew.bat build
-```
-
-Leave `hstats_mod_uuid` empty to disable metrics (the plugin logs a skip message at startup).
-
-**Note:** Only change the package name in `HStats.java` — do not modify the metrics-sending logic per HStats license.
-
-## Optional build options
-
-In `build.gradle.kts`, the `hytale { }` block supports:
-
-- `addAssetsDependency = true` — attach `Assets.zip` for IDE browsing (very large)
-- `updateChannel = "pre-release"` — target pre-release server builds
-
-## Bundling dependencies
-
-If your mod needs to ship third-party libraries in the release JAR, see Aetherhaven's `modEmbed` pattern in its `build.gradle.kts`. Do not merge `runtimeClasspath` — it can include HytaleServer.
+All rights reserved. See [LICENSE](LICENSE).

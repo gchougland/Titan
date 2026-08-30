@@ -21,6 +21,8 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hexvane.titan.spawn.TitanSiteMemory;
+import com.hypixel.hytale.component.ResourceType;
 import com.hypixel.hytale.server.core.util.TargetUtil;
 import org.joml.Vector3d;
 
@@ -66,8 +68,19 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
     /** Seconds the invisible root outlives its body. */
     private static final float DEATH_LINGER_SECONDS = 2f;
 
+    /** How long a natural spawn site stays empty after its titan is killed, in seconds. */
+    private static final float KILL_COOLDOWN = 900f;
+
     @Nonnull
     private final Query<EntityStore> query = Archetype.of(TitanComponent.getComponentType(), TransformComponent.getComponentType());
+
+    /** Where a kill is written down, so the site stays empty across a restart. */
+    @Nullable
+    private final ResourceType<EntityStore, TitanSiteMemory> siteMemoryType;
+
+    public TitanAiSystem(@Nullable final ResourceType<EntityStore, TitanSiteMemory> siteMemoryType) {
+        this.siteMemoryType = siteMemoryType;
+    }
 
     @Nonnull
     private final Vector3d scratch = new Vector3d();
@@ -116,6 +129,7 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
             titan.getVelocity().set(0);
             titan.setState(TitanState.DYING);
             playSound(commandBuffer, variant.getDeathSound(), transform.getPosition());
+            recordKill(store, titan);
             return;
         }
 
@@ -485,6 +499,19 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
         if (titan.getDeathTimer() >= DEATH_LINGER_SECONDS) {
             commandBuffer.removeEntity(self, RemoveReason.REMOVE);
         }
+    }
+
+    /**
+     * Notes that a naturally sited titan has been beaten, so its spot stays empty for a while and stays
+     * empty across a restart.
+     *
+     * <p>Recorded here, at the moment the last ore node goes, rather than by watching for the entity to
+     * disappear. The engine also removes titans for reasons that are not deaths, such as the ground they
+     * are standing on falling out of simulation range, and those must not count.
+     */
+    private void recordKill(@Nonnull final Store<EntityStore> store, @Nonnull final TitanComponent titan) {
+        if (siteMemoryType == null || titan.getSiteCell() == TitanComponent.NO_SITE) return;
+        store.getResource(siteMemoryType).markCleared(titan.getSiteCell(), KILL_COOLDOWN);
     }
 
     private void tickRecover(@Nonnull final TitanComponent titan, @Nonnull final TitanVariantAsset variant) {

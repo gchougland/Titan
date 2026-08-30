@@ -1,0 +1,16 @@
+{
+  "$Comment": "Slate cobalt on the ice fields. The tundra reads as a separate environment from the glacial plains but is the same open cold ground to walk across, and the zone-3 mountains are where a boulder that turns out to be alive belongs.",
+
+  "Environments": [
+    "Env_Zone3_Glacial",
+    "Env_Zone3_Tundra",
+    "Env_Zone3_Mountains",
+    "Env_Zone3_Encounters"
+  ],
+
+  "Chance": 0.35,
+
+  "Variants": [
+    { "Variant": "Stone_Talus_Cobalt", "Weight": 1 }
+  ]
+}

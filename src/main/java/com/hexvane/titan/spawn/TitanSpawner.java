@@ -23,6 +23,7 @@ import org.joml.Vector3d;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 
@@ -64,27 +65,43 @@ public final class TitanSpawner {
     }
 
     /**
-     * Spawns {@code variantId} at {@code position} facing {@code yaw} radians, with the default collider set.
+     * Spawns {@code variantId} at {@code position} facing {@code yaw} radians, with the default collider set
+     * and a fresh roll for its ore nodes.
      */
     @Nonnull
     public static Result spawn(@Nonnull final Store<EntityStore> store,
                                @Nonnull final String variantId,
                                @Nonnull final Vector3d position,
                                final float yaw) {
-        return spawn(store, variantId, position, yaw, ColliderMode.DEFAULT);
+        return spawn(store, variantId, position, yaw, ColliderMode.DEFAULT, ThreadLocalRandom.current().nextLong());
     }
 
-    /**
-     * Spawns {@code variantId} at {@code position} facing {@code yaw} radians.
-     *
-     * @param colliderMode which voxels become climbable hard collision
-     */
+    /** Spawns with the given collider set and a fresh roll for its ore nodes. */
     @Nonnull
     public static Result spawn(@Nonnull final Store<EntityStore> store,
                                @Nonnull final String variantId,
                                @Nonnull final Vector3d position,
                                final float yaw,
                                @Nonnull final ColliderMode colliderMode) {
+        return spawn(store, variantId, position, yaw, colliderMode, ThreadLocalRandom.current().nextLong());
+    }
+
+    /**
+     * Spawns {@code variantId} at {@code position} facing {@code yaw} radians.
+     *
+     * @param colliderMode which voxels become climbable hard collision
+     * @param seed         drives how many ore nodes the titan gets and where they sit. Pass a value derived
+     *                     from the titan's place in the world and it will be rebuilt identically every time,
+     *                     which is what lets a naturally sited titan survive being unloaded and reloaded
+     *                     without being saved. Pass a random one for a throwaway spawn.
+     */
+    @Nonnull
+    public static Result spawn(@Nonnull final Store<EntityStore> store,
+                               @Nonnull final String variantId,
+                               @Nonnull final Vector3d position,
+                               final float yaw,
+                               @Nonnull final ColliderMode colliderMode,
+                               final long seed) {
 
         final TitanVariantAsset variant = TitanVariantAsset.find(variantId);
         if (variant == null) return Result.failure("unknown variant '" + variantId + '\'');
@@ -111,7 +128,7 @@ public final class TitanSpawner {
         pose.computeWorld(skeleton, TitanPose.rootMatrix(position, yaw, titan.getScale(), new Matrix4d()));
 
         final Counts counts = spawnParts(store, root, titan, variant, skeleton, colliderMode);
-        final int weakpoints = spawnWeakpoints(store, root, titan, variant, skeleton);
+        final int weakpoints = spawnWeakpoints(store, root, titan, variant, skeleton, new Random(seed));
         titan.setWeakpointCount(weakpoints);
 
         LOGGER.at(Level.INFO).log("Spawned titan '%s' with %d parts (%d climbable, mode %s) and %d weakpoints at %s",
@@ -199,7 +216,8 @@ public final class TitanSpawner {
                                        @Nonnull final Ref<EntityStore> root,
                                        @Nonnull final TitanComponent titan,
                                        @Nonnull final TitanVariantAsset variant,
-                                       @Nonnull final TitanSkeletonAsset skeleton) {
+                                       @Nonnull final TitanSkeletonAsset skeleton,
+                                       @Nonnull final Random random) {
 
         final String modelId = variant.getWeakpointModel();
         final TitanSocketDef[] sockets = skeleton.getWeakpointSockets();
@@ -229,7 +247,7 @@ public final class TitanSpawner {
         final var localRotation = new Quaterniond();
         int spawned = 0;
 
-        for (final int socketIndex : chooseSockets(variant, sockets, nodeWidth * SOCKET_SPACING)) {
+        for (final int socketIndex : chooseSockets(variant, sockets, nodeWidth * SOCKET_SPACING, random)) {
             final TitanSocketDef socket = sockets[socketIndex];
             final int bone = socket.getBoneIndex();
             if (bone < 0) continue;
@@ -278,13 +296,12 @@ public final class TitanSpawner {
     @Nonnull
     private static int[] chooseSockets(@Nonnull final TitanVariantAsset variant,
                                        @Nonnull final TitanSocketDef[] sockets,
-                                       final double minSeparation) {
-
-        final var random = ThreadLocalRandom.current();
+                                       final double minSeparation,
+                                       @Nonnull final Random random) {
 
         final int min = Math.max(1, variant.getWeakpointCountMin());
         final int max = Math.max(min, variant.getWeakpointCountMax());
-        final int wanted = Math.min(sockets.length, random.nextInt(min, max + 1));
+        final int wanted = Math.min(sockets.length, min + random.nextInt(max - min + 1));
 
         final int[] order = new int[sockets.length];
         for (int i = 0; i < sockets.length; i++) order[i] = i;

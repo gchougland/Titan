@@ -28,6 +28,9 @@ import java.util.List;
  */
 public final class TitanComponent implements Component<EntityStore> {
 
+    /** {@link #getSiteCell()} for a titan that does not belong to a natural spawn site. */
+    public static final long NO_SITE = Long.MIN_VALUE;
+
     public static ComponentType<EntityStore, TitanComponent> getComponentType() {
         return TitanRegistry.getTitanComponentType();
     }
@@ -45,6 +48,11 @@ public final class TitanComponent implements Component<EntityStore> {
     private float stateTime;
     /** Set by the AI when it wants the animation system to restart the state's clip. */
     private boolean clipDirty = true;
+    /** Whether the pose was recomputed this tick; the parts and ore nodes skip their sync when it was not. */
+    private boolean poseDirty = true;
+    private float sleepPoseTimer;
+
+    private long siteCell = NO_SITE;
 
     private double scale = 1.0;
     private float yaw;
@@ -192,6 +200,52 @@ public final class TitanComponent implements Component<EntityStore> {
 
     public void markClipDirty() {
         clipDirty = true;
+    }
+
+    /**
+     * The natural spawn site this titan was built for, or {@link #NO_SITE} if it was spawned by hand.
+     *
+     * <p>Only needed so that a death can be attributed back to a place. Whether a titan is standing
+     * somewhere is worked out from the world seed every time, but the fact that one was killed there has
+     * to be written down, and this is the link between the corpse and the record.
+     */
+    public long getSiteCell() {
+        return siteCell;
+    }
+
+    public void setSiteCell(final long siteCell) {
+        this.siteCell = siteCell;
+    }
+
+    /**
+     * Whether the pose moved this tick. Set by the animation system and read by everything that copies
+     * bone matrices onto entities, so a titan that did not move costs nothing downstream.
+     */
+    public boolean isPoseDirty() {
+        return poseDirty;
+    }
+
+    public void setPoseDirty(final boolean poseDirty) {
+        this.poseDirty = poseDirty;
+    }
+
+    /**
+     * Rations how often a sleeping titan's pose is rebuilt.
+     *
+     * <p>Asleep, a titan is a boulder with a twelve-second breathing swell in it. Re-posing that twenty
+     * times a second rewrites a couple of hundred voxel transforms and ships every one to every client in
+     * range, for motion measured in fractions of a block. Running it a few times a second instead is
+     * indistinguishable and is what makes it affordable to leave several of them standing around the world.
+     *
+     * @return seconds of animation to advance by, or {@code 0} when this tick should be skipped entirely
+     */
+    public float consumeSleepInterval(final float dt, final float interval) {
+        sleepPoseTimer += dt;
+        if (sleepPoseTimer < interval) return 0f;
+
+        final float elapsed = sleepPoseTimer;
+        sleepPoseTimer = 0f;
+        return elapsed;
     }
 
     public float getYaw() {

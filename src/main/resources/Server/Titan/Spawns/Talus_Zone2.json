@@ -1,0 +1,18 @@
+{
+  "$Comment": "Open sand gives a talus nowhere to hide and the player nowhere to run, which is the best terrain in the game to fight one on. The arid zone-2 surfaces all qualify.",
+
+  "Environments": [
+    "Env_Zone2_Deserts",
+    "Env_Zone2_Savanna",
+    "Env_Zone2_Scrub",
+    "Env_Zone2_Plateaus",
+    "Env_Zone2_Oasis",
+    "Env_Zone2_Encounters"
+  ],
+
+  "Chance": 0.35,
+
+  "Variants": [
+    { "Variant": "Stone_Talus_Thorium", "Weight": 1 }
+  ]
+}

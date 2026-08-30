@@ -42,6 +42,12 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
     /** Longest IK chain the pre-allocated FABRIK buffers support. */
     private static final int MAX_CHAIN_BONES = 8;
 
+    /**
+     * Seconds between pose rebuilds for a sleeping titan. Its only motion is a twelve-second breathing
+     * swell, so this is still several updates per cycle and nothing about it reads as choppy.
+     */
+    private static final float SLEEP_POSE_INTERVAL = 0.25f;
+
     @Nonnull
     private final Query<EntityStore> query = Archetype.of(TitanComponent.getComponentType(), TransformComponent.getComponentType());
     @Nonnull
@@ -125,10 +131,22 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         final var animator = titan.getAnimator();
         if (skeleton == null || pose == null || animator == null) return;
 
-        if (titan.consumeClipDirty()) {
+        final boolean restarted = titan.consumeClipDirty();
+        if (restarted) {
             animator.play(TitanClipLibrary.get(skeleton, resolveClipName(titan)), true);
         }
-        animator.advance(dt);
+
+        float advance = dt;
+        if (!restarted && titan.getState() == TitanState.SLEEPING) {
+            advance = titan.consumeSleepInterval(dt, SLEEP_POSE_INTERVAL);
+            if (advance <= 0f) {
+                titan.setPoseDirty(false);
+                return;
+            }
+        }
+
+        titan.setPoseDirty(true);
+        animator.advance(advance);
         animator.sampleInto(skeleton, pose);
 
         final double scale = titan.getScale();
