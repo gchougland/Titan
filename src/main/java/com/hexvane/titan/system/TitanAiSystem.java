@@ -148,6 +148,7 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
             case SLAM -> tickSlam(store, commandBuffer, self, titan, variant);
             case PRONE -> tickProne(titan, variant);
             case RISING -> tickRising(titan, variant);
+            case EMOTING -> titan.getVelocity().set(0);
             default -> {
             }
         }

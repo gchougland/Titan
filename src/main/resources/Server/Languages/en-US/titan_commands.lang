@@ -34,6 +34,11 @@ commands.titan.anim.radius.desc=Search radius in blocks
 commands.titan.anim.playing=Playing {clip} ({duration, number}s) on a titan in state {state}.
 commands.titan.anim.unknownClip=Unknown clip "{clip}". Known clips: {known}
 
+commands.titan.dance.desc=Make the nearest titan perform a player emote
+commands.titan.dance.radius.desc=Search radius in blocks
+commands.titan.dance.playing=Dancing. The player emote drives {bones, number} of the titan's {total, number} bones over {duration, number}s.
+commands.titan.dance.unavailable=The {skeleton} clip set has no Dance entry.
+
 commands.titan.debug.desc=Inspect the nearest titan's rig
 commands.titan.debug.mode.desc=BONES, IK, COLLIDERS or STATE
 commands.titan.debug.particle.desc=Particle system to draw gizmos with

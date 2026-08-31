@@ -2,13 +2,16 @@
 
 Blockbench stores per-bone keyframes as quaternion *deltas* on top of the model's bind pose, which is
 awkward to hand-write, so the clips are authored here as Euler angles per bone and converted. The files it
-emits are stock-format .blockyanim and can be opened and re-edited in Blockbench against a stand-in model
-whose node names match the Stone_Talus bone names; this script is only the starting point.
+emits are stock-format .blockyanim and can be opened and re-edited in Blockbench against the stand-in model
+that tools/generate_talus_model.py writes; this script is only the starting point.
 
 Run from the repo root:  python tools/generate_talus_clips.py
 
 Conventions, matching the runtime:
-  - Titan-local space is +X right, +Y up, -Z forward, in model units (one prefab block).
+  - Bone names follow the vanilla player rig, so that character animations can be borrowed. See the
+    skeleton JSON for what that buys and what a talus leaves out.
+  - Titan-local space is +X right, +Y up, -Z forward, in model units (one prefab block). Note this is the
+    opposite of the player rig on both axes, which is why borrowed clips need FlipFacing.
   - Euler angles are XYZ degrees composed the same way JOML's rotateXYZ does, because that is what
     TitanPose.resetToBind uses for bind rotations.
   - A bone's own axis points down its local -Y, so +X rotation swings a limb forward and +Z swings it
@@ -26,16 +29,13 @@ OUT_DIR = os.path.join(os.path.dirname(__file__), '..', 'src', 'main', 'resource
 
 # Mirrors Server/Titan/Skeletons/Stone_Talus.json. Kept here only so the forward-kinematics check below
 # can report where a pose actually puts the hands and feet.
-SHOULDER = (4.0, 1.3)     # x offset from the centreline, y relative to the Body bone
+SHOULDER = (4.0, 1.3)     # x offset from the centreline, y relative to the Pelvis bone
 HIP = (2.2, -2.0)
 UPPER_ARM, LOWER_ARM = 3.4, 3.4
 UPPER_LEG, LOWER_LEG = 1.8, 1.8
 BODY_HEIGHT = 5.0
-# The back slab reaches this far up and forward of the Body node, per the skeleton's socket comment.
+# The back slab reaches this far up and forward of the Pelvis node, per the skeleton's socket comment.
 BACK_HALF_HEIGHT, BACK_HALF_DEPTH = 2.0, 2.0
-
-ARMS = ['Arm_L_Upper', 'Arm_L_Lower', 'Hand_L', 'Arm_R_Upper', 'Arm_R_Lower', 'Hand_R']
-LEGS = ['Leg_L_Upper', 'Leg_L_Lower', 'Foot_L', 'Leg_R_Upper', 'Leg_R_Lower', 'Foot_R']
 
 
 def euler_to_quat(rx, ry, rz):
@@ -98,8 +98,8 @@ def one_arm(side, upper_x, upper_z, lower_x):
     """One arm's angles. `upper_z` is the outward splay, already signed for the side."""
     upper_x, lower_x = elbow_back(upper_x, lower_x)
     return {
-        f'Arm_{side}_Upper': (upper_x, 0, upper_z),
-        f'Arm_{side}_Lower': (lower_x, 0, 0),
+        f'{side}-Arm': (upper_x, 0, upper_z),
+        f'{side}-Forearm': (lower_x, 0, 0),
     }
 
 
@@ -113,12 +113,12 @@ def arm_pose(upper_x, upper_z, lower_x):
 
 def leg_pose(upper_x, lower_x, foot_x):
     return {
-        'Leg_L_Upper': (upper_x, 0, 0),
-        'Leg_L_Lower': (lower_x, 0, 0),
-        'Foot_L': (foot_x, 0, 0),
-        'Leg_R_Upper': (upper_x, 0, 0),
-        'Leg_R_Lower': (lower_x, 0, 0),
-        'Foot_R': (foot_x, 0, 0),
+        'L-Thigh': (upper_x, 0, 0),
+        'L-Calf': (lower_x, 0, 0),
+        'L-Foot': (foot_x, 0, 0),
+        'R-Thigh': (upper_x, 0, 0),
+        'R-Calf': (lower_x, 0, 0),
+        'R-Foot': (foot_x, 0, 0),
     }
 
 
@@ -202,7 +202,7 @@ def poses_to_keys(frames):
 
 
 def body_keys(frames):
-    return {'Body': [(frame, delta) for frame, delta in frames]}
+    return {'Pelvis': [(frame, delta) for frame, delta in frames]}
 
 
 # --- The clips -------------------------------------------------------------------------------------
@@ -220,8 +220,8 @@ def build_wake():
                 poses_to_keys([
                     (0, SLEEP),
                     (40, blend(SLEEP, REST, 0.25)),
-                    (85, merge(blend(SLEEP, REST, 1.15), Body=(-8, 0, 0))),
-                    (150, merge(REST, Body=(0, 0, 0))),
+                    (85, merge(blend(SLEEP, REST, 1.15), Pelvis=(-8, 0, 0))),
+                    (150, merge(REST, Pelvis=(0, 0, 0))),
                 ]),
                 body_keys([(0, (0, -2.2, 0)), (40, (0, -1.6, 0)), (85, (0, 0.35, 0)), (150, (0, 0, 0))]))
 
@@ -230,10 +230,10 @@ def build_idle():
     # Breathing bob with a touch of sway; the arms drift a few degrees so it never looks frozen.
     return clip(180, False,
                 poses_to_keys([
-                    (0, merge(REST, Body=(0, 0, 0))),
-                    (60, merge(arm_pose(45, 12, -103), **leg_pose(10, -20, 10), Body=(1.5, 2, 1))),
-                    (120, merge(arm_pose(39, 8, -97), **leg_pose(10, -20, 10), Body=(-1, -2, -1))),
-                    (180, merge(REST, Body=(0, 0, 0))),
+                    (0, merge(REST, Pelvis=(0, 0, 0))),
+                    (60, merge(arm_pose(45, 12, -103), **leg_pose(10, -20, 10), Pelvis=(1.5, 2, 1))),
+                    (120, merge(arm_pose(39, 8, -97), **leg_pose(10, -20, 10), Pelvis=(-1, -2, -1))),
+                    (180, merge(REST, Pelvis=(0, 0, 0))),
                 ]),
                 body_keys([(0, (0, 0, 0)), (60, (0, 0.18, 0)), (120, (0, -0.12, 0)), (180, (0, 0, 0))]))
 
@@ -247,11 +247,11 @@ def build_walk():
 
     return clip(100, False,
                 poses_to_keys([
-                    (0, merge(REST, Body=(2, 0, 0))),
-                    (25, merge(left_forward, **legs, Body=(3, -4, 5))),
-                    (50, merge(REST, Body=(2, 0, 0))),
-                    (75, merge(right_forward, **legs, Body=(3, 4, -5))),
-                    (100, merge(REST, Body=(2, 0, 0))),
+                    (0, merge(REST, Pelvis=(2, 0, 0))),
+                    (25, merge(left_forward, **legs, Pelvis=(3, -4, 5))),
+                    (50, merge(REST, Pelvis=(2, 0, 0))),
+                    (75, merge(right_forward, **legs, Pelvis=(3, 4, -5))),
+                    (100, merge(REST, Pelvis=(2, 0, 0))),
                 ]),
                 body_keys([(0, (0, 0, 0)), (25, (0, 0.3, 0)), (50, (0, -0.15, 0)),
                            (75, (0, 0.3, 0)), (100, (0, 0, 0))]))
@@ -271,19 +271,19 @@ def build_attack(side):
 
     return clip(110, True,
                 poses_to_keys([
-                    (0, merge(REST, Body=(0, 0, 0))),
+                    (0, merge(REST, Pelvis=(0, 0, 0))),
                     # Rear back, weight onto the opposite leg.
-                    (35, merge(counterweight(15, -80), **legs, Body=(-10, sign * 18, sign * -8))),
+                    (35, merge(counterweight(15, -80), **legs, Pelvis=(-10, sign * 18, sign * -8))),
                     # Drive down and through.
-                    (65, merge(counterweight(55, -120), **legs, Body=(22, sign * -10, sign * 10))),
-                    (110, merge(counterweight(45, -105), **legs, Body=(16, sign * -6, sign * 6))),
+                    (65, merge(counterweight(55, -120), **legs, Pelvis=(22, sign * -10, sign * 10))),
+                    (110, merge(counterweight(45, -105), **legs, Pelvis=(16, sign * -6, sign * 6))),
                 ]),
                 body_keys([(0, (0, 0, 0)), (35, (0, 0.5, 0)), (65, (0, -0.9, 0)), (110, (0, -0.7, 0))]))
 
 
 # --- Body slam -------------------------------------------------------------------------------------
 #
-# Both arms are pinned by IK for the whole move, so what these clips actually control is the Body node.
+# Both arms are pinned by IK for the whole move, so what these clips actually control is the Pelvis node.
 # A negative X tips the slab's top towards -Z, and at -40 with the body dropped 2.2 the leading underside
 # sits right on the floor while the front lip of the back comes down to about 3.0 — low enough to step onto
 # from a braced forearm, which is the entire point of the move. See the climb_check output.
@@ -291,14 +291,14 @@ def build_attack(side):
 SLAM_PITCH = -40
 SLAM_DROP = -2.2
 
-REARED = merge(arm_pose(-15, 20, -60), **leg_pose(-10, -30, 4), Body=(26, 0, 0))
-FLOORED = merge(arm_pose(35, 12, -70), **leg_pose(45, -85, 20), Body=(SLAM_PITCH, 0, 0))
+REARED = merge(arm_pose(-15, 20, -60), **leg_pose(-10, -30, 4), Pelvis=(26, 0, 0))
+FLOORED = merge(arm_pose(35, 12, -70), **leg_pose(45, -85, 20), Pelvis=(SLAM_PITCH, 0, 0))
 
 
 def build_slam_windup():
     # Rocks back onto the hind legs. Deliberately slow and large: it is the tell that the slam is coming.
     return clip(66, True,
-                poses_to_keys([(0, merge(REST, Body=(0, 0, 0))), (40, blend(REST, REARED, 0.7)), (66, REARED)]),
+                poses_to_keys([(0, merge(REST, Pelvis=(0, 0, 0))), (40, blend(REST, REARED, 0.7)), (66, REARED)]),
                 body_keys([(0, (0, 0, 0)), (40, (0, 0.8, 0)), (66, (0, 1.1, 0))]))
 
 
@@ -311,7 +311,7 @@ def build_slam():
 
 def build_prone():
     # Face down, heaving. This is the window the player climbs, so it barely moves.
-    heave = merge(arm_pose(37, 12, -68), **leg_pose(47, -87, 20), Body=(SLAM_PITCH - 1, 0, 0))
+    heave = merge(arm_pose(37, 12, -68), **leg_pose(47, -87, 20), Pelvis=(SLAM_PITCH - 1, 0, 0))
     return clip(150, False,
                 poses_to_keys([(0, FLOORED), (60, heave), (110, FLOORED), (150, heave)]),
                 body_keys([(0, (0, SLAM_DROP, 0)), (60, (0, SLAM_DROP + 0.15, 0)),
@@ -321,7 +321,7 @@ def build_prone():
 def build_rise():
     # Shoves back up onto its feet and settles into the resting stance.
     return clip(96, True,
-                poses_to_keys([(0, FLOORED), (48, blend(FLOORED, REST, 0.6)), (96, merge(REST, Body=(0, 0, 0)))]),
+                poses_to_keys([(0, FLOORED), (48, blend(FLOORED, REST, 0.6)), (96, merge(REST, Pelvis=(0, 0, 0)))]),
                 body_keys([(0, (0, SLAM_DROP, 0)), (48, (0, -1.0, 0)), (96, (0, 0, 0))]))
 
 
@@ -329,13 +329,13 @@ def build_stunned():
     # Hunched over the buried fist, straining to pull it free. This is the window the player climbs, so the
     # pose barely moves.
     #
-    # The pitch is what makes the climb work. A negative Body X tips the slab's top towards -Z, which drops
+    # The pitch is what makes the climb work. A negative Pelvis X tips the slab's top towards -Z, which drops
     # the front lip of the back from 7.0 to 4.1 and pulls it forward to meet the planted arm, taking the
     # arm from a 52-degree wall down to a 39-degree ramp. See the climb_check output. Crouching further
     # would flatten it more, but at this pitch the slab's leading underside is only 0.74 off the ground and
     # any more would have it ploughing through rises in the terrain.
-    hunched = merge(arm_pose(50, 6, -95), **leg_pose(20, -34, 14), Body=(-32, 0, 0))
-    strain = merge(arm_pose(52, 6, -93), **leg_pose(22, -36, 14), Body=(-34, 2, 0))
+    hunched = merge(arm_pose(50, 6, -95), **leg_pose(20, -34, 14), Pelvis=(-32, 0, 0))
+    strain = merge(arm_pose(52, 6, -93), **leg_pose(22, -36, 14), Pelvis=(-34, 2, 0))
     return clip(120, False,
                 poses_to_keys([(0, hunched), (45, strain), (85, hunched), (120, strain)]),
                 body_keys([(0, (0, -1.5, 0)), (45, (0, -1.65, 0)), (85, (0, -1.5, 0)), (120, (0, -1.65, 0))]))
@@ -344,12 +344,12 @@ def build_stunned():
 def build_death():
     # Buckle, then collapse. TitanPartSyncSystem cuts the voxels loose almost immediately, so only the
     # first half second of this is ever really seen.
-    buckle = merge(arm_pose(60, 20, -70), **leg_pose(40, -70, 20), Body=(18, 0, 6))
-    collapse = merge(arm_pose(85, 45, -30), **leg_pose(75, -110, 30), Body=(38, 0, 14))
+    buckle = merge(arm_pose(60, 20, -70), **leg_pose(40, -70, 20), Pelvis=(18, 0, 6))
+    collapse = merge(arm_pose(85, 45, -30), **leg_pose(75, -110, 30), Pelvis=(38, 0, 14))
     return clip(90, True,
                 poses_to_keys([
-                    (0, merge(REST, Body=(0, 0, 0))),
-                    (20, merge(arm_pose(30, 4, -110), **leg_pose(4, -10, 6), Body=(-8, 0, -2))),
+                    (0, merge(REST, Pelvis=(0, 0, 0))),
+                    (20, merge(arm_pose(30, 4, -110), **leg_pose(4, -10, 6), Pelvis=(-8, 0, -2))),
                     (50, buckle),
                     (90, collapse),
                 ]),
@@ -381,18 +381,18 @@ def check(pose_name, pose, body_dy=0.0):
     out = []
     for side, sx in (('L', -1), ('R', 1)):
         shoulder = (sx * SHOULDER[0], body_y + SHOULDER[1], 0)
-        q_up = euler_to_quat(*pose[f'Arm_{side}_Upper'])
+        q_up = euler_to_quat(*pose[f'{side}-Arm'])
         d_up = rotate(q_up, (0, -1, 0))
         elbow = tuple(shoulder[i] + UPPER_ARM * d_up[i] for i in range(3))
-        q_lo = quat_mul(q_up, euler_to_quat(*pose[f'Arm_{side}_Lower']))
+        q_lo = quat_mul(q_up, euler_to_quat(*pose[f'{side}-Forearm']))
         d_lo = rotate(q_lo, (0, -1, 0))
         hand = tuple(elbow[i] + LOWER_ARM * d_lo[i] for i in range(3))
         out.append(f'hand_{side}=({hand[0]:6.2f},{hand[1]:6.2f},{hand[2]:6.2f})')
 
         hip = (sx * HIP[0], body_y + HIP[1], 0)
-        q_ul = euler_to_quat(*pose[f'Leg_{side}_Upper'])
+        q_ul = euler_to_quat(*pose[f'{side}-Thigh'])
         knee = tuple(hip[i] + UPPER_LEG * rotate(q_ul, (0, -1, 0))[i] for i in range(3))
-        q_ll = quat_mul(q_ul, euler_to_quat(*pose[f'Leg_{side}_Lower']))
+        q_ll = quat_mul(q_ul, euler_to_quat(*pose[f'{side}-Calf']))
         foot = tuple(knee[i] + LOWER_LEG * rotate(q_ll, (0, -1, 0))[i] for i in range(3))
         out.append(f'foot_{side}=({foot[0]:6.2f},{foot[1]:6.2f},{foot[2]:6.2f})')
     print(f'  {pose_name:8} ' + '  '.join(out))
@@ -402,7 +402,7 @@ def climb_check(pose_name, body_euler, body_dy, reach=5.0):
     """Reports the geometry a player has to climb during a pose.
 
     The attacking arm is fully IK-driven onto the impact point, so its clip angles say nothing about what
-    the arm looks like — the shoulder is what sets the slope. This walks the Body node's own rotation and
+    the arm looks like — the shoulder is what sets the slope. This walks the Pelvis node's own rotation and
     translation to find the shoulder and the front lip of the back slab, then prints the slope of the line
     from the planted fist up to the shoulder. Anything much past 45 degrees is a wall, not a ramp.
     """

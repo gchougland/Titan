@@ -47,6 +47,8 @@ walk away, though, and it will be whole again next time.
 `/titan spawn <variant>` places one in front of you, `/titan list` shows what is nearby, and `/titan kill`
 clears them out. `/ti` works as a shorthand.
 
+`/titan dance` is not useful, but a titan doing a player emote is worth seeing once.
+
 ## Installation
 
 Drop the mod into your server's mods folder and restart. Titans start appearing on their own, in existing

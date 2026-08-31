@@ -66,7 +66,9 @@ public final class TitanClipLibrary {
             names,
             entry.isLooping(),
             entry.getSpeed(),
-            entry.getBlendingDuration()
+            entry.getBlendingDuration(),
+            entry.getPositionScale(),
+            entry.isFlipFacing()
         );
     }
 

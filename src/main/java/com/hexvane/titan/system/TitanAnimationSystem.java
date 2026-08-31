@@ -153,8 +153,11 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         TitanPose.rootMatrix(transform.getPosition(), titan.getYaw(), scale, rootMatrix);
         pose.computeWorld(skeleton, rootMatrix);
 
-        // A sleeping titan is a boulder and a dying one is loose rubble; neither wants planted feet.
-        if (titan.getState() == TitanState.SLEEPING || titan.getState() == TitanState.DYING) return;
+        // A sleeping titan is a boulder, a dying one is loose rubble and an emoting one is showing a clip
+        // as authored; none of the three want planted feet.
+        if (titan.getState() == TitanState.SLEEPING
+            || titan.getState() == TitanState.DYING
+            || titan.getState() == TitanState.EMOTING) return;
 
         forward.set(-Math.sin(titan.getYaw()), 0, -Math.cos(titan.getYaw()));
         right.set(Math.cos(titan.getYaw()), 0, -Math.sin(titan.getYaw()));

@@ -15,6 +15,7 @@ public final class TitanCommand extends AbstractCommandCollection {
         addSubCommand(new TitanListCommand());
         addSubCommand(new TitanSitesCommand());
         addSubCommand(new TitanAnimCommand());
+        addSubCommand(new TitanDanceCommand());
         addSubCommand(new TitanDebugCommand());
     }
 }

@@ -44,7 +44,14 @@ public enum TitanState {
     /** Pushing back up off the floor. */
     RISING("Rise"),
     /** Falling apart. */
-    DYING("Death");
+    DYING("Death"),
+    /**
+     * Standing still playing whatever clip was handed to it, with the AI and the IK both stood down.
+     *
+     * <p>Nothing enters this on its own; it exists for commands that want a clip shown exactly as authored,
+     * without planted feet dragging the legs back onto the terrain.
+     */
+    EMOTING("Idle");
 
     @Nonnull
     private final String defaultClip;

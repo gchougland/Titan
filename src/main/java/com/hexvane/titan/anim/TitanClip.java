@@ -40,7 +40,12 @@ public final class TitanClip {
     }
 
     /**
-     * Rebinds a parsed animation onto a different bone-index layout.
+     * Rebinds a parsed animation onto a different bone-index layout, retargeting it on the way.
+     *
+     * <p>Bones the clip does not name are left null and keep their bind transform, and tracks naming bones
+     * the skeleton does not have are dropped. That is what makes borrowing an animation practical: a titan
+     * only has to reproduce the handful of bone names it actually wants driven, and the source rig's head,
+     * hair and clothing tracks fall away on their own.
      */
     @Nonnull
     public static TitanClip bind(@Nonnull final String name,
@@ -50,10 +55,13 @@ public final class TitanClip {
                                  @Nonnull final String[] boneNames,
                                  final boolean looping,
                                  final float speed,
-                                 final float blendingDuration) {
+                                 final float blendingDuration,
+                                 final float positionScale,
+                                 final boolean flipFacing) {
         final var tracks = new TitanBoneTrack[boneNames.length];
         for (int i = 0; i < boneNames.length; i++) {
-            tracks[i] = byBoneName.get(boneNames[i]);
+            final TitanBoneTrack source = byBoneName.get(boneNames[i]);
+            tracks[i] = source == null ? null : source.reinterpret(positionScale, flipFacing);
         }
         return new TitanClip(name, duration, looping, holdLastKeyframe, speed, blendingDuration, tracks);
     }

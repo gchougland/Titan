@@ -8,8 +8,8 @@ import javax.annotation.Nonnull;
 /**
  * Keyframes for one bone of a clip, stored as flat arrays so sampling allocates nothing.
  *
- * <p>Times are in seconds. Positions are Blockbench deltas from the bind pose; orientations are unit
- * quaternions replacing the bind orientation.
+ * <p>Times are in seconds. Both channels are Blockbench deltas on top of the bind pose: positions add to
+ * the bind translation in the parent's frame, orientations compose onto the bind rotation in the bone's own.
  */
 public final class TitanBoneTrack {
 
@@ -32,6 +32,40 @@ public final class TitanBoneTrack {
         this.positionValues = positionValues;
         this.rotationTimes = rotationTimes;
         this.rotationValues = rotationValues;
+    }
+
+    /**
+     * Re-expresses this track for a rig that is not the one it was authored on.
+     *
+     * <p>Done once at load rather than per sample, so a retargeted clip costs nothing extra to play.
+     *
+     * @param positionScale factor applied to every translation key
+     * @param flipFacing    turn the animation half a turn about {@code Y}, for a source rig whose
+     *                      {@code +X} and {@code +Z} point the other way. Negating those two components
+     *                      is what conjugating by a half turn works out to, for vectors and quaternions
+     *                      alike.
+     * @return {@code this} when there is nothing to do, otherwise a converted copy
+     */
+    @Nonnull
+    public TitanBoneTrack reinterpret(final float positionScale, final boolean flipFacing) {
+        if (positionScale == 1f && !flipFacing) return this;
+
+        final float[] positions = positionValues.clone();
+        for (int i = 0; i < positions.length; i += 3) {
+            positions[i] *= flipFacing ? -positionScale : positionScale;
+            positions[i + 1] *= positionScale;
+            positions[i + 2] *= flipFacing ? -positionScale : positionScale;
+        }
+
+        final float[] rotations = rotationValues.clone();
+        if (flipFacing) {
+            for (int i = 0; i < rotations.length; i += 4) {
+                rotations[i] = -rotations[i];
+                rotations[i + 2] = -rotations[i + 2];
+            }
+        }
+
+        return new TitanBoneTrack(positionTimes, positions, rotationTimes, rotations);
     }
 
     public boolean hasPosition() {
