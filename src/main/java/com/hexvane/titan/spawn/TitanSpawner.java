@@ -8,6 +8,7 @@ import com.hexvane.titan.asset.TitanVariantAsset;
 import com.hexvane.titan.config.TitanConfig;
 import com.hexvane.titan.entity.TitanComponent;
 import com.hypixel.hytale.component.AddReason;
+import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -208,6 +209,14 @@ public final class TitanSpawner {
 
             pose.getWorldRotation(bone.getIndex(), rotation);
 
+            // Collected and handed over in one go rather than added one at a time. Adding an entity walks
+            // every holder and ref system that could care about it and then drains a command buffer, and
+            // paying that per voxel is most of the hitch when a titan this size appears. The bulk call does
+            // the walk once for the whole bone. Sized to the voxel count, which is the most it can produce.
+            @SuppressWarnings("unchecked")
+            final Holder<EntityStore>[] holders = new Holder[voxels.size()];
+            int holderCount = 0;
+
             int index = -1;
             // Counted separately from `index` so the stride thins the candidates evenly. Keying it off the
             // raw voxel index instead would interact with the shape of the prefab and could pick none at all.
@@ -236,13 +245,14 @@ public final class TitanSpawner {
                     collider = colliderCandidate % bone.getColliderStride() == 0;
                 }
 
-                final var holder = TitanPartBuilder.buildVoxel(
+                holders[holderCount++] = TitanPartBuilder.buildVoxel(
                     store, root, voxel.blockKey(), worldPos, rotation, voxel.rotation(), boneScale,
                     bone.getIndex(), local, collider, colliderConfig);
-                store.addEntity(holder, AddReason.SPAWN);
                 counts.parts++;
                 if (collider) counts.colliders++;
             }
+
+            if (holderCount > 0) store.addEntities(holders, 0, holderCount, AddReason.SPAWN);
         }
         return counts;
     }

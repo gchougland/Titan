@@ -25,6 +25,12 @@ public final class TitanPose {
     @Nonnull
     private final Matrix4d[] world;
 
+    /** The world matrices as of the last {@link #captureMotion}, i.e. the previous tick's finished pose. */
+    @Nonnull
+    private final Matrix4d[] settled;
+    @Nonnull
+    private final boolean[] moved;
+
     @Nonnull
     private final Quaterniond scratchQuat = new Quaterniond();
     @Nonnull
@@ -36,10 +42,15 @@ public final class TitanPose {
         localTranslation = new Vector3d[boneCount];
         localRotation = new Quaterniond[boneCount];
         world = new Matrix4d[boneCount];
+        settled = new Matrix4d[boneCount];
+        moved = new boolean[boneCount];
         for (int i = 0; i < boneCount; i++) {
             localTranslation[i] = new Vector3d();
             localRotation[i] = new Quaterniond();
             world[i] = new Matrix4d();
+            settled[i] = new Matrix4d();
+            // Nothing has been captured yet, so assume the worst and let the first tick sort it out.
+            moved[i] = true;
         }
     }
 
@@ -145,6 +156,33 @@ public final class TitanPose {
         }
     }
 
+    /**
+     * Records which bones ended this tick somewhere other than where they ended the last one.
+     *
+     * <p>Call once the pose is finished. {@link #computeWorld} runs more than once a tick — an IK solver
+     * needs world matrices to work from before it can correct them — and only the last of those is the
+     * pose anything downstream should be comparing against.
+     *
+     * <p>The comparison is exact rather than approximate, which sounds too strict to ever match and is
+     * the point: bone matrices are built by the same arithmetic from the same inputs, so a bone the
+     * animation did not touch this tick lands on bit-identical numbers and can be recognised for free.
+     * That covers rather more than idling. Everything a titan does other than walk holds most of its body
+     * still — during the Roaming Temple's stomp one leg swings and the other three plus the body do not,
+     * so most of its voxels can be left alone. A bone that genuinely is moving slightly is not caught
+     * here; that is what the per-part tolerance in the sync system is for.
+     */
+    public void captureMotion() {
+        for (int i = 0; i < world.length; i++) {
+            moved[i] = !world[i].equals(settled[i]);
+            if (moved[i]) settled[i].set(world[i]);
+        }
+    }
+
+    /** @see #captureMotion */
+    public boolean hasBoneMoved(final int bone) {
+        return bone < 0 || bone >= moved.length || moved[bone];
+    }
+
     /** World-space position of a bone's pivot. */
     @Nonnull
     public Vector3d getWorldPosition(final int bone, @Nonnull final Vector3d dest) {
@@ -176,5 +214,22 @@ public final class TitanPose {
         world[bone].getNormalizedRotation(scratchQuat);
         scratchQuat.mul(local).getEulerAnglesYXZ(scratchVec);
         return dest.set((float) scratchVec.x, (float) scratchVec.y, (float) scratchVec.z);
+    }
+
+    /**
+     * As {@link #getWorldRotation(int, Rotation3f)}, working in scratch the caller owns.
+     *
+     * <p>Needed because a titan's parts can be synced in parallel, and thousands of threads asking one pose
+     * for a bone's orientation cannot share the pose's own scratch. The pose itself is only read here, so
+     * with the intermediates handed in this is safe to call from any number of threads at once.
+     */
+    @Nonnull
+    public Rotation3f getWorldRotation(final int bone,
+                                       @Nonnull final Rotation3f dest,
+                                       @Nonnull final Quaterniond quaternion,
+                                       @Nonnull final Vector3d euler) {
+        world[bone].getNormalizedRotation(quaternion);
+        quaternion.getEulerAnglesYXZ(euler);
+        return dest.set((float) euler.x, (float) euler.y, (float) euler.z);
     }
 }

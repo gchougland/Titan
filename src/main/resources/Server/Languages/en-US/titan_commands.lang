@@ -24,8 +24,11 @@ commands.titan.list.count={count, plural, one {1 titan} other {{count, number} t
 
 commands.titan.sites.desc=Show the natural spawn sites around you and why each is or is not occupied
 commands.titan.sites.cells.desc=How many grid cells to check in each direction
+commands.titan.sites.variant.desc=Only list cells holding this variant, e.g. Roaming_Temple
 commands.titan.sites.entry=({x, number}, {z, number}) {distance, number} blocks - {status}, {environment}, {variant}
 commands.titan.sites.count={cells, number} cells of {size, number} blocks checked. {sited, number} hold a titan, {ready, number} of those can be built right now.
+commands.titan.sites.filtered={cells, number} cells of {size, number} blocks checked. {sited, plural, one {1 holds} other {{sited, number} hold}} {variant}, {ready, number} of those can be built right now.
+commands.titan.sites.unreadable={unreadable, number} of those cells could not be read because their chunks are not loaded, so this is not the whole picture. Walk closer, or raise --cells to sweep further once they load.
 
 commands.titan.anim.desc=Play an animation clip on the nearest titan
 commands.titan.anim.clip.desc=Clip name from the skeleton's clip set, e.g. Walk
@@ -48,3 +51,16 @@ commands.titan.debug.foot=foot {chain}: stepping={stepping} progress={progress, 
 commands.titan.debug.hand=hand {chain}: weight={weight, number} goal ({x, number}, {y, number}, {z, number})
 commands.titan.debug.colliders={parts, number} parts, {colliders, number} of them climbable.
 commands.titan.debug.state={variant}: {state} for {stateTime, number}s, clip {clip}, yaw {yaw, number}, attack cooldown {cooldown, number}s, next arm {side}, {weakpoints, number}/{total, number} ore nodes ({toKill, number} to kill)
+
+commands.titan.perf.desc=Report how much of last tick titan parts spent on network updates
+commands.titan.perf.idle=No titan parts ticked last tick, so there is nothing to report.
+commands.titan.perf.volume=Sent {written, number} of {considered, number} part transforms last tick: {kib, number} KiB per tick, {kibs, number} KiB/s per viewer before compression.
+commands.titan.perf.skipped=Skipped {skipped, number}: {pose, number} titan not posing, {bone, number} bone still, {deadband, number} inside deadband, {phase, number} awaiting their turn.
+commands.titan.perf.tuning=Tolerances: {epsilon, number} blocks, {rotation, number} degrees, {interval, number}s between updates. Run /entity tracker on yourself for what your client is actually being sent.
+
+commands.titan.preview.desc=Stand a titan prefab up as a hologram to see whether one entity could replace its voxels
+commands.titan.preview.prefab.desc=Prefab key, e.g. Temple_Body
+commands.titan.preview.yaw.desc=Facing in degrees; defaults to your own facing. Spawn two at different yaws to see whether the mesh turns
+commands.titan.preview.layers.desc=Show only this many layers from the bottom up
+commands.titan.preview.unknownPrefab=No prefab found for "{prefab}".
+commands.titan.preview.spawned=Preview of {prefab} at {yaw, number} degrees, {distance, number} blocks ahead. Does the mesh face where you asked, and is it solid or a ghost? Remove it with /prefabpreview remove --radius=64.

@@ -1,5 +1,6 @@
 package com.hexvane.titan.system;
 
+import com.hexvane.titan.config.TitanConfig;
 import com.hexvane.titan.entity.TitanComponent;
 import com.hexvane.titan.entity.TitanPartComponent;
 import com.hexvane.titan.entity.TitanState;
@@ -32,9 +33,17 @@ import java.util.logging.Level;
 /**
  * Copies bone matrices onto the entities that make up a titan's body.
  *
- * <p>There is no entity parenting in the engine, so this is what holds a titan together: every voxel gets
- * its transform rewritten from the owner's pose each tick. When the owner starts dying the parts detach
- * here and {@link TitanRagdollSystem} takes over their motion.
+ * <p>There is no entity parenting in the engine, so this is what holds a titan together: a voxel's
+ * transform is rewritten from the owner's pose rather than following it. When the owner starts dying the
+ * parts detach here and {@link TitanRagdollSystem} takes over their motion.
+ *
+ * <p>Most of what follows is about not rewriting it. A rewritten transform is a packet, the engine puts
+ * every one of them in the same unsplit packet, and a titan of a few thousand voxels can fill a
+ * connection with a single tick of walking — which arrives as parts of the titan visibly flickering. So
+ * there are four gates before the write, coarse to fine: whether the titan re-posed at all, whether this
+ * part's bone did, whether the part's turn has come round if a sync interval is configured, and whether it
+ * has actually gone anywhere worth mentioning. {@link TitanSyncStats} counts which gate stopped what, and
+ * {@code /titan perf} reads it back.
  */
 public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> {
 
@@ -46,8 +55,18 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
     private static final double BURST_LIFT = 4.5;
     private static final double BURST_SPIN = 3.0;
 
-    /** How often each voxel restates its size to the clients watching it. See {@code consumeScaleRefresh}. */
-    public static final float SCALE_REFRESH_SECONDS = 2f;
+    /**
+     * How often each voxel restates its size to the clients watching it. See {@code consumeScaleRefresh}.
+     *
+     * <p>Long, because this is now a safety net rather than the fix it started as. It was two seconds when
+     * the failure it was written for looked like the only way a client could end up not knowing a part's
+     * size; {@code BlockEntitySystems.SendUpdates} turns out to send the scale to every viewer in
+     * {@code newlyVisibleTo} whether or not it is marked out of date, so a client that walks into range of
+     * a titan is told regardless and the case is already handled. On the Roaming Temple two seconds was a
+     * hundred-odd size packets every tick to say nothing; thirty leaves something in place to recover from
+     * a cause nobody has identified, at a fifteenth of the cost.
+     */
+    public static final float SCALE_REFRESH_SECONDS = 30f;
 
     /**
      * Shortest and longest a piece of rubble lies around before it is cleaned up, in seconds. Short enough
@@ -62,18 +81,30 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
     @Nonnull
     private final Set<Dependency<EntityStore>> dependencies = Set.of(new SystemDependency<>(Order.AFTER, TitanAnimationSystem.class));
 
+    /**
+     * The intermediates one part needs to work out where it goes, one set per thread.
+     *
+     * <p>These used to be fields on the system, which is the usual way to keep a per-tick hot loop from
+     * allocating and is exactly what stops a system being run in parallel. Held per thread instead they
+     * still allocate nothing per part and the loop can fan out.
+     */
+    private static final class Scratch {
+        @Nonnull
+        private final Vector3d worldPosition = new Vector3d();
+        @Nonnull
+        private final Rotation3f rotation = new Rotation3f();
+        @Nonnull
+        private final Quaterniond quaternion = new Quaterniond();
+        @Nonnull
+        private final Vector3d euler = new Vector3d();
+        @Nonnull
+        private final Vector3d burst = new Vector3d();
+        @Nonnull
+        private final Vector3d spin = new Vector3d();
+    }
+
     @Nonnull
-    private final Vector3d worldPosition = new Vector3d();
-    @Nonnull
-    private final Rotation3f scratchRotation = new Rotation3f();
-    @Nonnull
-    private final Vector3d burst = new Vector3d();
-    @Nonnull
-    private final Vector3d spin = new Vector3d();
-    @Nonnull
-    private final Quaterniond scratchQuaternion = new Quaterniond();
-    @Nonnull
-    private final Vector3d scratchEuler = new Vector3d();
+    private static final ThreadLocal<Scratch> SCRATCH = ThreadLocal.withInitial(Scratch::new);
 
     @Nonnull
     @Override
@@ -85,6 +116,11 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
     @Override
     public Set<Dependency<EntityStore>> getDependencies() {
         return dependencies;
+    }
+
+    @Override
+    public boolean isParallel(final int archetypeChunkSize, final int taskCount) {
+        return TitanConfig.get().isParallelPartSync() && useParallel(archetypeChunkSize, taskCount);
     }
 
     @Override
@@ -101,9 +137,11 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
         // Detached debris belongs to the ragdoll system and must survive the owner being removed.
         if (part.isDetached()) return;
 
+        // Through the command buffer rather than the store: the store's getter asserts it is being called
+        // on the world thread, and this system can be running on a pool thread instead.
         final Ref<EntityStore> owner = part.getOwner();
         final TitanComponent titan = owner != null && owner.isValid()
-            ? store.getComponent(owner, TitanComponent.getComponentType())
+            ? commandBuffer.getComponent(owner, TitanComponent.getComponentType())
             : null;
 
         if (titan == null) {
@@ -114,8 +152,10 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
         final var pose = titan.getPose();
         if (pose == null || part.getBoneIndex() >= pose.getBoneCount()) return;
 
+        final Scratch scratch = SCRATCH.get();
+
         if (titan.getState() == TitanState.DYING) {
-            detach(part, titan, transform);
+            detach(scratch, part, titan, transform);
             return;
         }
 
@@ -126,26 +166,52 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
             if (scaleComponent != null) scaleComponent.setScale(part.getScale());
         }
 
+        TitanSyncStats.countConsidered();
+
         // Nothing moved, so the transform already holds the right answer. This is what keeps a sleeping
         // titan cheap: it is the whole reason several of them can sit around the world at once.
-        if (!titan.isPoseDirty()) return;
+        if (!titan.isPoseDirty()) {
+            TitanSyncStats.countStillPose();
+            return;
+        }
 
-        pose.transformLocal(part.getBoneIndex(), part.getLocalOffset(), worldPosition);
-        pose.getWorldRotation(part.getBoneIndex(), scratchRotation);
-        BlockRotations.compose(scratchRotation, part.getBlockRotation(), scratchQuaternion, scratchEuler);
+        // Some of the titan re-posed, but not this part's bone. Everything the part's transform is built
+        // from is then unchanged, so recomputing it would land on the same numbers the clients already hold.
+        if (!pose.hasBoneMoved(part.getBoneIndex())) {
+            TitanSyncStats.countStillBone();
+            return;
+        }
+
+        final var config = TitanConfig.get();
+        if (!part.consumeSyncSlot(dt, config.getPartSyncInterval())) {
+            TitanSyncStats.countOffPhase();
+            return;
+        }
+
+        pose.transformLocal(part.getBoneIndex(), part.getLocalOffset(), scratch.worldPosition);
+        pose.getWorldRotation(part.getBoneIndex(), scratch.rotation, scratch.quaternion, scratch.euler);
+        BlockRotations.compose(scratch.rotation, part.getBlockRotation(), scratch.quaternion, scratch.euler);
 
         // A NaN that escapes the IK solvers would be replicated to clients, where it poisons collision and
         // camera maths badly enough to hang them. Drop the frame and keep the last good transform instead;
         // the titan visibly stutters, which is a far better failure than a locked-up client.
-        if (!isFinite(worldPosition) || !isFinite(scratchRotation)) {
+        if (!isFinite(scratch.worldPosition) || !isFinite(scratch.rotation)) {
             LOGGER.at(Level.SEVERE).atMostEvery(10, TimeUnit.SECONDS).log(
                 "Titan bone %d produced a non-finite transform (position %s, rotation %s); holding the previous pose",
-                part.getBoneIndex(), worldPosition, scratchRotation);
+                part.getBoneIndex(), scratch.worldPosition, scratch.rotation);
             return;
         }
 
-        transform.getPosition().set(worldPosition);
-        transform.getRotation().set(scratchRotation);
+        // Last, so a transform that was never going to be sent is not the one recorded as sent.
+        if (!part.hasDriftedFrom(scratch.worldPosition, scratch.rotation,
+            config.getPartSyncEpsilon(), config.getPartSyncRotationEpsilon())) {
+            TitanSyncStats.countDeadband();
+            return;
+        }
+
+        transform.getPosition().set(scratch.worldPosition);
+        transform.getRotation().set(scratch.rotation);
+        TitanSyncStats.countWritten();
     }
 
     private static boolean isFinite(@Nonnull final Vector3d v) {
@@ -160,9 +226,10 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
      * Kicks one voxel loose. Speed scales with distance from the body so the extremities fly furthest and
      * the pile reads as a collapse rather than an explosion.
      */
-    private void detach(@Nonnull final TitanPartComponent part,
-                        @Nonnull final TitanComponent titan,
-                        @Nonnull final TransformComponent transform) {
+    private static void detach(@Nonnull final Scratch scratch,
+                               @Nonnull final TitanPartComponent part,
+                               @Nonnull final TitanComponent titan,
+                               @Nonnull final TransformComponent transform) {
 
         final var skeleton = titan.getSkeleton();
         final var pose = titan.getPose();
@@ -175,28 +242,28 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
 
         if (!skeleton.getBones()[part.getBoneIndex()].isDetachable()) {
             // Bones flagged as fixed just drop straight down with the rest of the rubble.
-            burst.set(0, 0, 0);
-            spin.set(0, 0, 0);
-            part.detach(burst, spin, despawnAfter);
+            scratch.burst.set(0, 0, 0);
+            scratch.spin.set(0, 0, 0);
+            part.detach(scratch.burst, scratch.spin, despawnAfter);
             return;
         }
 
-        pose.getWorldPosition(skeleton.getBodyBoneIndex(), worldPosition);
-        burst.set(transform.getPosition()).sub(worldPosition);
-        final double distance = burst.length();
+        pose.getWorldPosition(skeleton.getBodyBoneIndex(), scratch.worldPosition);
+        scratch.burst.set(transform.getPosition()).sub(scratch.worldPosition);
+        final double distance = scratch.burst.length();
         if (distance < 1.0e-3) {
-            burst.set(0, BURST_LIFT, 0);
+            scratch.burst.set(0, BURST_LIFT, 0);
         } else {
-            burst.div(distance).mul(distance * BURST_SPREAD);
-            burst.y = Math.max(burst.y, 0) + BURST_LIFT;
+            scratch.burst.div(distance).mul(distance * BURST_SPREAD);
+            scratch.burst.y = Math.max(scratch.burst.y, 0) + BURST_LIFT;
         }
 
-        spin.set(
+        scratch.spin.set(
             random.nextDouble(-BURST_SPIN, BURST_SPIN),
             random.nextDouble(-BURST_SPIN, BURST_SPIN),
             random.nextDouble(-BURST_SPIN, BURST_SPIN)
         );
 
-        part.detach(burst, spin, despawnAfter);
+        part.detach(scratch.burst, scratch.spin, despawnAfter);
     }
 }

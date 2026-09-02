@@ -179,7 +179,7 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
      *
      * <p>The player's own view setting, capped by the server's ceiling on how far it will simulate.
      */
-    private static double simulatedRadius(@Nonnull final Store<EntityStore> store, @Nonnull final Ref<EntityStore> ref) {
+    public static double simulatedRadius(@Nonnull final Store<EntityStore> store, @Nonnull final Ref<EntityStore> ref) {
         final var player = store.getComponent(ref, Player.getComponentType());
         final int chunks = player == null
             ? Player.DEFAULT_VIEW_RADIUS_CHUNKS
@@ -304,15 +304,48 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
                                          final int blockZ,
                                          @Nullable final String variantId) {
 
-        final TitanVariantAsset variant = variantId == null ? null : TitanVariantAsset.find(variantId);
-        final int radius = variant != null && variant.getSpawnFootprintRadius() > 0
-            ? variant.getSpawnFootprintRadius() : FOOTPRINT_RADIUS;
-        final int relief = variant != null && variant.getSpawnFootprintRelief() > 0
-            ? variant.getSpawnFootprintRelief() : FOOTPRINT_RELIEF;
-        final int headroom = variant != null && variant.getSpawnHeadroom() > 0
-            ? variant.getSpawnHeadroom() : HEADROOM;
+        return groundFor(chunkStore, blockX, surfaceY, blockZ, variantId).ok();
+    }
 
-        return TitanTerrainProbe.isBuildable(chunkStore, blockX, surfaceY, blockZ, radius, relief, headroom);
+    /** {@link #isBuildableFor}, but reporting which check decided it. For {@code /titan sites}. */
+    @Nonnull
+    public static TitanTerrainProbe.Ground groundFor(@Nonnull final ChunkStore chunkStore,
+                                                     final int blockX,
+                                                     final int surfaceY,
+                                                     final int blockZ,
+                                                     @Nullable final String variantId) {
+
+        return TitanTerrainProbe.probe(chunkStore, blockX, surfaceY, blockZ,
+            footprintRadius(variantId), footprintRelief(variantId), headroom(variantId));
+    }
+
+    /**
+     * The Y a variant's body should sit over: the lowest ground in the footprint for something on legs long
+     * enough to want that, the middle of it otherwise.
+     *
+     * @see TitanVariantAsset#isSpawnLevelToLowest
+     */
+    public static int standingY(@Nonnull final TitanTerrainProbe.Ground ground, @Nullable final String variantId) {
+        final TitanVariantAsset variant = variantId == null ? null : TitanVariantAsset.find(variantId);
+        return variant != null && variant.isSpawnLevelToLowest() ? ground.lowestY() : ground.groundY();
+    }
+
+    public static int footprintRadius(@Nullable final String variantId) {
+        final TitanVariantAsset variant = variantId == null ? null : TitanVariantAsset.find(variantId);
+        return variant != null && variant.getSpawnFootprintRadius() > 0
+            ? variant.getSpawnFootprintRadius() : FOOTPRINT_RADIUS;
+    }
+
+    public static int footprintRelief(@Nullable final String variantId) {
+        final TitanVariantAsset variant = variantId == null ? null : TitanVariantAsset.find(variantId);
+        return variant != null && variant.getSpawnFootprintRelief() > 0
+            ? variant.getSpawnFootprintRelief() : FOOTPRINT_RELIEF;
+    }
+
+    public static int headroom(@Nullable final String variantId) {
+        final TitanVariantAsset variant = variantId == null ? null : TitanVariantAsset.find(variantId);
+        return variant != null && variant.getSpawnHeadroom() > 0
+            ? variant.getSpawnHeadroom() : HEADROOM;
     }
 
     /**
@@ -363,13 +396,16 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
             return false;
         }
 
-        if (!isBuildableFor(chunkStore, blockX, surfaceY, blockZ, variantId)) {
+        final TitanTerrainProbe.Ground ground = groundFor(chunkStore, blockX, surfaceY, blockZ, variantId);
+        if (!ground.ok()) {
             // Deliberately not marked barren: players reshape terrain, and a hillside that is too steep
             // today may be flattened tomorrow.
             return false;
         }
 
-        final var position = new Vector3d(blockX + 0.5, surfaceY + 1.0, blockZ + 0.5);
+        // The probe's ground rather than the heightmap, which counts trees: siting off the raw surface is
+        // what would stand a titan on a canopy, since there is open air above one for the headroom check.
+        final var position = new Vector3d(blockX + 0.5, standingY(ground, variantId) + 1.0, blockZ + 0.5);
         final float yaw = candidate.yaw();
         // Seeding the build from the cell is what makes the rebuilt titan the same titan: same ore count,
         // same nodes, in the same places, every time this site is visited.

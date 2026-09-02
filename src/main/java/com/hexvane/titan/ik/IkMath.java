@@ -13,8 +13,9 @@ public final class IkMath {
 
     public static final double EPSILON = 1.0e-6;
 
-    /** Squared sine of 15 degrees: below this a bone counts as vertical for {@link #uprightTwist}. */
-    private static final double UPRIGHT_MIN_LENGTH_SQ = 0.067;
+    /** Squared sine of 15 degrees: inside this a bone counts as upright for {@link #uprightTwist}. */
+    private static final double UPRIGHT_BLEND_SIN_SQ = 0.067;
+    private static final double UPRIGHT_BLEND_SIN = Math.sqrt(UPRIGHT_BLEND_SIN_SQ);
 
     private IkMath() {
     }
@@ -76,19 +77,63 @@ public final class IkMath {
      * cross-section round with it, leaving a ridge where the player wants a walkable face. World up
      * projects cleanly out of any limb that is not close to vertical.
      *
-     * @param pole fallback for a near-vertical bone, where up carries no roll information and normalising
-     *             the little that is left of it would make the bone spin on the spot
+     * <p>Close to vertical it has to hand over to the pole regardless, and the handover is eased rather
+     * than switched. The two references can point opposite ways, so switching between them was rolling a
+     * bone half a turn in a single tick — see the comment on the sign below, which is the substance of it.
+     *
+     * <p>One discontinuity is left, at dead vertical, and it cannot be removed. Projected up is the uphill
+     * direction across the bone, and uphill reverses as a bone tips through vertical, so anything that
+     * keeps a face uphill has to roll half a turn on the way through. Only the sign of an undefined
+     * quantity, in a pose where the roll it decides is unobservable on a bone pointing at the sky. Limbs do
+     * not sit there in practice: the temple's shin is between 10 and 19 degrees off vertical through its
+     * whole gait, because the knee bending outward is what holds the shin off vertical in the first place.
+     * {@code tools/_twist_continuity.py} sweeps both versions and prints the worst jump in each.
+     *
+     * @param pole stands in for up as a bone approaches vertical, where up carries no roll information and
+     *             normalising the little that is left of it would make the bone spin on the spot
      */
     @Nonnull
     public static Vector3d uprightTwist(@Nonnull final Vector3dc direction,
                                         @Nonnull final Vector3dc pole,
                                         @Nonnull final Vector3d dest) {
         // World up with the component along the bone removed. Its length is the sine of the bone's angle
-        // off vertical, which is exactly the quantity the fallback threshold is about.
+        // off vertical, which is exactly the quantity the handover to the pole is about.
         final double along = direction.y();
         dest.set(-direction.x() * along, 1 - along * along, -direction.z() * along);
-        if (dest.lengthSquared() < UPRIGHT_MIN_LENGTH_SQ) return dest.set(pole);
-        return dest.normalize();
+
+        final double sinSq = dest.lengthSquared();
+        if (sinSq >= UPRIGHT_BLEND_SIN_SQ) return dest.normalize();
+
+        // Which end of the pole axis to lean on, decided by the side up was already pointing.
+        //
+        // This is the whole of the fix for a titan's legs snapping half a turn round as they walk. The two
+        // references do not merely differ near the handover, they oppose each other: work through a bone
+        // leaning away from its own pole, which is exactly what a shin does when the knee bends outward,
+        // and projected up comes out as (-cos, sin, 0) against the pole's (cos, -sin, 0). Precisely
+        // antiparallel. Swapping between them therefore rolled the bone by exactly 180 degrees, and the
+        // temple's shin sits at 18 degrees off vertical standing and 10 mid-stride, so it crossed the
+        // threshold twice a step and rolled a half turn each time. On a square stone column that is
+        // invisible; on a column with a crystal growing out of one face it is the crystal changing sides.
+        final double side = dest.dot(pole) < 0 ? -1 : 1;
+
+        // Eased rather than mixed straight so the two branches meet with matching slope as well as matching
+        // value, leaving no rate of roll for the eye to catch at the join.
+        final double s = Math.sqrt(sinSq) / UPRIGHT_BLEND_SIN;
+        final double t = s * s * (3 - 2 * s);
+
+        if (sinSq > EPSILON * EPSILON) {
+            dest.mul(t / Math.sqrt(sinSq));
+        } else {
+            dest.set(0, 0, 0);
+        }
+
+        final double weight = (1 - t) * side;
+        dest.add(pole.x() * weight, pole.y() * weight, pole.z() * weight);
+
+        // Cannot cancel out: the sign above leaves the two at a non-negative dot, so the shortest the sum
+        // gets is when they are square to each other, and even that keeps most of a unit of length.
+        final double len = dest.length();
+        return len < EPSILON ? dest.set(pole) : dest.div(len);
     }
 
     /**

@@ -100,6 +100,11 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
             a -> a.spawnHeadroom
         ).add()
         .append(
+            new KeyedCodec<>("SpawnLevelToLowest", Codec.BOOLEAN),
+            (a, v) -> a.spawnLevelToLowest = v,
+            a -> a.spawnLevelToLowest
+        ).add()
+        .append(
             new KeyedCodec<>("MoveSpeed", Codec.FLOAT),
             (a, v) -> a.moveSpeed = v,
             a -> a.moveSpeed
@@ -471,6 +476,7 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     private int spawnFootprintRadius;
     private int spawnFootprintRelief;
     private int spawnHeadroom;
+    private boolean spawnLevelToLowest;
     private float moveSpeed = 1.6f;
     private float turnSpeed = 0.9f;
     private float wakeRadius = 14f;
@@ -664,6 +670,22 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     /** Clear air needed above the site, in blocks, or {@code 0} for the default. */
     public int getSpawnHeadroom() {
         return spawnHeadroom;
+    }
+
+    /**
+     * Whether to stand the body over the lowest ground in its footprint rather than the middle of it.
+     *
+     * <p>For anything on tall legs this is what makes rough ground usable. A leg can only reach a couple of
+     * blocks past its rest length before the foot hangs in the air, but it can fold a long way, so the
+     * failure is entirely one-sided: ground below the body is the problem and ground above it is not.
+     * Levelling to the lowest corner means every other foot is above its rest height and merely bends,
+     * which turns a couple of blocks of tolerance into most of the leg's travel.
+     *
+     * <p>Wrong for a titan that sits directly on the ground, which would end up partly buried on a slope,
+     * so it is off unless a variant asks.
+     */
+    public boolean isSpawnLevelToLowest() {
+        return spawnLevelToLowest;
     }
 
     /** Blocks per second while chasing. */

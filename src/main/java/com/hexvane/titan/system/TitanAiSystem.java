@@ -90,8 +90,15 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
     private static final double WANDER_MIN_LEG = 12.0;
     /** Rolls per tick for somewhere to wander to before giving up and trying again next tick. */
     private static final int WANDER_GOAL_ATTEMPTS = 6;
-    /** Vertical search window for the ground under a candidate wander goal, in blocks. */
-    private static final int WANDER_GROUND_ABOVE = 24;
+    /**
+     * Vertical search window for the ground under a candidate wander goal, in blocks.
+     *
+     * <p>The upward reach is deliberately short. The scan takes the first solid block from the top down,
+     * and a tree counts as solid, so reaching high enough to clear a canopy means a goal in a wood lands
+     * in the branches and the titan sets off towards a point fifteen blocks above the dirt. Eight blocks
+     * is more than enough for terrain that rises inside a wander radius and too little to catch a tree.
+     */
+    private static final int WANDER_GROUND_ABOVE = 8;
     private static final int WANDER_GROUND_BELOW = 32;
 
     /** Seconds spent hauling both fists overhead. */

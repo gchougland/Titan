@@ -148,6 +148,20 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         titan.setPoseDirty(true);
         animator.advance(advance);
         animator.sampleInto(skeleton, pose);
+        poseBones(dt, titan, skeleton, pose, transform, store);
+
+        // Has to be the finished pose, and there is more than one way out of posing it, which is why this
+        // sits here rather than after either of the two passes inside.
+        pose.captureMotion();
+    }
+
+    /** Turns the sampled clip into world matrices, with the IK correction pass on top where it applies. */
+    private void poseBones(final float dt,
+                           @Nonnull final TitanComponent titan,
+                           @Nonnull final TitanSkeletonAsset skeleton,
+                           @Nonnull final TitanPose pose,
+                           @Nonnull final TransformComponent transform,
+                           @Nonnull final Store<EntityStore> store) {
 
         final double scale = titan.getScale();
         TitanPose.rootMatrix(transform.getPosition(), titan.getYaw(), scale, rootMatrix);

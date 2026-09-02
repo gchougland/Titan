@@ -7,6 +7,7 @@ import com.hexvane.titan.asset.TitanSkeletonAsset;
 import com.hexvane.titan.asset.TitanSpawnRuleAsset;
 import com.hexvane.titan.asset.TitanVariantAsset;
 import com.hexvane.titan.command.TitanCommand;
+import com.hexvane.titan.config.TitanConfig;
 import com.hexvane.titan.spawn.PrefabVoxelReader;
 import com.hexvane.titan.spawn.TitanEnvironment;
 import com.hexvane.titan.spawn.TitanSiteMemory;
@@ -17,6 +18,7 @@ import com.hexvane.titan.system.TitanPartSyncSystem;
 import com.hexvane.titan.system.TitanRagdollSystem;
 import com.hexvane.titan.system.TitanBossBarSystem;
 import com.hexvane.titan.system.TitanRootDamageSystem;
+import com.hexvane.titan.system.TitanSyncStats;
 import com.hexvane.titan.system.TitanWeakpointDamageBonusSystem;
 import com.hexvane.titan.system.TitanWeakpointDamageSystem;
 import com.hexvane.titan.system.TitanWeakpointDeathSystem;
@@ -26,6 +28,7 @@ import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
 import com.hypixel.hytale.component.ResourceType;
 import com.hypixel.hytale.server.core.asset.HytaleAssetStore;
+import com.hypixel.hytale.server.core.modules.entity.tracker.EntityTrackerSystems;
 import com.hypixel.hytale.server.core.plugin.PluginBase;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
@@ -62,7 +65,27 @@ public final class TitanBootstrap {
     public static void install(@Nonnull final PluginBase plugin) {
         registerAssets(plugin);
         registerComponentsAndSystems(plugin);
+        applyEngineGlobals();
         plugin.getCommandRegistry().registerCommand(new TitanCommand());
+    }
+
+    /**
+     * Pushes the config's engine-wide settings onto the engine.
+     *
+     * <p>Only the entity level-of-detail ratio so far, and it needs saying that this is a global shared
+     * with everything else that has a small bounding box. The engine stops sending a client any entity
+     * whose thickness is small next to its distance, which for a titan's one-block voxels lands at about
+     * 169 blocks — inside the default view distance, so a titan on the horizon comes apart while its
+     * silhouette is still perfectly legible. An owner who would rather see the whole thing can say so, and
+     * pays for it in every dropped item that now also stays visible further out. Left alone unless asked,
+     * and set back to the engine's own default when it is not, so a config edit that removes the value
+     * actually removes the override.
+     */
+    private static void applyEngineGlobals() {
+        final double ratio = TitanConfig.get().getEntityLodRatio();
+        EntityTrackerSystems.LODCull.ENTITY_LOD_RATIO = ratio > 0
+            ? ratio
+            : EntityTrackerSystems.LODCull.ENTITY_LOD_RATIO_DEFAULT;
     }
 
     private static void registerAssets(@Nonnull final PluginBase plugin) {
@@ -138,6 +161,7 @@ public final class TitanBootstrap {
         registry.registerSystem(new TitanAiSystem(siteMemoryType));
         registry.registerSystem(new TitanAnimationSystem());
         registry.registerSystem(new TitanPartSyncSystem());
+        registry.registerSystem(new TitanSyncStats.Roll());
         registry.registerSystem(new TitanWeakpointSystem());
         registry.registerSystem(new TitanWeakpointDeathSystem());
         registry.registerSystem(new TitanRootDamageSystem());

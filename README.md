@@ -64,6 +64,9 @@ clears them out. `/ti` works as a shorthand.
 
 `/titan dance` is not useful, but a titan doing a player emote is worth seeing once.
 
+`/titan perf` reports how much of last tick a titan spent talking to your client, and how much of it was
+skipped rather than sent. Worth a look if a very large titan looks like it is coming apart as it walks.
+
 ## Server settings
 
 `mods/Hexvane_Titan/config.json` holds a handful of switches. `WeakpointHealthMultiplier`,
@@ -74,6 +77,28 @@ scale the whole ladder at once, and `DisabledVariants` keeps named variants out 
 ground markers are drawn at all. Both default to on. Turning telegraphs off makes the fight considerably
 harder rather than merely quieter, since the boulder's landing spot and the plough's corridor are the only
 warning either one gives.
+
+The rest are about what a titan costs to watch. A titan is thousands of block entities and each one that
+moves is a packet, so a big one walking can say more per tick than a connection can carry, which arrives
+looking like parts of it flickering. `PartSyncEpsilon` is how far a block may drift, in blocks, before the
+server bothers to correct you — a tenth by default, which is not visible on something tens of blocks tall
+and lets most of the body sit out most ticks. `PartSyncRotationEpsilon` is the same for a block's own
+facing, in degrees. Setting either to zero restores the old behaviour of sending everything.
+
+`PartSyncInterval` puts a floor on the gap between one block's updates, in seconds, and is off by default
+because unlike the tolerances it drops updates that did have something to say. `0.1` halves the traffic and
+whether you can see it is worth finding out for yourself.
+
+`ParallelPartSync` moves the work of posing a titan off the world thread and across the tick pool. Off by
+default, and only worth reaching for if a titan is costing you tick time rather than bandwidth.
+
+`EntityLodRatio` overrides how aggressively the server stops sending you small entities at range. Titans
+are built from single blocks, which the default gives up on at about 169 blocks — close enough that a titan
+on the horizon comes apart while you can still make out its shape. `0.000015` reaches past the default view
+distance. It applies to every small entity though, dropped items included, so it costs bandwidth to set.
+
+[docs/PERFORMANCE.md](docs/PERFORMANCE.md) explains what each of these is actually doing and what it bought,
+and opens with a plain-English version worth reading before touching any of them.
 
 Individual variants can be retuned in their own files under `Server/Titan/Variants`. Every number the three
 new attacks use is there — chance, reach, damage, radius, timing — along with the particle system and sound
