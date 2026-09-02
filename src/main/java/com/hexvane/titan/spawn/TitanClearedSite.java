@@ -36,12 +36,12 @@ public final class TitanClearedSite {
         this.seconds = seconds;
     }
 
-    /** Packed grid cell, as produced by {@link TitanSite#cellKey}. */
+    /** @return packed grid cell, as produced by {@link TitanSite#cellKey}. */
     public long getCell() {
         return cell;
     }
 
-    /** Seconds left before the site may be occupied again. */
+    /** @return seconds left before the site may be occupied again. */
     public float getSeconds() {
         return seconds;
     }

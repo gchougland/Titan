@@ -123,11 +123,13 @@ public final class TitanBoneDef {
     private transient int index = -1;
     private transient int parentIndex = -1;
 
+    /** Unique bone name; animation tracks and IK chains refer to bones by this. */
     @Nonnull
     public String getName() {
         return name;
     }
 
+    /** Name of the parent bone, or {@code null} for a root. */
     @Nullable
     public String getParent() {
         return parent;
@@ -160,6 +162,7 @@ public final class TitanBoneDef {
         return pivot;
     }
 
+    /** Extra uniform scale on this bone's geometry, on top of the rig's own scale. */
     public float getScale() {
         return scale;
     }
@@ -167,8 +170,8 @@ public final class TitanBoneDef {
     /**
      * Reflects the prefab's voxels across the bone's own X axis.
      *
-     * <p>Lets a limb pair share one prefab: authoring only the right hand and mirroring it for the left
-     * gives a matched pair, where reusing the prefab as-is would make both hands the same hand.
+     * <p>Lets a limb pair share one prefab. Only the right hand is authored; the left reuses it mirrored,
+     * where reusing it unchanged would give two right hands.
      */
     public boolean isMirrorX() {
         return mirrorX;
@@ -182,10 +185,10 @@ public final class TitanBoneDef {
     /**
      * Whether every exposed voxel is collider-eligible, rather than only those with an exposed top face.
      *
-     * <p>Top-faces-only is much cheaper and is what a bone that stays roughly level wants. It is useless on
-     * a bone that swings, though: "top" is measured in the prefab's own space, so on an arm held out at an
-     * angle the eligible voxels are the handful capping the segment at its joint, and the whole length of
-     * the limb — the part a player would actually walk up — gets no collision at all.
+     * <p>Top-faces-only is much cheaper and suits a bone that stays roughly level. It fails on a bone that
+     * swings, because the top face is measured in the prefab's own space: on an arm held out at an angle
+     * the only eligible voxels are the few capping the segment at its joint, leaving the walkable length
+     * of the limb without collision.
      */
     public boolean isColliderAllFaces() {
         return colliderAllFaces;
@@ -199,11 +202,11 @@ public final class TitanBoneDef {
     /**
      * Drops every voxel that is completely walled in by its neighbours, leaving only the shell.
      *
-     * <p>Free on anything solid, because a block with all six faces buried is never drawn and never
-     * touched. The saving scales with bulk: a limb segment a couple of blocks thick is nearly all shell
-     * already, but a body the size of a small island is mostly filling, and paying an entity for each of
-     * those is what puts a titan of that size out of reach. The one visible difference is the death
-     * ragdoll, which crumbles into a hollow shell rather than a solid mass.
+     * <p>A block with all six faces buried is never drawn and never touched, so this is free on solid
+     * geometry. The saving scales with bulk: a limb segment a couple of blocks thick is nearly all shell
+     * already, while a body the size of a small island is mostly filling, and paying an entity for each
+     * interior voxel would put a titan that size out of reach. The one visible difference is the death
+     * ragdoll, which crumbles into a hollow shell.
      */
     public boolean isHollow() {
         return hollow;
@@ -213,9 +216,9 @@ public final class TitanBoneDef {
      * Lowest prefab layer this bone takes, inclusive, in the prefab's own block coordinates.
      *
      * <p>Slicing lets one authored prefab serve several bones: a leg modelled as a single pillar becomes a
-     * thigh, a calf and a foot by cutting it at two heights, which is what gives it a knee to bend without
-     * anyone having to cut the asset up by hand. Each slice is skinned independently, so the cut faces are
-     * treated as exposed and survive {@link #isHollow()}.
+     * thigh, a calf and a foot by cutting it at two heights, giving it a knee to bend without splitting
+     * the asset by hand. Each slice is skinned independently, so the cut faces count as exposed and
+     * survive {@link #isHollow()}.
      */
     public int getSliceMinY() {
         return sliceMinY;
@@ -231,10 +234,12 @@ public final class TitanBoneDef {
         return detachable;
     }
 
+    /** @return this bone's index in the skeleton's bone array. */
     public int getIndex() {
         return index;
     }
 
+    /** @return the parent's bone index, or {@code -1} for a root or an unresolved parent. */
     public int getParentIndex() {
         return parentIndex;
     }

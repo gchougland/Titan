@@ -14,29 +14,26 @@ import java.util.concurrent.atomic.LongAdder;
 /**
  * Counts what {@link TitanPartSyncSystem} sent to the clients on the last tick.
  *
- * <p>A titan's cost is almost entirely replication rather than computation: every part whose transform is
- * rewritten becomes a {@code TransformUpdate} in that tick's {@code EntityUpdates} packet, and the engine
- * packs the whole lot into one packet with no splitting. A walking Roaming Temple can therefore push a few
- * hundred kilobytes down a single connection in one tick, which is what makes its parts flicker. Every
- * lever in the sync system exists to bring that number down, so the number is worth being able to read.
+ * <p>A titan costs far more in replication than in computation: every part whose transform is rewritten
+ * becomes a {@code TransformUpdate} in that tick's {@code EntityUpdates} packet, and the engine packs the
+ * whole lot into one packet with no splitting. A large titan can push a few hundred kilobytes down a single
+ * connection in one tick, which shows up as its parts flickering.
  *
  * <p>Counters are process-wide rather than per world or per titan. That is coarse, but it is what the
- * packet builder sees, and it keeps the accounting cheap enough to leave switched on: the adders are only
+ * packet builder sees, and it keeps the accounting cheap enough to leave switched on: the adders are
  * touched once per part and are striped across threads, which the sync system needs since it runs in
- * parallel. The one thing to know when reading them is that worlds tick independently, so with titans
- * standing in two worlds at once the totals are summed and the split between the two is arbitrary.
+ * parallel. Worlds tick independently, so titans standing in two worlds at once contribute to the same
+ * totals.
  */
 public final class TitanSyncStats {
 
     /**
-     * Wire cost of replicating one part's transform, in bytes.
+     * Approximate wire cost of replicating one part's transform, in bytes.
      *
-     * <p>{@code ModelTransform.MAX_SIZE} is 49 — a fixed block of three raw doubles for the position plus
+     * <p>{@code ModelTransform.MAX_SIZE} is 49: a fixed block of three raw doubles for the position plus
      * two packed {@code Direction}s, with absent fields zero-filled rather than omitted, so there is no
      * cheaper case to account for. The rest is the {@code EntityUpdate} that carries it: a network id, a
-     * type tag and the update's own framing. Approximate on purpose; it is here to turn a part count into a
-     * number that can be held against a connection, not to predict a packet to the byte. Compression takes
-     * roughly half of it back off again on the wire.
+     * type tag and the update's own framing. Compression takes roughly half of it back off on the wire.
      */
     public static final int BYTES_PER_TRANSFORM = 63;
 
@@ -116,9 +113,8 @@ public final class TitanSyncStats {
     /**
      * Closes off the tick: publishes the counters as {@link #lastTick} and zeroes them.
      *
-     * <p>Registered to run after {@link TitanPartSyncSystem} so it sees a whole tick. It is a separate
-     * system rather than a hook in the sync system because that one is called per entity and has nowhere to
-     * notice that a tick has ended.
+     * <p>Ordered after {@link TitanPartSyncSystem} so it sees a whole tick. The sync system itself is called
+     * once per entity and has nowhere to notice that a tick has ended.
      */
     public static final class Roll extends TickingSystem<EntityStore> {
 

@@ -1,0 +1,18 @@
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+indent_style = space
+indent_size = 4
+max_line_length = 160
+
+[*.java]
+ij_java_ternary_operation_signs_on_next_line = true
+ij_java_align_multiline_ternary_operation = false
+
+[*.{json,md,yml}]
+indent_size = 2

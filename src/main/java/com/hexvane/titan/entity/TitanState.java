@@ -16,14 +16,12 @@ import javax.annotation.Nonnull;
  *                    CHASE &lt;-- STOMP_RECOVER                   &lt;-- STOMP &lt;-- STOMP_WINDUP &lt;+
  * </pre>
  *
- * <p>Every attack is a hit followed by a window where the titan cannot defend itself, and each one opens a
- * different way in. The arm smash buries one fist and leaves that arm as a ramp; the ground pound buries
- * both and offers two; the body slam and the head plow put the whole creature on the floor with its back
- * within jumping range. Only the boulder throw is answered from a distance, and its recovery is short to
- * match — there is nothing to climb when the titan never came near you. The leg stomp is the exception
- * that offers nothing: a titan too large to climb has no reason to hand out a way up.
+ * <p>Each attack ends in a recovery window that opens a route onto the titan's back. The arm smash buries
+ * one fist and leaves that arm as a ramp, the ground pound buries both, and the body slam and head plow
+ * put the whole creature on the floor. The boulder throw is a ranged attack, so its recovery is short and
+ * offers no climb, and the leg stomp offers none by design.
  *
- * <p>Losing all weakpoints jumps straight to {@link #DYING} from anywhere.
+ * <p>Losing all weakpoints jumps straight to {@link #DYING} from any state.
  */
 public enum TitanState {
     /** Curled into a boulder. No clip plays and no transforms are sent. */
@@ -38,7 +36,7 @@ public enum TitanState {
     WINDUP("Idle"),
     /** Arm driving down; the impact fires partway through. */
     SMASH("Idle"),
-    /** Hand embedded in the ground — the climbing window. */
+    /** Hand embedded in the ground, which is the climbing window. */
     STUNNED("Stunned"),
     /** Pulling the arm free. */
     RECOVER("Idle"),
@@ -46,7 +44,7 @@ public enum TitanState {
     SLAM_WINDUP("Slam_Windup"),
     /** Body pitching down onto the ground; the impact fires partway through. */
     SLAM("Slam"),
-    /** Chest down, both forearms out front — the long climbing window. */
+    /** Chest down, both forearms out front, which is the longest climbing window. */
     PRONE("Prone"),
     /** Pushing back up off the floor. */
     RISING("Rise"),
@@ -55,7 +53,7 @@ public enum TitanState {
     POUND_WINDUP("Pound_Windup"),
     /** Both fists driving into the ground; the launch fires partway through. */
     POUND("Pound"),
-    /** Both fists embedded — two arm ramps at once, and the widest way up there is. */
+    /** Both fists embedded, giving two arm ramps at once. */
     POUND_STUNNED("Stunned"),
     /** Hauling both arms back out of the ground. */
     POUND_RECOVER("Idle"),
@@ -64,7 +62,7 @@ public enum TitanState {
     HURL_WINDUP("Hurl_Windup"),
     /** Throwing it. The boulder leaves the hand partway through. */
     HURL("Hurl"),
-    /** Following through after the throw. Short: the titan never left its feet. */
+    /** Following through after the throw. Short, since the titan never left its feet. */
     HURL_RECOVER("Idle"),
 
     /** Rearing up and pitching the slab down, arms sweeping back. */
@@ -86,7 +84,7 @@ public enum TitanState {
     /**
      * Standing still playing whatever clip was handed to it, with the AI and the IK both stood down.
      *
-     * <p>Nothing enters this on its own; it exists for commands that want a clip shown exactly as authored,
+     * <p>Never entered by the AI. It exists for commands that need a clip shown exactly as authored,
      * without planted feet dragging the legs back onto the terrain.
      */
     EMOTING("Idle");
@@ -135,17 +133,16 @@ public enum TitanState {
     /**
      * Whether one leg is under IK, lifted clear of the gait and aimed at the impact point.
      *
-     * <p>The odd one out among the attacks: everything else borrows an arm, which the animation system
-     * treats as an override on top of the clip. A stomp takes a foot away from the walk planner instead,
-     * so the other legs have to keep holding the body up while it happens.
+     * <p>Unlike the arm attacks, which the animation system layers over the clip, a stomp takes a foot away
+     * from the walk planner, so the remaining legs must keep supporting the body for its duration.
      */
     public boolean isLegStomp() {
         return this == STOMP_WINDUP || this == STOMP || this == STOMP_RECOVER;
     }
 
     /**
-     * Whether one arm is doing the work and the other should fade back to its clip pose. Both the smash and
-     * the boulder throw are single-armed, and both aim the working hand at {@code attackPoint}.
+     * Whether one arm is doing the work and the other should fade back to its clip pose. The smash and the
+     * boulder throw are both single-armed and both aim the working hand at {@code attackPoint}.
      */
     public boolean isOneArmed() {
         return isArmSmash() || isBoulderThrow();
@@ -156,6 +153,7 @@ public enum TitanState {
         return isBodySlam() || isGroundPound() || isHeadPlow();
     }
 
+    /** Whether any attack is in progress. */
     public boolean isAttacking() {
         return isOneArmed() || isTwoArmed() || isLegStomp();
     }
@@ -166,6 +164,7 @@ public enum TitanState {
             || this == HURL_WINDUP || this == PLOW_WINDUP || this == STOMP_WINDUP;
     }
 
+    /** Whether the titan has not yet begun falling apart. */
     public boolean isAlive() {
         return this != DYING;
     }

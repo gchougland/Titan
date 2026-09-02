@@ -1,5 +1,5 @@
 {
-  "$Comment": "Open sand gives a talus nowhere to hide and the player nowhere to run, which is the best terrain in the game to fight one on. The arid zone-2 surfaces all qualify.",
+  "$Comment": "Open sand gives a talus nowhere to hide and the player nowhere to run, so every arid zone 2 surface is listed.",
 
   "Environments": [
     "Env_Zone2_Deserts",

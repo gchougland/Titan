@@ -24,22 +24,16 @@ import javax.annotation.Nullable;
 /**
  * Rewards bringing the right tool to an ore node.
  *
- * <p>An ore node is a lump of raw ore embedded in rock, so a pickaxe should be the obvious answer, and out
- * of the box it is the worst one: every pickaxe in the game overrides its damage against entities to a flat
- * one point no matter what it is made of, which would be a hundred-odd swings a node. The multiplier undoes
- * that. A mace is already a heavy blunt weapon doing real damage, so it only needs a nudge to come second.
+ * <p>Every pickaxe in the game overrides its damage against entities to a flat one point whatever it is
+ * made of, which would leave a node taking a hundred-odd swings; the multiplier undoes that. A mace is
+ * already a heavy blunt weapon doing real damage, so it only needs a nudge to come second.
  *
  * <p>Runs in the filter group, where damage is still being adjusted, unlike
  * {@link TitanWeakpointDamageSystem}, which watches the result.
  */
 public final class TitanWeakpointDamageBonusSystem extends DamageEventSystem {
 
-    /**
-     * What a tool has to be able to break for its owner to count as carrying a pickaxe.
-     *
-     * <p>Matched on what the tool is for rather than on its name, so a modded pickaxe is covered and a
-     * shovel or an axe is not. Anything built to chew through stone and ore has a claim on ore set in rock.
-     */
+    /** Gather type a tool must handle to count as a pickaxe. Matched on purpose, not name, so mods count. */
     private static final String ROCK_GATHER_TYPE = "Rocks";
     private static final String ORE_GATHER_PREFIX = "Ore";
 
@@ -70,8 +64,8 @@ public final class TitanWeakpointDamageBonusSystem extends DamageEventSystem {
 
         if (damage.isCancelled() || damage.getAmount() <= 0f) return;
 
-        // Only a swing counts. A shot arrow also arrives as an entity source naming the archer, and their
-        // hand holds the bow that fired it, so paying out on that would reward a quiver rather than a tool.
+        // Only a swing counts: an arrow also arrives as an entity source naming the archer, whose hand
+        // holds the bow that fired it.
         if (!(damage.getSource() instanceof Damage.EntitySource entitySource)) return;
         if (entitySource instanceof Damage.ProjectileSource) return;
 

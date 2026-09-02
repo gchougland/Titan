@@ -68,8 +68,8 @@ public final class PrefabVoxelReader {
      * Reads the rock-type variant of a prefab: {@code Talus_Body} with a suffix of {@code Basalt} reads
      * {@code Talus_Body_Basalt}.
      *
-     * <p>A rock type only has to ship the parts it changes; anything it leaves out silently falls back to
-     * the unsuffixed prefab rather than leaving that bone with no geometry.
+     * <p>A rock type only has to ship the parts it changes. Anything it leaves out falls back to the
+     * unsuffixed prefab instead of leaving that bone with no geometry.
      */
     @Nonnull
     public static PrefabVoxels read(@Nullable final String prefabKey, @Nullable final String suffix) {
@@ -124,9 +124,9 @@ public final class PrefabVoxelReader {
 
         final var collected = new ArrayList<int[]>();
         final var keys = new ArrayList<String>();
-        // Every cell that holds anything, which is what decides whether a player could land on one.
+        // Every cell that holds anything; decides whether a player could land on top of one.
         final var occupied = new LongOpenHashSet();
-        // Only the cells that actually hide what is behind them. See isOccluder.
+        // Only the cells that hide what is behind them. See isOccluder.
         final var occluders = new LongOpenHashSet();
 
         buffer.forEach(
@@ -143,8 +143,8 @@ public final class PrefabVoxelReader {
                 if (isOccluder(type)) occluders.add(pack(x, y, z));
 
                 // A multi-block covers several cells but is one object: the anchor carries the model and
-                // every other cell is a filler reference back to it. Spawning a voxel per cell renders that
-                // many overlapping copies, which is where a single Bench_Memories turned into nine.
+                // every other cell is a filler reference back to it. Spawning a voxel per cell would render
+                // one overlapping copy of the model for each.
                 if (filler != 0) return;
 
                 collected.add(new int[]{x, y, z, rotation});
@@ -190,10 +190,9 @@ public final class PrefabVoxelReader {
     /**
      * Whether a block fills its cell densely enough to hide whatever is behind it.
      *
-     * <p>Only a solid full cube does. A slab, a stair, a vine or a bench leaves most of its cell empty, so
-     * the rock behind one is still in plain sight and culling it punches a hole through the titan — which
-     * is what happened to the wall under the ivy and the floor under the slabs. This is the same test the
-     * engine uses to decide whether a block is a solid cube.
+     * <p>Only a solid full cube does. A slab, stair, vine or bench leaves most of its cell empty, so the
+     * rock behind one stays visible and culling it punches a hole through the titan. This is the same test
+     * the engine uses to decide whether a block is a solid cube.
      */
     private static boolean isOccluder(@Nonnull final BlockType type) {
         return type.isCubeDrawType() && type.getOpacity() == Opacity.Solid;

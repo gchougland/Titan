@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 
 /**
- * {@code /titan list [--radius=n]} — nearby titans and their state, plus every variant the server knows.
+ * {@code /titan list [--radius=n]}: nearby titans and their state, plus every variant the server knows.
  */
 public final class TitanListCommand extends AbstractPlayerCommand {
 

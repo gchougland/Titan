@@ -43,9 +43,9 @@ public final class TitanClip {
      * Rebinds a parsed animation onto a different bone-index layout, retargeting it on the way.
      *
      * <p>Bones the clip does not name are left null and keep their bind transform, and tracks naming bones
-     * the skeleton does not have are dropped. That is what makes borrowing an animation practical: a titan
-     * only has to reproduce the handful of bone names it actually wants driven, and the source rig's head,
-     * hair and clothing tracks fall away on their own.
+     * the skeleton does not have are dropped. Borrowing an animation therefore only requires the titan to
+     * reproduce the bone names it wants driven; the source rig's head, hair and clothing tracks are
+     * discarded on their own.
      */
     @Nonnull
     public static TitanClip bind(@Nonnull final String name,
@@ -66,6 +66,7 @@ public final class TitanClip {
         return new TitanClip(name, duration, looping, holdLastKeyframe, speed, blendingDuration, tracks);
     }
 
+    /** @return the logical animation name this clip was bound under. */
     @Nonnull
     public String getName() {
         return name;
@@ -76,30 +77,33 @@ public final class TitanClip {
         return duration;
     }
 
+    /** @return whether playback wraps back to the start at the end of the clip. */
     public boolean isLooping() {
         return looping;
     }
 
+    /** @return playback rate multiplier; always positive. */
     public float getSpeed() {
         return speed;
     }
 
+    /** @return cross-fade time in seconds when this clip becomes active. */
     public float getBlendingDuration() {
         return blendingDuration;
     }
 
+    /** @return the length of the bound track array, i.e. the skeleton's bone count. */
     public int getBoneCount() {
         return tracks.length;
     }
 
+    /** @return the track driving this bone, or {@code null} if the clip does not animate it. */
     @Nullable
     public TitanBoneTrack getTrack(final int boneIndex) {
         return boneIndex < 0 || boneIndex >= tracks.length ? null : tracks[boneIndex];
     }
 
-    /**
-     * Maps an elapsed playback time onto a sample time inside the clip.
-     */
+    /** Maps an elapsed playback time onto a sample time inside the clip. */
     public float resolveTime(final float elapsed) {
         final float scaled = elapsed * speed;
         if (looping) {

@@ -1,7 +1,7 @@
 {
   "$Comment": [
-    "A dimmer, longer-lived ring, laid down in a row to mark the corridor a plough is about to come down. Same Scale 1.0 as the other two so it is spawned by radius the same way.",
-    "Longer lived than the pulse ring because the corridor is drawn as a whole line at once and has to hold still long enough to be read as a direction rather than a spot."
+    "A dimmer, longer-lived ring, laid down in a row to mark the corridor a plough is about to come down. Same Scale 1.0 as the other two, so it is spawned by radius the same way.",
+    "The 0.7 second lifespan is longer than the pulse ring's because the corridor is drawn as a whole line at once and has to hold long enough to read as a direction rather than a spot."
   ],
   "RenderMode": "Erosion",
   "ParticleRotationInfluence": "None",

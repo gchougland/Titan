@@ -10,21 +10,21 @@ import java.util.Locale;
 /**
  * Which of a bone's voxels get hard collision.
  *
- * <p>Every collider is an entity the client has to resolve the player against every frame while it moves,
- * so this is the main dial for how heavy a titan is to stand next to. It is settable per spawn so a
- * misbehaving client can be bisected without a rebuild.
+ * <p>Every collider is an entity the client resolves the player against each frame while it moves, so this
+ * is the main dial for how expensive a titan is to stand next to. Settable per spawn so a misbehaving
+ * client can be bisected without a rebuild.
  */
 public enum ColliderMode {
 
-    /** No hard collision at all: the titan is scenery you walk through. Diagnostic setting. */
+    /** No hard collision at all; the titan is scenery the player walks through. Diagnostic. */
     NONE,
 
     /** Each bone picks its own face set, per {@link TitanBoneDef#isColliderAllFaces()}. */
     AUTO,
 
     /**
-     * Force top-faces-only on every bone. Diagnostic: this is what a bone that never leaves the horizontal
-     * wants, and seeing a limb become unclimbable under it confirms the limb is being rotated.
+     * Force top-faces-only on every bone. Diagnostic: it is all a bone that stays horizontal needs, so a
+     * limb that turns unclimbable under it must be rotating.
      */
     TOP,
 

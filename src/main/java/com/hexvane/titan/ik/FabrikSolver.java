@@ -11,7 +11,9 @@ import javax.annotation.Nonnull;
  */
 public final class FabrikSolver {
 
+    /** Iteration cap for the default overload. */
     private static final int DEFAULT_ITERATIONS = 12;
+    /** Distance from the goal, in blocks, at which the default overload stops iterating. */
     private static final double DEFAULT_TOLERANCE = 0.01;
 
     private FabrikSolver() {
@@ -33,6 +35,7 @@ public final class FabrikSolver {
         solve(joints, lengths, goal, count, DEFAULT_ITERATIONS, DEFAULT_TOLERANCE);
     }
 
+    /** As {@link #solve(Vector3d[], double[], Vector3dc, int)}, with an explicit iteration cap and tolerance. */
     public static void solve(@Nonnull final Vector3d[] joints,
                              @Nonnull final double[] lengths,
                              @Nonnull final Vector3dc goal,

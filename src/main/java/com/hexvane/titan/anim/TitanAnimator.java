@@ -31,16 +31,19 @@ public final class TitanAnimator {
         this.blendScratch = new TitanPose(boneCount);
     }
 
+    /** @return the clip being played, or {@code null} when nothing is loaded. */
     @Nullable
     public TitanClip getCurrent() {
         return current;
     }
 
+    /** @return the active clip's name, or {@code <none>} when nothing is loaded. */
     @Nonnull
     public String getCurrentName() {
         return current == null ? "<none>" : current.getName();
     }
 
+    /** @return seconds elapsed since the active clip started, before its speed is applied. */
     public float getCurrentTime() {
         return currentTime;
     }
@@ -52,6 +55,7 @@ public final class TitanAnimator {
         return p < 0f ? 0f : (p > 1f ? 1f : p);
     }
 
+    /** @return {@code true} when no clip is loaded, or a non-looping clip has run out. */
     public boolean isFinished() {
         return current == null || current.isFinished(currentTime);
     }
@@ -78,6 +82,7 @@ public final class TitanAnimator {
         currentTime = 0f;
     }
 
+    /** Moves playback and any running cross-fade on by {@code dt} seconds. */
     public void advance(final float dt) {
         currentTime += dt;
         if (previous != null) {
@@ -91,7 +96,7 @@ public final class TitanAnimator {
 
     /**
      * Writes the current animation state into {@code dest} as local bone transforms. Falls back to the
-     * bind pose when no clip is loaded, which is also what a missing {@code .blockyanim} produces.
+     * bind pose when no clip is loaded, which is also the result of a missing {@code .blockyanim}.
      */
     public void sampleInto(@Nonnull final TitanSkeletonAsset skeleton, @Nonnull final TitanPose dest) {
         if (current == null) {

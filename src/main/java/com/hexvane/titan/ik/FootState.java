@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
  */
 public final class FootState {
 
-    /** Where the foot currently is, in world space. This is what the IK solver aims at. */
+    /** Current world-space foot position; the goal the IK solver aims at. */
     @Nonnull
     public final Vector3d current = new Vector3d();
     /** Contact point the foot is locked to while grounded. */
@@ -22,19 +22,23 @@ public final class FootState {
     @Nonnull
     public final Vector3d stepOrigin = new Vector3d();
 
+    /** Whether the foot is off the ground, arcing towards {@link #stepTarget}. */
     public boolean stepping;
     /** Progress through the current step, in {@code [0,1]}. */
     public float stepProgress;
     /** Alternating group so diagonally opposite limbs swing together. */
     public int gaitGroup;
+    /** Cleared until the first tick has snapped the foot onto the terrain. */
     public boolean initialised;
 
+    /** Lifts the foot off its current position and starts a step towards {@link #stepTarget}. */
     public void beginStep() {
         stepOrigin.set(current);
         stepping = true;
         stepProgress = 0f;
     }
 
+    /** Plants the foot at the step target and ends the step. */
     public void finishStep() {
         planted.set(stepTarget);
         current.set(stepTarget);

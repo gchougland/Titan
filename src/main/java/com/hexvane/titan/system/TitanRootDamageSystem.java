@@ -16,15 +16,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Keeps the titan's own health pool out of reach.
+ * Cancels every damage event aimed at a titan's invisible root.
  *
- * <p>The invisible root holds the summed health of every ore node so the boss bar has something to draw
- * from, and holding a stat map is also what makes an entity a legal attack target. Its box sits between the
- * legs, so without this a swing down there would drain the bar without breaking a single node.
+ * <p>The root holds the summed health of the ore nodes for the boss bar to draw from, and any entity
+ * carrying a stat map is a legal attack target. Its box sits between the legs, so a swing down there would
+ * otherwise drain the bar without breaking a node.
  *
- * <p>The obvious fix, the engine's {@code Invulnerable} marker, is the wrong tool: it is replicated to
- * clients, and the client answers it by swapping the boss bar to its white indestructible styling. Refusing
- * the damage here leaves the root just as untouchable and the bar in its ordinary red.
+ * <p>The engine's {@code Invulnerable} marker is not used for this: it replicates to clients, which answer
+ * it by swapping the boss bar to its white indestructible styling.
  */
 public final class TitanRootDamageSystem extends DamageEventSystem {
 

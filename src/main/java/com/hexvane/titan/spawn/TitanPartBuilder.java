@@ -15,9 +15,9 @@ import com.hypixel.hytale.server.core.entity.entities.BlockEntity;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.BoundingBox;
 import com.hypixel.hytale.server.core.modules.entity.component.EntityScaleComponent;
+import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
 import com.hypixel.hytale.server.core.modules.entity.component.ModelComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.PersistentModel;
-import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
 import com.hypixel.hytale.server.core.modules.entity.component.RespondToHit;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.hitboxcollision.HitboxCollision;
@@ -42,9 +42,9 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Assembles the entities a titan is made of.
  *
- * <p>Voxels are deliberately built without a {@code Velocity} component: the core
- * {@code BlockEntitySystems.Ticking} system only simulates block entities that have one, so while a part is
- * attached the skeleton owns its transform outright. The death ragdoll adds {@code Velocity} back and hands
+ * <p>Voxels are built without a {@code Velocity} component, since the core
+ * {@code BlockEntitySystems.Ticking} system only simulates block entities that have one. While a part is
+ * attached the skeleton owns its transform outright; the death ragdoll adds {@code Velocity} back and hands
  * the debris over to engine physics.
  */
 public final class TitanPartBuilder {
@@ -97,10 +97,9 @@ public final class TitanPartBuilder {
     /**
      * Builds a bare rendered block with no notion of what it belongs to.
      *
-     * <p>Split out from {@link #buildVoxel} because a thrown boulder is made of the same thing a titan is —
-     * scaled blocks whose transforms something else owns — but it is emphatically not a titan part. Giving
-     * it the part marker up front would have the sync system look for a skeleton on a rock, not find one,
-     * and delete the boulder in mid-air.
+     * <p>Split out from {@link #buildVoxel} because a thrown boulder is the same thing, a scaled block whose
+     * transform something else owns, without being a titan part. With the part marker attached the sync
+     * system would look for a skeleton on the boulder, fail to find one, and delete it in mid-air.
      */
     @Nonnull
     public static Holder<EntityStore> buildBlock(@Nonnull final Store<EntityStore> store,
@@ -120,11 +119,10 @@ public final class TitanPartBuilder {
         final double half = scale * 0.5;
         holder.addComponent(BoundingBox.getComponentType(), new BoundingBox(new Box(-half, -half, -half, half, half, half)));
 
-        // Without this the voxel is not a legal attack target and the engine drops it: Interaction's
-        // invulnerability check treats anything with neither EntityStatMap nor RespondToHit as unhittable.
-        // A player's swing is resolved from the hit list their client reports, so the rock was already in
-        // it and was being discarded here, leaving only the ore node behind it to take the blow. The
-        // marker makes a sword or arrow land on the body; no stat map means it still takes no damage.
+        // Interaction's invulnerability check treats anything with neither EntityStatMap nor RespondToHit
+        // as unhittable, so without this the engine drops the voxel from the hit list the client reported
+        // for a swing. The marker makes a sword or arrow land on the body; with no stat map it still takes
+        // no damage.
         holder.addComponent(RespondToHit.getComponentType(), RespondToHit.INSTANCE);
 
         holder.addComponent(NetworkId.getComponentType(), new NetworkId(store.getExternalData().takeNextNetworkId()));
@@ -184,9 +182,9 @@ public final class TitanPartBuilder {
     /**
      * The space a weakpoint occupies at {@code modelScale}, in world blocks relative to its entity position.
      *
-     * <p>Needed because a blockymodel's origin is wherever the artist left it — for the ore cluster it is
-     * down at the base, so an entity placed on a socket draws its ore hanging in the air above it. The
-     * spawner reads the box back to seat the node on its socket and to space nodes apart.
+     * <p>A blockymodel's origin is wherever the artist left it; for the ore cluster it sits at the base, so
+     * an entity placed on a socket draws its ore hanging in the air above it. The spawner reads the box
+     * back to seat the node on its socket and to space nodes apart.
      *
      * @return {@code null} when the model or its hitbox is missing
      */

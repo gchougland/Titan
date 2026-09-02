@@ -10,13 +10,12 @@ import javax.annotation.Nullable;
 /**
  * Server-owner tuning knobs, read from {@code mods/Hexvane_Titan/config.json}.
  *
- * <p>The tuning is all multipliers rather than absolute numbers. The per-variant assets already say what a
- * Copper Talus hits for and what a Mithril one is worth; these scale the whole ladder at once so a server
- * can make titans harsher or gentler without editing six files and losing the balance between them. On top
- * of that sits a list of variants to leave out of the world entirely.
+ * <p>Combat tuning is expressed as multipliers rather than absolute values, since the per-variant assets
+ * already define each tier. Scaling them together keeps the balance between tiers intact. A list of
+ * disabled variant ids sits alongside them.
  *
- * <p>The values are read at spawn or hit time, so editing the file and reloading is enough for the tool
- * bonuses and any titan spawned afterwards.
+ * <p>Values are read at spawn or hit time, so a reload applies to tool bonuses and to any titan spawned
+ * afterwards.
  */
 public final class TitanConfig {
 
@@ -93,11 +92,13 @@ public final class TitanConfig {
     @Nonnull
     private static volatile TitanConfig active = new TitanConfig();
 
+    /** @return the config currently in force */
     @Nonnull
     public static TitanConfig get() {
         return active;
     }
 
+    /** Installs the config loaded from disk. Called once during plugin setup. */
     public static void setActive(@Nonnull final TitanConfig config) {
         active = config;
     }
@@ -135,18 +136,17 @@ public final class TitanConfig {
     /**
      * Scales pickaxe damage against ore nodes.
      *
-     * <p>Large by default, and it has to be: every pickaxe in the game overrides its damage against
-     * entities to a flat 1 regardless of what it is made of, so at face value even a mithril one would need
-     * a hundred swings per node. This is what makes the obvious tool for prising ore out of rock the right
-     * one to bring.
+     * <p>Large by default because every pickaxe overrides its damage against entities to a flat 1
+     * regardless of material, which would otherwise leave even a mithril pickaxe needing a hundred swings
+     * per node.
      */
     public float getPickaxeDamageMultiplier() {
         return clamp(pickaxeDamageMultiplier);
     }
 
     /**
-     * Scales mace damage against ore nodes. Modest on purpose: maces already hit for 29 to 93, so they only
-     * need a nudge to be the best weapon for the job rather than a rewrite.
+     * Scales mace damage against ore nodes. Kept small because maces already hit for 29 to 93, so only a
+     * nudge is needed to make them the best weapon for the job.
      */
     public float getMaceDamageMultiplier() {
         return clamp(maceDamageMultiplier);
@@ -155,8 +155,8 @@ public final class TitanConfig {
     /**
      * Whether fighting a titan takes over the music.
      *
-     * <p>Forced music overrides whatever the zone was playing for as long as the bar is up, which is the
-     * right call for a boss and the wrong one for a server that has put work into its own soundtrack.
+     * <p>Forced music overrides the zone soundtrack for as long as the boss bar is up, so servers with a
+     * curated soundtrack of their own may want it off.
      */
     public boolean isBattleMusicEnabled() {
         return battleMusic;
@@ -165,9 +165,9 @@ public final class TitanConfig {
     /**
      * Whether attacks are marked on the ground before they land.
      *
-     * <p>On by default: a titan is large enough that its windups are easy to miss from underneath it, and
-     * every one of its attacks is meant to be dodgeable. Turning this off leaves the animations as the only
-     * warning, which is how the fight read before and is a genuinely harder version of it.
+     * <p>On by default, since a titan is large enough that its windup animations are easy to miss from
+     * underneath it and every attack is meant to be dodgeable. Turning this off leaves the animations as
+     * the only warning and makes the fight considerably harder.
      */
     public boolean areTelegraphsEnabled() {
         return telegraphs;
@@ -176,9 +176,9 @@ public final class TitanConfig {
     /**
      * Whether a titan variant is allowed to exist on this server.
      *
-     * <p>Listing a variant's id under {@code DisabledVariants} takes it out of natural spawning and refuses
-     * it to the spawn command, so an owner who does not want, say, the mithril tier can drop it without
-     * touching the spawn rules. The shipped ids are {@code Stone_Talus_Copper}, {@code Stone_Talus_Iron},
+     * <p>Listing a variant id under {@code DisabledVariants} removes it from natural spawning and rejects
+     * it from the spawn command, without any change to the spawn rule assets. The shipped ids are
+     * {@code Stone_Talus_Copper}, {@code Stone_Talus_Iron},
      * {@code Stone_Talus_Cobalt}, {@code Stone_Talus_Thorium}, {@code Stone_Talus_Adamantite} and
      * {@code Stone_Talus_Mithril}.
      */
@@ -195,20 +195,16 @@ public final class TitanConfig {
      * How far one of a titan's voxels may drift from where the clients think it is before the server
      * bothers to correct them, in blocks.
      *
-     * <p>This is the main lever on how much bandwidth a walking titan costs. A titan is held together by
-     * rewriting every voxel's transform from its bones, and the engine turns each rewritten transform into
-     * an update in that tick's packet — a large one walking is thousands of them, in a single packet the
-     * engine does not split. Past what a connection can carry the updates start arriving late or not at
-     * all, which is what makes a titan's blocks flicker as it moves.
+     * <p>This is the main lever on the bandwidth a walking titan costs. Every voxel transform rewritten
+     * from the bones becomes an update in that tick's packet, which the engine does not split, so a large
+     * titan walking produces thousands of them at once. Beyond what the connection carries, updates arrive
+     * late or not at all and the blocks visibly flicker.
      *
-     * <p>Raising this trades accuracy for room. The error it buys is bounded rather than cumulative,
-     * because a part is measured against what was last sent instead of against its last computed position,
-     * so a voxel is never more than this far from the truth however long the titan walks. The default is a
-     * tenth of a block, which on a titan tens of blocks tall is not something you can see, and which at a
-     * walking pace lets most parts sit out two ticks in three.
+     * <p>The resulting error is bounded rather than cumulative, because each part is compared against what
+     * was last sent rather than its last computed position. The default of a tenth of a block is not
+     * visible on a titan tens of blocks tall and lets most parts skip two ticks in three at walking pace.
      *
-     * <p>Zero sends every part every tick, which is the old behaviour and the honest baseline to measure
-     * against with {@code /titan perf}.
+     * <p>Zero sends every part every tick, which is the baseline to measure against with {@code /titan perf}.
      */
     public double getPartSyncEpsilon() {
         return nonNegative(partSyncEpsilon);
@@ -217,10 +213,10 @@ public final class TitanConfig {
     /**
      * The same deadband for a voxel's own orientation, configured in degrees and returned in radians.
      *
-     * <p>Separate from the positional one because it means something much smaller: a part's rotation only
-     * spins the single block in place, so a quarter of a degree is invisible, whereas the swing that
-     * rotation causes further out along a limb already shows up in that part's position and is caught by
-     * {@link #getPartSyncEpsilon}. Both have to be inside their deadband for an update to be skipped.
+     * <p>Held separately from the positional deadband because a part's own rotation only spins one block in
+     * place, making a quarter of a degree invisible. The displacement that rotation causes further out
+     * along a limb shows up as position and is caught by {@link #getPartSyncEpsilon}. An update is skipped
+     * only when both deadbands are satisfied.
      */
     public double getPartSyncRotationEpsilon() {
         return Math.toRadians(nonNegative(partSyncRotationEpsilon));
@@ -229,15 +225,13 @@ public final class TitanConfig {
     /**
      * Shortest gap between two updates for the same voxel, in seconds. Zero means every tick.
      *
-     * <p>Where the epsilon drops updates that say nothing, this one drops updates that would have said
-     * something, so it costs real smoothness and is off by default. Parts are staggered across the
-     * interval rather than all resent together, which keeps the peak packet down as well as the average —
-     * resending the whole body on every fourth tick would leave the spike that causes the flicker exactly
-     * where it was.
+     * <p>Unlike the deadbands, this drops updates that did have something to report, so it costs real
+     * smoothness and is off by default. Parts are staggered across the interval rather than resent
+     * together, which lowers the peak packet as well as the average; resending the whole body every fourth
+     * tick would leave the spike that causes the flicker untouched.
      *
-     * <p>Whether a longer gap is visible depends on how the client interpolates between updates, which is
-     * not something this end can find out, so it is a knob to try rather than a setting with a right
-     * answer. {@code 0.1} halves the traffic outright.
+     * <p>Visibility of a longer gap depends on client-side interpolation, which the server cannot observe,
+     * so this is best measured in practice. {@code 0.1} halves the traffic.
      */
     public double getPartSyncInterval() {
         return nonNegative(partSyncInterval);
@@ -246,15 +240,14 @@ public final class TitanConfig {
     /**
      * Overrides the engine's entity level-of-detail ratio, or zero to leave it alone.
      *
-     * <p>The engine stops sending a client any entity whose thickness is small next to its distance —
-     * {@code thickness < ratio * distance²} — which for a one-block voxel at the shipped {@code 0.000035}
-     * is about 169 blocks. That is inside the default view distance, so a titan seen from across a valley
-     * dissolves from the outside in while its silhouette is still perfectly readable. Lowering the ratio
-     * pushes that boundary out: {@code 0.000015} reaches roughly 258 blocks, past the default view radius.
+     * <p>The engine drops any entity satisfying {@code thickness < ratio * distance²}, which for a
+     * one-block voxel at the shipped {@code 0.000035} is about 169 blocks. That falls inside the default
+     * view distance, so a distant titan dissolves from the outside in while its silhouette is still
+     * readable. Lowering the ratio pushes the boundary out, and {@code 0.000015} reaches roughly 258
+     * blocks.
      *
-     * <p>It is a global, so this affects every small entity, dropped items included, and every one of them
-     * that stays visible for longer is more to replicate. That is why it is an opt-in number here rather
-     * than a value the mod quietly changes on the engine's behalf.
+     * <p>The setting is global, so it also keeps every other small entity visible for longer, dropped items
+     * included, at a corresponding replication cost. It is opt-in for that reason.
      */
     public double getEntityLodRatio() {
         return nonNegative(entityLodRatio);
@@ -263,34 +256,32 @@ public final class TitanConfig {
     /**
      * Whether a titan's voxels are re-posed across the tick thread pool rather than on the world thread.
      *
-     * <p>Worth having on a titan the size of the Roaming Temple, where the work is thousands of independent
-     * matrix multiplications in one archetype chunk and fans out perfectly. The mod's side of it is written
-     * to be safe either way: every part touches only its own components, the scratch it works in is per
-     * thread, and the owning titan is read through the command buffer so it does not trip the world thread
-     * assertion.
+     * <p>Worthwhile on very large titans, where the work is thousands of independent matrix multiplications
+     * in a single archetype chunk. The mod side is safe either way: each part touches only its own
+     * components, scratch state is per thread, and the owning titan is read through the command buffer so
+     * the world thread assertion is not tripped.
      *
-     * <p>Off by default because of the engine's side rather than ours. Parallel entity ticking is
-     * implemented and live, but of everything that ships only {@code FluidSystems} actually asks for it —
-     * every other system routes through {@code maybeUseParallel}, which is stubbed to return false with the
-     * real condition commented out. That is a lightly travelled road to put a titan on without being asked,
-     * so it is a switch to reach for when a titan is costing world-thread time rather than the default.
+     * <p>Off by default because of the engine side. Parallel entity ticking is implemented, but of the
+     * shipped systems only {@code FluidSystems} requests it; the rest route through
+     * {@code maybeUseParallel}, which is stubbed to return false. Enable this when a titan is costing
+     * world-thread time rather than bandwidth.
      */
     public boolean isParallelPartSync() {
         return parallelPartSync;
     }
 
     /**
-     * A hand-edited file can hold anything; a negative multiplier would heal on hit.
+     * Falls back to {@code 1} for any value a hand-edited file should not contain, such as a negative
+     * multiplier that would heal on hit.
      *
-     * <p>Stored as doubles rather than floats only so the file survives being rewritten: a float widened
-     * back out turns a tidy {@code 1.2} into {@code 1.2000000476837158}, and the config is written back on
-     * every boot to pick up options added since it was created.
+     * <p>The fields are doubles rather than floats so the file survives the rewrite on every boot. A float
+     * widened back out would turn {@code 1.2} into {@code 1.2000000476837158}.
      */
     private static float clamp(final double value) {
         return Double.isFinite(value) && value > 0 ? (float) value : 1f;
     }
 
-    /** As {@link #clamp}, for the tolerances, where zero is a meaningful setting and the fallback is off. */
+    /** As {@link #clamp}, for tolerances, where zero is a meaningful setting and so is the fallback. */
     private static double nonNegative(final double value) {
         return Double.isFinite(value) && value > 0 ? value : 0;
     }

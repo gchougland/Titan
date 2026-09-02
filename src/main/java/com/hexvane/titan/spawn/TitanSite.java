@@ -5,11 +5,10 @@ import javax.annotation.Nonnull;
 /**
  * Decides where titans could stand, from nothing but the world seed and a grid cell.
  *
- * <p>Nothing about a site is rolled at the moment a player walks up to it. The world is cut into fixed
- * cells, and a cell's seed alone fixes the spot within it, whether it is occupied at all, and which variant
- * stands there. That means a titan a player walked away from is the same titan when they come back, and two
- * players approaching from opposite sides agree on what they are looking at, without any of it having to be
- * saved. It also means the whole candidate list can be re-derived after a restart.
+ * <p>The world is cut into fixed cells, and a cell's seed alone fixes the spot within it, whether it is
+ * occupied, and which variant stands there. Nothing is rolled when a player walks up, so a titan is the
+ * same titan when they come back, two players approaching from opposite sides agree on what they see, and
+ * the whole candidate list can be re-derived after a restart without any of it being saved.
  *
  * <p>Cells are large and sites are inset from their edges, so two neighbouring titans can never end up
  * within sight of each other however the rolls land.
@@ -17,14 +16,12 @@ import javax.annotation.Nonnull;
 public final class TitanSite {
 
     /**
-     * Edge length of one cell, in blocks. At most one titan stands in a cell.
+     * Edge length of one cell, in blocks. At most one titan stands in a cell, so this is the density knob:
+     * titans per unit area is a rule's chance over this squared.
      *
-     * <p>This is the density knob: a cell holds at most one titan, so how many there are per acre is the
-     * rule's chance over this squared. It is deliberately larger than the roughly 190 blocks the world is
-     * simulated out to around a player, which means a player standing still may have no site in reach at
-     * all. That is the intent — a titan should be something walked into rather than something waiting at
-     * the edge of every view — but it is also the floor: cells very much larger than this and the odds of
-     * a given walk crossing one at all stop being worth the rule existing.
+     * <p>Larger than the roughly 190 blocks the world is simulated out to around a player, so a player
+     * standing still may have no site in reach and a titan is something walked into rather than something
+     * waiting at the edge of every view. Much larger again and few walks would cross a cell at all.
      */
     public static final int CELL_BLOCKS = 256;
 
@@ -32,10 +29,10 @@ public final class TitanSite {
      * How far a site is kept from its cell's edges, in blocks. Without it two titans in adjacent cells
      * could land back to back on the shared border.
      *
-     * <p>This, and not the cell size, is what sets how close two titans can ever get: sites in neighbouring
-     * cells are at worst twice this apart, however the rolls land, so raising the cell size alone thins
-     * them out on average while leaving the awkward close pairs exactly as close as they were. Kept well
-     * under half the cell, or every titan ends up near its cell's centre and the grid becomes visible.
+     * <p>This, not the cell size, sets how close two titans can ever get: sites in neighbouring cells are
+     * at worst twice this apart however the rolls land, so raising the cell size alone only thins them out
+     * on average. Kept well under half the cell, or every site lands near its cell's centre and the grid
+     * becomes visible.
      */
     private static final int CELL_MARGIN = 64;
 
@@ -60,17 +57,17 @@ public final class TitanSite {
             return z;
         }
 
-        /** Which way the titan faces, in radians. */
+        /** @return which way the titan faces, in radians. */
         public float yaw() {
             return yaw;
         }
 
-        /** Compared against a rule's chance to decide whether this cell holds a titan at all. */
+        /** @return roll compared against a rule's chance to decide whether this cell holds a titan. */
         public double occupancy() {
             return occupancy;
         }
 
-        /** Feeds the rule's weighted variant pick. */
+        /** @return roll feeding the rule's weighted variant pick. */
         public double variant() {
             return variant;
         }
@@ -84,7 +81,7 @@ public final class TitanSite {
         return ((long) cellX << 32) | (cellZ & 0xFFFFFFFFL);
     }
 
-    /** Fills {@code out} with the site this cell would hold. Pure: the same inputs always agree. */
+    /** Fills {@code out} with the site this cell would hold. Pure: the same inputs always give the same site. */
     public static void roll(final long worldSeed, final int cellX, final int cellZ, @Nonnull final Roll out) {
         long state = mix(worldSeed ^ mix(cellKey(cellX, cellZ)));
 

@@ -44,7 +44,7 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
 
     /**
      * Seconds between pose rebuilds for a sleeping titan. Its only motion is a twelve-second breathing
-     * swell, so this is still several updates per cycle and nothing about it reads as choppy.
+     * swell, so this still leaves several updates per cycle.
      */
     private static final float SLEEP_POSE_INTERVAL = 0.25f;
 
@@ -150,8 +150,7 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         animator.sampleInto(skeleton, pose);
         poseBones(dt, titan, skeleton, pose, transform, store);
 
-        // Has to be the finished pose, and there is more than one way out of posing it, which is why this
-        // sits here rather than after either of the two passes inside.
+        // Must run on the finished pose, and poseBones has more than one exit.
         pose.captureMotion();
     }
 
@@ -167,8 +166,8 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         TitanPose.rootMatrix(transform.getPosition(), titan.getYaw(), scale, rootMatrix);
         pose.computeWorld(skeleton, rootMatrix);
 
-        // A sleeping titan is a boulder, a dying one is loose rubble and an emoting one is showing a clip
-        // as authored; none of the three want planted feet.
+        // None of these want planted feet: sleeping is a boulder, dying is loose rubble, and emoting plays
+        // the clip as authored.
         if (titan.getState() == TitanState.SLEEPING
             || titan.getState() == TitanState.DYING
             || titan.getState() == TitanState.EMOTING) return;
@@ -220,9 +219,8 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         final int stomping = titan.getStompFoot();
 
         for (int i = 0; i < feet.length; i++) {
-            // A leg mid-stomp belongs to the AI, which is holding it in the air over a marked spot. Handing
-            // it to the planner as well would have the gait quietly walking it back to where it thinks the
-            // foot should be, and the attack would never leave the ground.
+            // A leg mid-stomp belongs to the AI, which holds it in the air over a marked spot. Letting the
+            // planner touch it as well would drag the foot back to wherever the gait wants it.
             if (i == stomping) {
                 feet[i].current.set(titan.getStompGoal());
                 continue;
@@ -320,8 +318,8 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         blendLocal(pose, lower, upperWorld, lowerWorld, weight);
 
         // The solve only orients the thigh and shin. Left alone the foot inherits the shin, so a bent knee
-        // tips the sole up off the ground at whatever angle the leg happens to be folded to. Overriding it
-        // with the body's own rotation — which carries the yaw and nothing else — keeps the sole flat.
+        // tips the sole up off the ground. The root rotation carries the yaw and nothing else, so
+        // overriding the foot with it leaves the sole flat.
         if (levelEnd) {
             rootMatrix.getNormalizedRotation(levelRotation);
             blendLocal(pose, end, lowerWorld, levelRotation, weight);

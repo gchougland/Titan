@@ -21,10 +21,10 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import javax.annotation.Nonnull;
 
 /**
- * {@code /titan anim <clip> [--state=NAME] [--radius=n]} — previews a clip on the nearest titan.
+ * {@code /titan anim <clip> [--state=NAME] [--radius=n]}: previews a clip on the nearest titan.
  *
- * <p>Handy while authoring {@code .blockyanim} files: the clip cache is dropped first, so re-exporting from
- * Blockbench and re-running this picks up the new file without restarting the server.
+ * <p>Development aid for authoring {@code .blockyanim} files. The clip cache is dropped on every run, so a
+ * re-export from Blockbench is picked up without restarting the server.
  */
 public final class TitanAnimCommand extends AbstractPlayerCommand {
 

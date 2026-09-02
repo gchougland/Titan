@@ -33,20 +33,16 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Puts a boss bar across the top of the screen, and the fight's music in the ears, of anyone fighting a
- * titan.
+ * Shows a boss bar and plays the battle music for everyone engaged with a titan.
  *
- * <p>The bar is the engine's own, and it works by naming an entity: the client finds that entity's Health
- * and draws the bar from it. A titan has no health of its own, only the ore nodes bolted to its back, so the
- * invisible root carries a pooled total and this system keeps it level with what is left of the nodes. One
- * bar then reads as the whole creature rather than as whichever lump you happen to be hitting.
+ * <p>The engine's bar works by naming an entity: the client finds that entity's Health and draws the bar
+ * from it. A titan has no health of its own, only the ore nodes bolted to its back, so the invisible root
+ * carries a pooled total that this system keeps level with what is left of the nodes, and one bar reads as
+ * the whole creature rather than as a single lump of ore.
  *
- * <p>It only goes up while the titan is on its feet. A sleeping one is meant to pass for a boulder, and
- * announcing it with a boss bar would give the disguise away from across the field.
- *
- * <p>The music rides on exactly the same set of players. Working out who is engaged with a titan is the
- * hard part and this system already does it, so the battle track goes to whoever the bar goes to and stops
- * when it does.
+ * <p>The bar only goes up while the titan is on its feet, since a sleeping one is meant to pass for a
+ * boulder. The music goes to the same players and is tracked by the same list: working out who is engaged
+ * is the hard part and is already done here.
  */
 public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
 
@@ -54,10 +50,8 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
     private static final int NO_ENTITY = 0;
 
     /**
-     * How far from a titan the bar stays up, in blocks.
-     *
-     * <p>Past the range a titan will chase to, so backing off for a breather does not make the bar flicker,
-     * but short enough that it goes away once you have genuinely left the fight.
+     * How far from a titan the bar stays up, in blocks. Past the range a titan will chase to, so backing off
+     * for a breather does not flicker the bar, but short enough to clear once the player leaves the fight.
      */
     private static final double VIEW_RADIUS = 72.0;
 
@@ -101,19 +95,17 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Copies what is left of the ore nodes onto the root's own Health, which is what the bar is drawn from.
+     * Copies what is left of the ore nodes onto the root's own Health, which the bar is drawn from.
      *
      * <p>What is left means the work still owed, not the rock still standing. A titan may carry more nodes
-     * than a kill costs, and summing all of them would leave the bar with a tail it can never spend: break
-     * the five that kill a seven-node temple and two full nodes would still be sitting in the total. So the
-     * bar is the cheapest way out from here — the weakest nodes still needed, as many of them as there are
-     * breaks left to owe — measured against a full bar of the same size.
+     * than a kill costs, so summing all of them would leave the bar with a tail it can never spend. The
+     * total is instead the cheapest way out from here: the weakest nodes still needed, as many of them as
+     * there are breaks left to owe, measured against a full bar of the same size.
      *
-     * <p>That only ever falls. Damaging a node either lowers one already counted or drags it into the count
-     * below something dearer, and breaking one drops both a term and the node that was cheapest to lose. So
-     * it drains smoothly while a node is being worked on, steps down as each one goes, and reaches the
-     * bottom on the break that kills. Spreading damage across every node instead of finishing them one at a
-     * time moves the bar just as far; it is the same total either way.
+     * <p>That total only ever falls. Damage either lowers a node already counted or pulls it into the count
+     * below a dearer one, and a break drops both a term and the node that was cheapest to lose. So the bar
+     * drains while a node is being worked on, steps down as each one goes, and bottoms out on the break that
+     * kills, and spreading damage across every node moves it just as far.
      */
     private void syncPooledHealth(@Nonnull final Store<EntityStore> store,
                                   @Nonnull final ArchetypeChunk<EntityStore> archetypeChunk,
@@ -126,8 +118,8 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
 
         final int healthIndex = DefaultEntityStatTypes.getHealth();
 
-        // Never let it reach the floor while the titan is still standing: zero health is what the engine
-        // reads as death, and the root has to outlive its own collapse.
+        // Zero health reads as death to the engine and the root has to outlive the collapse, so the value
+        // is held above a floor while the titan is still standing.
         final float floor = Math.min(1f, titan.getTotalHealth());
         final int needed = titan.getWeakpointsStillNeeded();
         if (needed <= 0) {
@@ -153,7 +145,7 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
         stats.setStatValue(healthIndex, Math.max(floor, remaining));
     }
 
-    /** A titan on its feet and able to fight back. Asleep or already dying, there is nothing to show. */
+    /** @return whether the titan is on its feet and able to fight back. Asleep or dying, there is nothing to show. */
     private static boolean isFighting(@Nonnull final TitanComponent titan) {
         final TitanState state = titan.getState();
         return state != TitanState.SLEEPING && state != TitanState.DYING && titan.getWeakpointsTotal() > 0;
@@ -174,11 +166,9 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
      * sending a packet only to those whose state actually changed.
      *
      * <p>The bar and the music go to the same players and are remembered by the same list, but neither is
-     * conditional on the other. A root the client has no network id for cannot be pointed at by a bar, and
-     * that is precisely the case where the fight most needs the music to still say it is happening; and a
-     * variant naming no track still gets its bar. What the list has to guarantee is only that whatever was
-     * turned on for a player is turned off again when they leave, which is why membership is decided once,
-     * here, rather than by whichever of the two happened to succeed.
+     * conditional on the other: a root with no network id can carry no bar yet still needs the music, and a
+     * variant naming no track still gets its bar. Membership is decided here, once, so whatever was turned
+     * on for a player is turned off again when they leave.
      */
     private static void updateViewers(@Nonnull final ComponentAccessor<EntityStore> accessor,
                                       @Nonnull final Ref<EntityStore> self,
@@ -203,8 +193,8 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
         for (final Ref<EntityStore> player : engaged) {
             if (!player.isValid()) continue;
 
-            // Restated every tick rather than only on joining, so two titans whose fights overlap cannot
-            // leave a player in silence: whichever one is still engaged puts the track straight back.
+            // Restated every tick, not just on joining, so overlapping fights cannot leave a player in
+            // silence: the titan still engaged puts the track straight back.
             TitanBattleMusic.apply(accessor, player, music);
 
             if (viewers.contains(player)) continue;
@@ -242,9 +232,8 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
     /**
      * Takes the bar down when a titan leaves the world without dying.
      *
-     * <p>The ordinary route out is the tick above noticing the titan is no longer fighting, but a titan can
-     * also be removed outright, by an unloading rig or by {@code /titan kill instant}. That gives the tick no
-     * chance to run, and would leave whoever was fighting it staring at a bar for a creature that is gone.
+     * <p>Normally the tick above notices the titan has stopped fighting, but an outright removal, by an
+     * unloading site or by {@code /titan kill instant}, never gives it that chance.
      */
     public static final class Removal extends HolderSystem<EntityStore> {
 

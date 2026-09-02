@@ -41,6 +41,7 @@ public final class TitanSocketDef {
 
     private transient int boneIndex = -1;
 
+    /** Name of the bone this socket rides on. */
     @Nonnull
     public String getBone() {
         return bone;
@@ -55,10 +56,9 @@ public final class TitanSocketDef {
     /**
      * Direction the growth on this socket points, in the bone's local space.
      *
-     * <p>Only worth stating on a bone whose pivot is not inside the shape it carries. A body slab pivoting
-     * at its own centre needs nothing here, because the way out to a socket on its surface is already the
-     * surface normal there; a limb pivoting at the joint it hangs from does, because by that measure every
-     * socket down its length points at the floor.
+     * <p>Only needed on a bone whose pivot sits outside the shape it carries. For a body slab pivoting at
+     * its own centre the offset direction is already the surface normal; for a limb pivoting at the joint
+     * it hangs from it is not, and every socket down the limb would otherwise point along the limb.
      *
      * @return {@code null} to derive the normal from the offset direction
      */
@@ -67,6 +67,7 @@ public final class TitanSocketDef {
         return normal;
     }
 
+    /** @return the resolved bone index, or {@code -1} when the bone name did not match. */
     public int getBoneIndex() {
         return boneIndex;
     }

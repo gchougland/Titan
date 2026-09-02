@@ -11,18 +11,20 @@ import javax.annotation.Nullable;
 /**
  * Procedural gait: decides where each foot should be planted and arcs it to the next contact point.
  *
- * <p>Feet stay locked to the ground until the body has dragged them past their stride threshold, which is
- * what stops the sliding you get from playing a canned walk cycle on a creature that moves at a
- * variable speed. Diagonal pairs share a {@code gaitGroup} and only one group may swing at a time, giving
- * the heavy alternating stomp a Stone Talus should have.
+ * <p>Feet stay locked to the ground until the body has dragged them past their stride threshold. That
+ * avoids the foot sliding a canned walk cycle produces on a creature moving at variable speed. Diagonal
+ * pairs share a {@code gaitGroup} and only one group may swing at a time, giving a heavy alternating
+ * stomp.
  */
 public final class TitanFootPlanner {
 
     /** How far ahead of the body the next contact point is placed, as a fraction of the stride. */
     private static final double LEAD_FRACTION = 0.55;
-    /** Seconds a single step takes; slow on purpose, these are very large creatures. */
+    /** Seconds a single step takes; slow to suit the scale of the creature. */
     private static final float STEP_DURATION = 0.55f;
+    /** Blocks above the candidate contact point that the ground search starts from. */
     private static final int GROUND_SEARCH_ABOVE = 4;
+    /** Blocks below the candidate contact point that the ground search gives up at. */
     private static final int GROUND_SEARCH_BELOW = 12;
 
     private TitanFootPlanner() {
@@ -130,7 +132,7 @@ public final class TitanFootPlanner {
     }
 
     /**
-     * Averages the planted heights so the body rides over uneven terrain instead of clipping into it.
+     * Height the body should ride at, so it clears uneven terrain instead of clipping into it.
      *
      * @return the highest planted foot height, or {@code NaN} when nothing is planted yet
      */

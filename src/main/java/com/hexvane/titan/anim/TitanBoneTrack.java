@@ -41,9 +41,8 @@ public final class TitanBoneTrack {
      *
      * @param positionScale factor applied to every translation key
      * @param flipFacing    turn the animation half a turn about {@code Y}, for a source rig whose
-     *                      {@code +X} and {@code +Z} point the other way. Negating those two components
-     *                      is what conjugating by a half turn works out to, for vectors and quaternions
-     *                      alike.
+     *                      {@code +X} and {@code +Z} point the other way. Conjugating by a half turn
+     *                      reduces to negating those two components, for vectors and quaternions alike.
      * @return {@code this} when there is nothing to do, otherwise a converted copy
      */
     @Nonnull
@@ -68,10 +67,12 @@ public final class TitanBoneTrack {
         return new TitanBoneTrack(positionTimes, positions, rotationTimes, rotations);
     }
 
+    /** @return {@code true} when the track carries position keys. */
     public boolean hasPosition() {
         return positionTimes.length > 0;
     }
 
+    /** @return {@code true} when the track carries rotation keys. */
     public boolean hasRotation() {
         return rotationTimes.length > 0;
     }

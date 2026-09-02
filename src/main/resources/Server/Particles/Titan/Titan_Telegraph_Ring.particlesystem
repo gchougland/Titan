@@ -1,7 +1,7 @@
 {
   "$Comment": [
-    "IsImportant is the whole point of a telegraph: the client is told to draw it even when it is off screen or behind something. A titan is tall enough that the attack you most need to see coming is the one landing on the ground you cannot see because the titan is standing between you and it.",
-    "CullDistance is well past the range the boss bar stays up at, so the fight never has a telegraph quietly stop being drawn."
+    "IsImportant makes the client draw the effect even when it is off screen or occluded. A titan is large enough to stand between the player and the ground an attack lands on, so the marker has to survive occlusion.",
+    "CullDistance of 96 is well past the range the boss bar stays up at, so a telegraph is never culled part way through a fight."
   ],
   "Spawners": [
     {

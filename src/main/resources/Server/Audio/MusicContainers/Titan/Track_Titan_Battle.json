@@ -1,9 +1,9 @@
 {
   "$Comment": [
-    "The track a titan fight plays over. FightorFlight is one of the unused pieces that ship with the game but nothing references, so pointing at it costs the mod no download: every client already has the file, it was simply never given a container to be played through.",
-    "Track paths are relative to Common, which is why this reads Music/... rather than Common/Music/.... The engine validates on load that the file exists under a Music root and that it is 44.1 or 48 kHz, so a typo here is a startup failure rather than a silent quiet fight.",
-    "LoopCount 0 means loop forever, which matters because this is held for as long as a player is engaged. The default of 1 would leave the back half of a long fight in silence, and a boss going quiet reads as a bug.",
-    "Volume is in decibels, not a multiplier, and it is a boost because this track opens soft. Averaged over its length it is exactly as loud as the vanilla boss track, but its first thirty seconds are about 2.5 dB down and its dynamic range is half again as wide, so the moment a fight actually starts is the quietest part of it. Five is close to the practical ceiling regardless of the engine allowing ten: the file already peaks at -5.9 dBFS, so much beyond this clips the loud passages rather than raising them."
+    "The track a titan fight plays over. FightorFlight ships with the game but no container references it, so pointing at it adds nothing to the mod's download.",
+    "Track paths are relative to Common, so this reads Music/... rather than Common/Music/.... The engine validates on load that the file exists under a Music root and is 44.1 or 48 kHz, so a typo fails on load rather than at playback.",
+    "LoopCount 0 loops forever, which is needed because the track is held for as long as a player is engaged. The default of 1 would leave the back half of a long fight in silence.",
+    "Volume is in decibels, not a multiplier, and is boosted because this track opens soft. Averaged over its length it is as loud as the vanilla boss track, but its first thirty seconds are about 2.5 dB down and its dynamic range is half again as wide. The engine allows 10, but the file peaks at -5.9 dBFS, so much beyond 5 clips the loud passages rather than raising them."
   ],
 
   "Type": "SingleTrack",

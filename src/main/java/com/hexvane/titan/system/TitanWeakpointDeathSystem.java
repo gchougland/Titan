@@ -20,12 +20,12 @@ import javax.annotation.Nonnull;
  *
  * <p>Polling the node's health does not work: the engine adds {@link DeathComponent} the moment health hits
  * zero and {@code DeathSystems.CorpseRemoval} despawns the entity on its very next tick, so a ticking system
- * can miss the zero-health window entirely and never notice the node was destroyed. Watching for
- * {@code DeathComponent} being added catches every kill exactly once, whatever dealt it.
+ * can miss the zero-health window entirely. Watching for {@code DeathComponent} being added catches every
+ * kill exactly once, whatever dealt it.
  *
- * <p>This is also the only place a titan is told it has lost a node. Nothing else may credit a break:
- * {@link TitanComponent#auditWeakpoints} reads a missing node as the rig being torn down rather than as a
- * kill, so a death has to arrive from an actual death event to count.
+ * <p>This is the only place a titan is credited with losing a node. {@link TitanComponent#auditWeakpoints}
+ * reads a missing node as the rig being torn down, not as a kill, so breaks have to arrive from a real
+ * death event.
  */
 public final class TitanWeakpointDeathSystem extends DeathSystems.OnDeathSystem {
 

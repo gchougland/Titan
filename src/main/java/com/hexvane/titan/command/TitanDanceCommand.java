@@ -19,16 +19,13 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import javax.annotation.Nonnull;
 
 /**
- * {@code /titan dance [--radius=n]} — makes the nearest titan perform a stock player emote.
+ * {@code /titan dance [--radius=n]}: plays a stock player emote on the nearest titan. Development aid for
+ * checking that clips authored for a character retarget onto a titan skeleton.
  *
- * <p>The point of the command is the demonstration: the clip is the untouched vanilla
- * {@code Dance_Boogie.blockyanim}, authored for a character a fraction of a titan's size, and it plays
- * because titan skeletons name their bones after the player rig. Anything animated for a character can be
- * dropped into a clip set the same way.
- *
- * <p>The titan is parked in {@link TitanState#EMOTING} so the AI stops steering it and the IK stops
- * planting its feet, leaving the clip in sole control. It stays there until something wakes it back up:
- * {@code /titan anim} with a state, a kill, or the next server restart.
+ * <p>The clip is the unmodified vanilla {@code Dance_Boogie.blockyanim}; it plays because titan skeletons
+ * name their bones after the player rig. The titan is held in {@link TitanState#EMOTING} for the duration
+ * so the AI stops steering it and the IK stops planting its feet, and it stays there until
+ * {@code /titan anim} sets another state, it is killed, or the server restarts.
  */
 public final class TitanDanceCommand extends AbstractPlayerCommand {
 
@@ -71,8 +68,8 @@ public final class TitanDanceCommand extends AbstractPlayerCommand {
             return;
         }
 
-        // Entering a state marks the clip dirty, which would have the animation system overwrite the dance
-        // on the very next tick. Swallow that before handing the animator the clip we actually want.
+        // Entering a state marks the clip dirty, so the animation system would overwrite the dance on the
+        // next tick. Consume the flag before handing the animator the emote.
         titan.setState(TitanState.EMOTING);
         titan.consumeClipDirty();
         animator.play(clip, true);
@@ -83,7 +80,7 @@ public final class TitanDanceCommand extends AbstractPlayerCommand {
             .param("duration", clip.getDuration()));
     }
 
-    /** How many of the skeleton's bones the borrowed clip actually found a track for. */
+    /** @return how many of the clip's bones have a track, out of {@link TitanClip#getBoneCount()}. */
     private static int countDrivenBones(@Nonnull final TitanClip clip) {
         int driven = 0;
         for (int i = 0; i < clip.getBoneCount(); i++) {

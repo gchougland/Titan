@@ -10,27 +10,23 @@ import javax.annotation.Nonnull;
 /**
  * Turns a block's stored orientation into something an entity transform can carry.
  *
- * <p>A slab, stair or pillar keeps which way it faces in a {@code RotationTuple} index alongside its block
- * id. Placed in the world the chunk renderer reads that index directly, but a titan's blocks are entities,
- * and {@code BlockEntity} stores nothing but the block key — so the orientation has to be folded into the
- * entity's rotation instead, on top of whatever the bone is doing.
+ * <p>A slab, stair or pillar keeps its facing in a {@code RotationTuple} index alongside its block id, which
+ * the chunk renderer reads directly. {@code BlockEntity} carries only the block key, so for a titan's blocks
+ * the orientation has to be folded into the entity's rotation on top of whatever the bone is doing.
  */
 public final class BlockRotations {
 
     /**
      * A block's mesh faces the opposite way as an entity to the way it faces in a chunk, so every rotation
-     * carries half a turn of yaw to cancel that out. This is not a guess: the engine applies the same
-     * correction in the only two places it rebuilds a placed block as an entity, {@code FallingBlock} and
-     * {@code CarriedBlock}, both of which add {@code PI} to the yaw they hand the transform.
-     *
-     * <p>It applies to unrotated blocks too, which is why there is no fast path for them. It went unnoticed
-     * until now only because a titan is mostly plain cubes, and half a turn does nothing to a cube.
+     * carries half a turn of yaw to cancel that out. The engine applies the same correction in
+     * {@code FallingBlock} and {@code CarriedBlock}, both of which add {@code PI} to the yaw they hand the
+     * transform. It applies to unrotated blocks too, so there is no fast path for them.
      */
     private static final float ENTITY_YAW_OFFSET = (float) Math.PI;
 
     /**
-     * One quaternion per rotation index. There are only 64 of them and they never change, so they are built
-     * once rather than rebuilt from Euler angles for every block of every titan on every tick.
+     * One quaternion per rotation index, built once. There are only 64 and they never change, so no block
+     * has to rebuild one from Euler angles per tick.
      */
     @Nonnull
     private static final Quaterniond[] QUATERNIONS = build();
@@ -58,10 +54,9 @@ public final class BlockRotations {
      * Folds a block's own orientation into {@code boneRotation}, in place.
      *
      * <p>Composed as {@code bone * block} so the block turns within its bone: a stair on a leg keeps facing
-     * along that leg as it swings, rather than being pinned to a world direction.
-     *
-     * <p>The scratch objects are the caller's because this runs for every voxel of a moving titan, and
-     * JOML's own {@code mul} overloads allocate their intermediates.
+     * along that leg as it swings instead of being pinned to a world direction. The scratch objects belong
+     * to the caller because this runs for every voxel of a moving titan and JOML's {@code mul} overloads
+     * allocate their intermediates.
      */
     public static void compose(@Nonnull final Rotation3f boneRotation,
                                final int rotationIndex,

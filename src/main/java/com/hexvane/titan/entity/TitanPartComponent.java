@@ -140,10 +140,9 @@ public final class TitanPartComponent implements Component<EntityStore> {
      * Whether this part has moved far enough from what the clients were last told to be worth telling them
      * again, and records the new transform as sent if so.
      *
-     * <p>The saving is possible because the engine's own check for whether a transform needs replicating is
-     * exact equality, so leaving the transform alone costs nothing at all — no packet, no dirty flag. What
-     * this buys is the difference between every voxel of a walking titan reporting in every tick and only
-     * the ones that have visibly gone somewhere.
+     * <p>The saving works because the engine tests transforms for exact equality before replicating them,
+     * so leaving one untouched costs nothing: no packet and no dirty flag. That is the difference between
+     * every voxel of a walking titan reporting in each tick and only those that visibly moved.
      *
      * <p>Measuring against what was last sent rather than against last tick's position is what keeps the
      * error bounded. A part is never further from the truth than the tolerance, however long the titan

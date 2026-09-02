@@ -4,6 +4,7 @@ import com.hexvane.titan.config.TitanConfig;
 import com.hexvane.titan.entity.TitanComponent;
 import com.hexvane.titan.entity.TitanPartComponent;
 import com.hexvane.titan.entity.TitanState;
+import com.hexvane.titan.physics.DebrisBurst;
 import com.hexvane.titan.spawn.BlockRotations;
 import com.hypixel.hytale.component.Archetype;
 import com.hypixel.hytale.component.ArchetypeChunk;
@@ -37,12 +38,12 @@ import java.util.logging.Level;
  * transform is rewritten from the owner's pose rather than following it. When the owner starts dying the
  * parts detach here and {@link TitanRagdollSystem} takes over their motion.
  *
- * <p>Most of what follows is about not rewriting it. A rewritten transform is a packet, the engine puts
- * every one of them in the same unsplit packet, and a titan of a few thousand voxels can fill a
- * connection with a single tick of walking — which arrives as parts of the titan visibly flickering. So
- * there are four gates before the write, coarse to fine: whether the titan re-posed at all, whether this
- * part's bone did, whether the part's turn has come round if a sync interval is configured, and whether it
- * has actually gone anywhere worth mentioning. {@link TitanSyncStats} counts which gate stopped what, and
+ * <p>Most of what follows is about not rewriting it. Every rewritten transform becomes an update in the
+ * same unsplit packet, so a titan of a few thousand voxels can fill a connection with a single tick of
+ * walking, which the player sees as parts of the titan flickering. Four gates therefore run before the
+ * write, coarse to fine: whether the titan re-posed at all, whether this part's bone did, whether the
+ * part's turn has come round if a sync interval is configured, and whether it has moved far enough to be
+ * worth reporting. {@link TitanSyncStats} counts which gate stopped what, and
  * {@code /titan perf} reads it back.
  */
 public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> {
@@ -58,13 +59,11 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
     /**
      * How often each voxel restates its size to the clients watching it. See {@code consumeScaleRefresh}.
      *
-     * <p>Long, because this is now a safety net rather than the fix it started as. It was two seconds when
-     * the failure it was written for looked like the only way a client could end up not knowing a part's
-     * size; {@code BlockEntitySystems.SendUpdates} turns out to send the scale to every viewer in
-     * {@code newlyVisibleTo} whether or not it is marked out of date, so a client that walks into range of
-     * a titan is told regardless and the case is already handled. On the Roaming Temple two seconds was a
-     * hundred-odd size packets every tick to say nothing; thirty leaves something in place to recover from
-     * a cause nobody has identified, at a fifteenth of the cost.
+     * <p>Deliberately long, since this is only a safety net. {@code BlockEntitySystems.SendUpdates} already
+     * sends the scale to every viewer in {@code newlyVisibleTo} whether or not it is marked out of date, so
+     * a client walking into range of a titan is told without any help from here. The interval only covers a
+     * client that somehow misses that packet. On the Roaming Temple a two-second interval cost upwards of a
+     * hundred redundant size packets per tick, so it is set well above what any recovery needs.
      */
     public static final float SCALE_REFRESH_SECONDS = 30f;
 
@@ -84,9 +83,8 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
     /**
      * The intermediates one part needs to work out where it goes, one set per thread.
      *
-     * <p>These used to be fields on the system, which is the usual way to keep a per-tick hot loop from
-     * allocating and is exactly what stops a system being run in parallel. Held per thread instead they
-     * still allocate nothing per part and the loop can fan out.
+     * <p>Held per thread rather than on the system, which would allocate nothing per part but would also
+     * prevent the loop from being run in parallel.
      */
     private static final class Scratch {
         @Nonnull
@@ -250,19 +248,10 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
 
         pose.getWorldPosition(skeleton.getBodyBoneIndex(), scratch.worldPosition);
         scratch.burst.set(transform.getPosition()).sub(scratch.worldPosition);
-        final double distance = scratch.burst.length();
-        if (distance < 1.0e-3) {
-            scratch.burst.set(0, BURST_LIFT, 0);
-        } else {
-            scratch.burst.div(distance).mul(distance * BURST_SPREAD);
-            scratch.burst.y = Math.max(scratch.burst.y, 0) + BURST_LIFT;
-        }
 
-        scratch.spin.set(
-            random.nextDouble(-BURST_SPIN, BURST_SPIN),
-            random.nextDouble(-BURST_SPIN, BURST_SPIN),
-            random.nextDouble(-BURST_SPIN, BURST_SPIN)
-        );
+        // Speed proportional to the distance from the body, so the extremities fly furthest.
+        DebrisBurst.solve(scratch.burst, scratch.burst.length() * BURST_SPREAD, BURST_LIFT, scratch.burst);
+        DebrisBurst.spin(random, BURST_SPIN, scratch.spin);
 
         part.detach(scratch.burst, scratch.spin, despawnAfter);
     }

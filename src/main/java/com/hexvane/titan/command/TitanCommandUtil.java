@@ -31,12 +31,10 @@ final class TitanCommandUtil {
     /**
      * A string argument that completes from a list looked up when the client asks.
      *
-     * <p>An argument type rather than the {@code suggest} hook on the argument itself, which looks like the
-     * obvious way to do this and silently does nothing. The client is told each argument's type and how many
-     * values that type can suggest, and it only asks the server for completions when that count says there
-     * are some. {@link ArgTypes#STRING} is the shared free-text type and reports none, so a per-argument
-     * hook hung off it is never called; a type of our own that says otherwise is what puts the list on
-     * screen. The shipped commands that complete strings all do it this way.
+     * <p>The client only requests completions when the argument's type reports a non-zero suggestion count.
+     * {@link ArgTypes#STRING} reports zero, so a {@code suggest} hook hung off an individual
+     * {@code STRING} argument is never called and the count has to come from a dedicated type. The shipped
+     * commands that complete strings are all written this way.
      */
     @Nonnull
     static SingleArgumentType<String> suggesting(@Nonnull final Supplier<List<String>> candidates) {
@@ -64,11 +62,11 @@ final class TitanCommandUtil {
     }
 
     /**
-     * The variants worth naming on a command line: everything loaded, minus anything the owner switched off.
+     * Every loaded variant except those the server owner has disabled. Disabled variants are skipped when a
+     * site picks what stands on it, so there is nothing to spawn or search for.
      *
-     * <p>Read at completion time rather than captured once, so a variant added by another pack, or one the
-     * owner has since disabled, is reflected without the command being re-registered. A disabled variant is
-     * skipped when a site picks what stands on it, so it is equally pointless to spawn and to search for.
+     * <p>Read at completion time rather than captured once, so a variant added by another pack or disabled
+     * since startup is reflected without re-registering the command.
      */
     @Nonnull
     static List<String> enabledVariants() {
@@ -102,8 +100,10 @@ final class TitanCommandUtil {
     }
 
     /**
-     * Spatial queries hand back a shared thread-local list, so anything that keeps iterating while doing
-     * other lookups needs its own copy.
+     * Copies the entities within {@code radius} of {@code origin}.
+     *
+     * <p>Spatial queries return a shared thread-local list, so a caller that performs further lookups while
+     * iterating needs a copy of its own.
      */
     @Nonnull
     static List<Ref<EntityStore>> snapshotNearby(@Nonnull final Store<EntityStore> store,

@@ -1,8 +1,8 @@
 {
   "$Comment": [
     "Rearing up and then driving the front of the slab into the ground. 60 frames, one second.",
-    "The rear is the tell. A titan about to plough goes up before it goes down, which is a full third of a second of warning that something is coming and that it is not another smash, and it happens above the shoulder line where a player standing on the back can see it.",
-    "The pitch is carried on Pelvis, so the whole rig goes with it. The legs come too, but they are put back on the terrain by foot IK before anything is drawn, which is what leaves the body angled while the feet stay under it."
+    "The rear is the tell: a titan about to plough goes up before it goes down, giving a third of a second of warning that this is not another smash. It happens above the shoulder line, so a player standing on the back can see it.",
+    "The pitch is carried on Pelvis, so the whole rig goes with it. The legs come too, but foot IK puts them back on the terrain before anything is drawn, leaving the body angled while the feet stay under it."
   ],
   "formatVersion": 1,
   "duration": 60,

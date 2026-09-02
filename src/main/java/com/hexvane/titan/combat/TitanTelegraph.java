@@ -14,15 +14,12 @@ import javax.annotation.Nullable;
 /**
  * Draws the ground markers that say where a titan is about to hit.
  *
- * <p>The engine has no attack indicator of any kind, so these are ordinary particle systems that happen to
- * be a single ring-shaped quad lying face up. The assets are authored at a radius of one block, which is
- * what makes this class small: the scale carried by the spawn packet is the radius in blocks, so a caller
- * asks for the circle it is actually about to damage and the marker is drawn at exactly that size. Nothing
- * in the assets knows what a smash or a pound is.
+ * <p>The engine has no attack indicator, so these are ordinary particle systems drawn as a single
+ * ring-shaped quad lying face up. The assets are authored at a radius of one block, so the scale carried
+ * by the spawn packet is the radius in blocks and a caller can simply pass the area it is about to damage.
  *
- * <p>Markers are laid on the terrain rather than at the attack's own height. A smash is aimed at a point
- * that may be a metre off the floor, and a ring floating there — or worse, buried in the hillside — is not
- * a marker of anything.
+ * <p>Markers are settled onto the terrain rather than drawn at the attack's own height, since a smash is
+ * aimed at a point that may be well above or below the surface.
  */
 public final class TitanTelegraph {
 
@@ -48,8 +45,8 @@ public final class TitanTelegraph {
     /**
      * How long to wait before the next pulse of a windup marker.
      *
-     * <p>Shortens as the windup runs out, so the marker beats faster the closer the attack gets. That is
-     * the part that carries the timing: the ring says where, and the rate it flashes at says when.
+     * <p>Shortens as the windup runs out, so the marker beats faster the closer the attack gets. The ring
+     * communicates where the blow lands and the pulse rate communicates when.
      *
      * @param remaining seconds of windup left
      */
@@ -74,7 +71,7 @@ public final class TitanTelegraph {
         if (!isEnabled() || system == null || system.isEmpty() || radius <= 0) return;
 
         // Copied rather than mutated in place: the caller passes its live attack point, and worlds tick on
-        // separate threads, so a shared scratch vector here would be both destructive and a race.
+        // separate threads, so a shared scratch vector would be both destructive and a race.
         final var at = new Vector3d(centre);
         if (!settleOnGround(chunkStore, at)) return;
 
@@ -117,8 +114,8 @@ public final class TitanTelegraph {
     }
 
     /**
-     * Fires a one-shot effect at a point, at its authored size. For the things that are not markers of a
-     * future attack but debris from a present one, such as the ground splitting as a boulder is torn free.
+     * Fires a one-shot effect at a point, at its authored size. Used for effects that accompany an attack
+     * rather than warn of one, such as the ground splitting as a boulder is torn free.
      */
     public static void burst(@Nonnull final ComponentAccessor<EntityStore> accessor,
                              @Nullable final String system,

@@ -24,9 +24,8 @@ import java.util.Set;
 /**
  * Integrates the debris a dead titan leaves behind.
  *
- * <p>The pieces are simulated here rather than handed to the engine's block-entity physics because they
- * need to tumble, settle into a pile and then disappear again — engine physics would keep them alive
- * indefinitely and each one is a full entity. How long each one lasts is rolled per block when it comes
+ * <p>The pieces tumble, settle into a pile and then disappear. Engine block-entity physics would keep them
+ * alive indefinitely instead, and each piece is a full entity. Lifetime is rolled per block as it comes
  * loose, so the pile thins out rather than vanishing all at once.
  */
 public final class TitanRagdollSystem extends EntityTickingSystem<EntityStore> {
@@ -41,6 +40,16 @@ public final class TitanRagdollSystem extends EntityTickingSystem<EntityStore> {
     /** Below this speed a bouncing piece is considered settled. */
     private static final double REST_SPEED = 0.8;
     private static final double TERMINAL_SPEED = 60.0;
+
+    /**
+     * Vertical window searched for the floor under a falling piece, in blocks.
+     *
+     * <p>Only a little upward reach is needed, since the sample is taken from the piece's current height
+     * and a piece never rises between ticks. The downward reach has to cover a fall from a titan's
+     * shoulders to the ground below it.
+     */
+    private static final int GROUND_ABOVE = 2;
+    private static final int GROUND_BELOW = 48;
 
     @Nonnull
     private final Query<EntityStore> query = Archetype.of(TitanPartComponent.getComponentType(), TransformComponent.getComponentType());
@@ -96,7 +105,7 @@ public final class TitanRagdollSystem extends EntityTickingSystem<EntityStore> {
         final double halfHeight = (scaleComponent == null ? 1f : scaleComponent.getScale()) * 0.5;
 
         final var chunkStore = store.getExternalData().getWorld().getChunkStore();
-        final double ground = GroundSampler.sample(chunkStore, next.x, position.y, next.z, 2, 48);
+        final double ground = GroundSampler.sample(chunkStore, next.x, position.y, next.z, GROUND_ABOVE, GROUND_BELOW);
 
         if (GroundSampler.isValid(ground) && next.y - halfHeight <= ground) {
             next.y = ground + halfHeight;

@@ -11,8 +11,7 @@ import javax.annotation.Nonnull;
  * Reads the terrain surface under a point so feet can be planted on it.
  *
  * <p>Only touches already-loaded chunk sections. An unloaded column reports {@link #NO_GROUND} and the
- * caller keeps the foot where it was, which is the correct behaviour while a titan walks towards the edge
- * of the loaded area.
+ * caller leaves the foot where it was, so gait stays sane at the edge of the loaded area.
  */
 public final class GroundSampler {
 
@@ -22,6 +21,7 @@ public final class GroundSampler {
     private GroundSampler() {
     }
 
+    /** @return {@code true} when {@code y} is a real surface height and not {@link #NO_GROUND}. */
     public static boolean isValid(final double y) {
         return !Double.isNaN(y);
     }
@@ -54,8 +54,8 @@ public final class GroundSampler {
     }
 
     /**
-     * Whether a block blocks movement. Unloaded sections and unknown blocks count as empty so the caller
-     * treats them as "no ground here" rather than as a wall.
+     * Whether a block blocks movement. Unloaded sections and unknown blocks count as empty, so the caller
+     * treats them as absent ground instead of as a wall.
      */
     public static boolean isSolid(@Nonnull final ChunkStore chunkStore, final int x, final int y, final int z) {
         final int id = blockId(chunkStore, x, y, z);
@@ -66,6 +66,7 @@ public final class GroundSampler {
         return type.getOpacity() != Opacity.Transparent;
     }
 
+    /** @return the block id at the given world position, or {@code UNKNOWN_ID} if the section is not loaded. */
     public static int blockId(@Nonnull final ChunkStore chunkStore, final int x, final int y, final int z) {
         final var ref = chunkStore.getChunkSectionReferenceAtBlock(x, y, z);
         if (ref == null) return BlockType.UNKNOWN_ID;

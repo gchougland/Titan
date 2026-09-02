@@ -13,16 +13,13 @@ import javax.annotation.Nonnull;
 /**
  * The only thing about a titan worth writing to disk: which sites the players have already cleared.
  *
- * <p>Everything else is recoverable without saving anything. Where titans stand, which variant each one is
- * and how it is built all fall out of the world seed, so a restart puts the same titan back in the same
- * place on its own. What the seed cannot know is that somebody already came and killed one, and without
- * that the boss a player just spent ten minutes on would be waiting for them again after the next restart.
+ * <p>Where titans stand, which variant each one is and how it is built all fall out of the world seed, so a
+ * restart puts the same titan back in the same place unaided. A kill is the one fact the seed cannot
+ * supply. Damage short of a kill is not kept, so a wounded titan is whole again next time, as with the rest
+ * of the world's bosses.
  *
  * <p>The engine loads registered resources from the world's save directory at startup, so this arrives
- * populated; the spawn system only has to save it when a record changes.
- *
- * <p>Damage short of a kill is deliberately not kept. A titan you wounded and walked away from is whole
- * again next time, which is the same rule the rest of the world's bosses follow.
+ * populated and the spawn system only has to save it when a record changes.
  */
 public final class TitanSiteMemory implements Resource<EntityStore> {
 
@@ -56,7 +53,7 @@ public final class TitanSiteMemory implements Resource<EntityStore> {
      * Records that a site's titan has been killed and must stay gone for {@code seconds}.
      *
      * <p>Synchronised because the kill is reported by the AI, which ticks titans in parallel, while the
-     * countdown and the save run on the world thread. Kills are rare enough that the lock never matters.
+     * countdown and the save run on the world thread. Kills are rare enough for the lock to cost nothing.
      */
     public synchronized void markCleared(final long cell, final float seconds) {
         cleared.put(cell, seconds);
@@ -89,11 +86,10 @@ public final class TitanSiteMemory implements Resource<EntityStore> {
     }
 
     /**
-     * Whether a record has changed since the last save.
+     * Whether a record has been added or dropped since the last save.
      *
-     * <p>The ticking countdown alone does not count. Rewriting the file every tick to shave a fraction of a
-     * second off a fifteen minute timer would be absurd, and a record that expires unsaved simply reappears
-     * as an expired record on the next load and is dropped there instead.
+     * <p>The ticking countdown alone does not count. A record that expires unsaved comes back as an expired
+     * record on the next load and is dropped there instead.
      */
     public synchronized boolean consumeDirty() {
         if (!dirty) return false;

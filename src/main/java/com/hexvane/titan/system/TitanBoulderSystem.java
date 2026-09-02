@@ -10,6 +10,7 @@ import com.hexvane.titan.entity.TitanComponent;
 import com.hexvane.titan.entity.TitanPartComponent;
 import com.hexvane.titan.entity.TitanWeakpointComponent;
 import com.hexvane.titan.ik.GroundSampler;
+import com.hexvane.titan.physics.DebrisBurst;
 import com.hypixel.hytale.component.Archetype;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -36,12 +37,10 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Flies the boulders titans throw, and breaks them when they land.
  *
- * <p>Deliberately not the engine's projectile or physics: a boulder is a cluster of block entities with no
- * single body to give a velocity to, and it has to come apart into rubble on impact rather than disappear.
- * What it does instead is borrow both halves of what a titan already does — the root holds a transform that
- * its blocks are hung off, and when it lands those blocks are handed straight to the debris physics that
- * cleans up a titan's corpse. The rock shattering into a pile that tumbles and fades is that system,
- * unchanged.
+ * <p>The engine's projectile and physics systems do not fit here: a boulder is a cluster of block entities
+ * with no single body to give a velocity to, and it has to come apart into rubble on impact rather than
+ * disappear. It instead borrows both halves of the titan rig. The root holds a transform its blocks hang
+ * off, and on landing those blocks are handed to the same debris physics that clears a titan's corpse.
  */
 public final class TitanBoulderSystem extends EntityTickingSystem<EntityStore> {
 
@@ -306,9 +305,9 @@ public final class TitanBoulderSystem extends EntityTickingSystem<EntityStore> {
         /**
          * Hands one block over to the debris physics.
          *
-         * <p>The part marker is added already detached, which is what makes this free: the sync system skips
-         * detached parts before it ever looks for the titan they belong to, so a rock chip that never had one
-         * passes straight through, and the ragdoll system picks it up and tumbles it like any other rubble.
+         * <p>The part marker is added already detached, which costs nothing: the sync system skips detached
+         * parts before it looks for the titan they belong to, so a rock chip that never had one passes
+         * straight through and the ragdoll system tumbles it like any other rubble.
          */
         private void release(@Nonnull final CommandBuffer<EntityStore> commandBuffer,
                              @Nonnull final Ref<EntityStore> self,
@@ -317,21 +316,10 @@ public final class TitanBoulderSystem extends EntityTickingSystem<EntityStore> {
 
             final var random = ThreadLocalRandom.current();
 
-            burst.set(part.getLocalOffset());
-            final double distance = burst.length();
-            if (distance < 1.0e-3) {
-                burst.set(0, BURST_LIFT, 0);
-            } else {
-                burst.div(distance).mul(BURST_SPREAD);
-                burst.y = Math.max(burst.y, 0) + BURST_LIFT;
-            }
+            // Every chip scatters at the same speed, then inherits a share of the rock's own flight.
+            DebrisBurst.solve(part.getLocalOffset(), BURST_SPREAD, BURST_LIFT, burst);
             burst.fma(MOMENTUM_SHARE, boulder.getVelocity());
-
-            spin.set(
-                random.nextDouble(-BURST_SPIN, BURST_SPIN),
-                random.nextDouble(-BURST_SPIN, BURST_SPIN),
-                random.nextDouble(-BURST_SPIN, BURST_SPIN)
-            );
+            DebrisBurst.spin(random, BURST_SPIN, spin);
 
             final var rubble = commandBuffer.ensureAndGetComponent(self, TitanPartComponent.getComponentType());
             rubble.detach(burst, spin, random.nextFloat(DEBRIS_LIFETIME_MIN, DEBRIS_LIFETIME_MAX));

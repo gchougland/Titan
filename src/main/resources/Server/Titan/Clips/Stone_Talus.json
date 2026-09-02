@@ -1,8 +1,8 @@
 {
   "$Comment": [
     "Logical clip names come from TitanState; Attack_Arm_L/R are picked by the attacking side. Files are paths under Common/, the same convention as ModelAsset animation sets, and resolve against every loaded pack rather than just this mod's, so a clip can point straight at a vanilla file.",
-    "Dance is that case: a stock player emote, played on a talus with no conversion step and no copy of the file. The skeleton borrows the player rig's bone names, so the parser matches up the spine, arms and legs on its own and the head, face, hair and cloth tracks are dropped for having nowhere to go.",
-    "The two adjustments there are the ones rotations alone cannot carry. PositionScale converts the translation keys out of player units, where the pelvis sits 51 up, into titan units, where it sits 5 up. FlipFacing turns the animation around, because the player rig puts +X left and +Z forward and a talus does the opposite. Reachable in game with /titan dance."
+    "Dance is that case: a stock player emote, played on a talus with no conversion step and no copy of the file. The skeleton borrows the player rig's bone names, so the parser matches up the spine, arms and legs on its own and drops the head, face, hair and cloth tracks.",
+    "PositionScale converts the translation keys out of player units, where the pelvis sits 51 up, into titan units, where it sits 5 up. FlipFacing turns the animation around, because the player rig puts +X left and +Z forward and a talus does the opposite. Play it in game with /titan dance."
   ],
   "Animations": {
     "Sleep": {

@@ -20,6 +20,13 @@ import javax.annotation.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Entry point for the Titan mod.
+ *
+ * <p>{@link #setup()} loads the server config and hands off to {@link TitanBootstrap}, which registers the
+ * components, systems, assets and commands. {@link #start()} publishes the mod's asset pack so the Asset
+ * Editor can see it.
+ */
 public final class TitanPlugin extends JavaPlugin {
     private static TitanPlugin instance;
 
@@ -64,13 +71,12 @@ public final class TitanPlugin extends JavaPlugin {
     }
 
     /**
-     * Writes the config back out over what was just read.
+     * Writes the config back out over what was just read, so the file on disk always lists every option.
      *
-     * <p>A missing config file is not an error: the engine hands back the codec's defaults and never writes
-     * anything, which leaves a server owner with nothing to edit and no way to discover what is tunable. A
-     * file that predates a new option has the same problem for that option alone. Saving on every boot
-     * covers both, and is safe because what gets written is what was read: any value already set survives
-     * the round trip and only the keys that were absent appear, at their defaults.
+     * <p>The engine falls back to codec defaults without writing a file, so a fresh install would otherwise
+     * leave the owner with nothing to edit, and a file predating a new option would omit that option.
+     * Saving what was just read is lossless: existing values survive the round trip and absent keys are
+     * added at their defaults.
      */
     private void syncConfigFile() {
         Path path = getDataDirectory().resolve("config.json");

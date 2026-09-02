@@ -50,16 +50,19 @@ public final class TitanClipSetAsset implements JsonAssetWithMap<String, Default
         return id;
     }
 
+    /** @return every entry in the set, keyed by logical animation name. */
     @Nonnull
     public Map<String, TitanClipEntry> getAnimations() {
         return animations;
     }
 
+    /** @return the entry for a logical animation name, or {@code null} if the set does not define it. */
     @Nullable
     public TitanClipEntry get(@Nonnull final String name) {
         return animations.get(name);
     }
 
+    /** @return the clip set with this id, or {@code null} if it is not loaded. */
     @Nullable
     public static TitanClipSetAsset find(@Nullable final String id) {
         return id == null ? null : ASSET_MAP.getAsset(id);

@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
  * can die, unload, or have its assets swapped out by a live reload; a rock already in the air should still
  * land the way it was thrown.
  *
- * <p>Runtime-only. A boulder mid-flight is not a thing worth writing to disk.
+ * <p>Runtime-only, since a boulder mid-flight has no meaning across a restart.
  */
 public final class TitanBoulderComponent implements Component<EntityStore> {
 
@@ -42,8 +42,8 @@ public final class TitanBoulderComponent implements Component<EntityStore> {
     /**
      * Where the throw was aimed, kept so the ground can go on being marked for the whole flight.
      *
-     * <p>The windup's marker says a rock is coming and roughly where. This is what keeps it there while the
-     * rock is actually in the air, which is most of the time a player has to react in.
+     * <p>The windup's marker shows roughly where the rock will land; this holds that marker on the ground
+     * for the flight itself, which is most of the window a player has to react in.
      */
     @Nonnull
     private final Vector3d landing = new Vector3d();

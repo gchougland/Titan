@@ -1,6 +1,6 @@
 {
   "$Comment": [
-    "Split ground, laid face up where a titan is dragging a boulder out. Five of them at random turns so the break does not read as one repeated stamp, and they linger well past the pull because a hole torn in the ground should still be there a moment later."
+    "Split ground, laid face up where a titan is dragging a boulder out. Five of them at random Z rotations so the break does not read as one repeated stamp, and a 1.4 to 2.0 second lifespan so the hole outlasts the pull."
   ],
   "RenderMode": "Erosion",
   "ParticleRotationInfluence": "None",

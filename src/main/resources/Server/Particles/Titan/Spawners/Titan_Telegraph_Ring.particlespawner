@@ -1,10 +1,10 @@
 {
   "$Comment": [
     "One flat ring lying face up on the ground, marking where a titan attack is about to land.",
-    "Authored at Scale 1.0, which is a ring of radius one: the scale numbers are half-extents, not widths, so 1.0 reaches one block out from the centre rather than covering one block in total. The scale float on the spawn packet multiplies it, so passing the attack's blast radius draws the ring at exactly the size of the circle that is about to be dangerous. Nothing else about the asset needs to know how big any particular attack is, and getting this wrong is not a crash but a marker that quietly lies about the size of the attack.",
-    "Rotation.X of 90 is what lays it down; the shipped shockwave spawners do the same. ParticleRotationInfluence None keeps it there instead of turning to face the camera, and ParticleRotateWithSpawner lets the yaw on the packet turn it, which only the plough corridor uses.",
-    "It lives less than half a second on purpose. The windup pulses this repeatedly and shortens the gap as the attack nears, so the ring reads as a heartbeat getting faster rather than a static decal.",
-    "Two things will make a marker like this invisible rather than merely wrong, and both have bitten this file. Opacity inside Animation multiplies the InitialAnimationFrame opacity, so a 0 up there zeroes every frame below it no matter what they say; it is 1, as it is in every shipped spawner. And SoftParticles fades whatever is near solid geometry, which for a quad lying on the floor is all of it, so it is off here and on only for the airborne dust."
+    "Authored at Scale 1.0, which is a ring of radius one: the scale numbers are half-extents, not widths, so 1.0 reaches one block out from the centre rather than covering one block in total. The scale float on the spawn packet multiplies it, so passing the attack's blast radius draws the ring at the size of the circle that is about to be dangerous and nothing in the asset needs to know how big any particular attack is.",
+    "Rotation.X of 90 lays it down, matching the shipped shockwave spawners. ParticleRotationInfluence None keeps it there instead of turning to face the camera, and ParticleRotateWithSpawner lets the yaw on the packet turn it, which only the plough corridor uses.",
+    "The 0.45 second lifespan is short because the windup pulses this repeatedly and shortens the gap as the attack nears, so the ring reads as a quickening pulse rather than a static decal.",
+    "Two settings will make the marker invisible rather than merely wrong. Opacity inside Animation multiplies the InitialAnimationFrame opacity, so a 0 there zeroes every frame below it; it is 1, as in every shipped spawner. SoftParticles fades whatever is near solid geometry, which for a quad lying on the floor is all of it, so it is disabled here and enabled only for the airborne dust."
   ],
   "RenderMode": "Erosion",
   "ParticleRotationInfluence": "None",

@@ -1,5 +1,5 @@
 {
-  "$Comment": "Slate cobalt on the ice fields. The tundra reads as a separate environment from the glacial plains but is the same open cold ground to walk across, and the zone-3 mountains are where a boulder that turns out to be alive belongs.",
+  "$Comment": "Slate cobalt on the ice fields. Tundra is a separate environment from the glacial plains but the same open cold ground to walk across, so both are listed alongside the zone 3 mountains.",
 
   "Environments": [
     "Env_Zone3_Glacial",

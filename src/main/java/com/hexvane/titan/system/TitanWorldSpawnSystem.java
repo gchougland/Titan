@@ -41,15 +41,14 @@ import java.util.logging.Level;
  *
  * <p>Where they stand is not decided here. {@link TitanSite} derives that from the world seed, so this
  * system only has to notice that a player has come within reach of a site the seed already placed, check
- * the terrain there is worth standing on, and build it. Because the build is seeded from the site too, the
- * titan that comes back after an unload, a relog or a server restart is the same one down to the placement
- * of its ore nodes. The single fact that cannot be recovered from the seed, that somebody already killed
- * one, is the only thing {@link TitanSiteMemory} writes to disk.
+ * the terrain there is worth standing on, and build it. The build is seeded from the site too, so the titan
+ * that comes back after an unload, a relog or a server restart is the same one down to the placement of its
+ * ore nodes. Only the fact that somebody already killed one cannot be recovered from the seed, and it is
+ * all {@link TitanSiteMemory} writes to disk.
  *
- * <p>Assembly cannot be hidden from the player. Chunks stop loading and entities stop being sent at the
- * same distance, so any spot whose ground can be read is also a spot the player would be shown a titan
- * appearing in. Rather than pretend otherwise, each sweep builds the furthest valid site it can find, which
- * in normal play puts assembly out at the edge of view where it is easy to miss.
+ * <p>Chunks stop loading and entities stop being sent at the same distance, so any spot whose ground can be
+ * read is also a spot the player would be shown a titan appearing in. Each sweep therefore builds the
+ * furthest valid site it can find, which puts assembly out at the edge of view.
  */
 public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
 
@@ -60,14 +59,13 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
     private static final float SCAN_INTERVAL = 2f;
 
     /**
-     * Both bands are fractions of the distance out to which the engine keeps chunks around a player
-     * simulated, not fixed block counts, because that distance depends on the player's view setting.
+     * Spawn and despawn bands, as fractions of the distance out to which the engine keeps chunks around a
+     * player simulated. Fractions rather than block counts, since that distance follows the view setting.
      *
-     * <p>Everything has to happen inside it. Outside, the ground cannot be read, so there is nothing to
-     * measure a site against; worse, a titan left out there is quietly destroyed, because the engine
-     * discards entities in sections that stop ticking and a titan is not the kind of thing it can put in
-     * cold storage. Building a little inside the edge and tearing down just short of it means the titan is
-     * always taken down by us, on purpose, rather than by the engine behind our back.
+     * <p>Both have to sit inside it. Outside, the ground cannot be read, so there is nothing to measure a
+     * site against, and a titan left out there is destroyed outright: the engine discards entities in
+     * sections that stop ticking and cannot put a titan into cold storage. Building a little inside the edge
+     * and tearing down just short of it keeps every teardown ours.
      */
     private static final double SPAWN_FRACTION = 0.80;
     private static final double DESPAWN_FRACTION = 0.95;
@@ -84,10 +82,8 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
      *
      * <p>Generous on purpose. Natural terrain rolls, the legs are solved with inverse kinematics and the
      * body settles onto whatever is under it, so the check only has to rule out cliff edges and ravines.
-     * Demanding genuinely flat ground rejects almost everywhere outside a desert.
-     *
-     * <p>These are the figures for a titan a few blocks across. A variant that needs more room says so
-     * itself; see {@link #isBuildableFor}.
+     * Demanding genuinely flat ground rejects almost everywhere outside a desert. These are the figures for
+     * a titan a few blocks across; a variant that needs more room says so itself, see {@link #isBuildableFor}.
      */
     public static final int FOOTPRINT_RADIUS = 4;
     public static final int FOOTPRINT_RELIEF = 6;
@@ -175,9 +171,8 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
     }
 
     /**
-     * How far around a player the engine keeps chunk sections ticking, in blocks.
-     *
-     * <p>The player's own view setting, capped by the server's ceiling on how far it will simulate.
+     * How far around a player the engine keeps chunk sections ticking, in blocks: the player's own view
+     * setting, capped by the server's ceiling on how far it will simulate.
      */
     public static double simulatedRadius(@Nonnull final Store<EntityStore> store, @Nonnull final Ref<EntityStore> ref) {
         final var player = store.getComponent(ref, Player.getComponentType());
@@ -190,9 +185,9 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
     /**
      * Takes down titans nobody is near any more.
      *
-     * <p>Kills are not detected here. A titan can go missing for reasons that have nothing to do with a
-     * player beating it, and treating those as kills would leave sites empty all over the world for no
-     * reason, so the AI reports a death at the moment it happens and anything else is just an unload.
+     * <p>Kills are not inferred here. A titan can go missing for reasons that have nothing to do with a
+     * player beating it, so the AI reports a death at the moment it happens and everything else counts as
+     * an unload.
      */
     private static void reap(@Nonnull final Store<EntityStore> store,
                              @Nonnull final World world,
@@ -217,9 +212,8 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
 
             if (isWatched(watchers, transform.getPosition())) continue;
 
-            // The site is only being unloaded, and the seed rebuilds the same titan there on the next
-            // visit. Removing the root is enough, since parts and ore nodes drop themselves once their
-            // owner is gone.
+            // Only an unload; the seed rebuilds the same titan on the next visit. Removing the root is
+            // enough, since parts and ore nodes drop themselves once their owner is gone.
             world.execute(() -> {
                 if (root.isValid()) store.removeEntity(root, RemoveReason.REMOVE);
             });
@@ -239,8 +233,7 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
         final List<Candidate> candidates = collectCandidates(world, sites, memory, watchers);
         if (candidates.isEmpty()) return;
 
-        // Furthest first. Assembly is visible whatever we do, so the best available answer is to do it as
-        // far away as the loaded terrain allows and let the player walk up to something already standing.
+        // Furthest first: assembly is visible, and distance hides it.
         candidates.sort(Comparator.comparingDouble(Candidate::distance).reversed());
 
         final ChunkStore chunkStore = world.getChunkStore();
@@ -293,10 +286,8 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
     }
 
     /**
-     * Whether the ground at a site will hold the variant that site rolled.
-     *
-     * <p>Falls back to the shared figures above for anything that has not asked for more, which is every
-     * titan small enough for them to mean the same thing.
+     * Whether the ground at a site will hold the variant that site rolled. Variants that declare no
+     * footprint of their own fall back to the shared figures above.
      */
     public static boolean isBuildableFor(@Nonnull final ChunkStore chunkStore,
                                          final int blockX,
@@ -382,13 +373,12 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
             return false;
         }
 
-        // Picked before the ground is measured, because how much ground has to be measured depends on
-        // which titan it is. The roll is the cell's, so this is the same variant either way round.
+        // Picked before the ground is measured, since how much ground to measure depends on the variant.
+        // The roll belongs to the cell, so the choice comes out the same either way round.
         final String variantId = rule.pickVariant(candidate.variantRoll());
         if (variantId == null) {
-            // Nothing this rule is allowed to spawn. Either it was authored without any variants, which is a
-            // mistake worth pointing out, or the owner has turned all of them off, which is the config
-            // working as intended and should stay quiet.
+            // Either the rule was authored without any variants, which is worth warning about, or the owner
+            // has turned all of them off, which is the config working as intended.
             if (rule.getVariants().length == 0) {
                 LOGGER.at(Level.WARNING).log("Titan spawn rule '%s' declares no variants", rule.getId());
             }
@@ -398,17 +388,17 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
 
         final TitanTerrainProbe.Ground ground = groundFor(chunkStore, blockX, surfaceY, blockZ, variantId);
         if (!ground.ok()) {
-            // Deliberately not marked barren: players reshape terrain, and a hillside that is too steep
-            // today may be flattened tomorrow.
+            // Not marked barren: players reshape terrain, and a hillside too steep today may be flat
+            // tomorrow.
             return false;
         }
 
-        // The probe's ground rather than the heightmap, which counts trees: siting off the raw surface is
-        // what would stand a titan on a canopy, since there is open air above one for the headroom check.
+        // The probe's ground, not the heightmap, which counts trees: a canopy has open air above it and so
+        // passes the headroom check.
         final var position = new Vector3d(blockX + 0.5, standingY(ground, variantId) + 1.0, blockZ + 0.5);
         final float yaw = candidate.yaw();
-        // Seeding the build from the cell is what makes the rebuilt titan the same titan: same ore count,
-        // same nodes, in the same places, every time this site is visited.
+        // Seeding the build from the cell rebuilds the same titan on every visit: same ore count, same
+        // nodes, in the same places.
         final long buildSeed = worldSeed ^ key;
 
         sites.pending.add(key);

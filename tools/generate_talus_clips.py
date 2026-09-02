@@ -285,8 +285,8 @@ def build_attack(side):
 #
 # Both arms are pinned by IK for the whole move, so what these clips actually control is the Pelvis node.
 # A negative X tips the slab's top towards -Z, and at -40 with the body dropped 2.2 the leading underside
-# sits right on the floor while the front lip of the back comes down to about 3.0 — low enough to step onto
-# from a braced forearm, which is the entire point of the move. See the climb_check output.
+# sits right on the floor while the front lip of the back comes down to about 3.0, low enough to step onto
+# from a braced forearm. See the climb_check output.
 
 SLAM_PITCH = -40
 SLAM_DROP = -2.2
@@ -402,7 +402,7 @@ def climb_check(pose_name, body_euler, body_dy, reach=5.0):
     """Reports the geometry a player has to climb during a pose.
 
     The attacking arm is fully IK-driven onto the impact point, so its clip angles say nothing about what
-    the arm looks like — the shoulder is what sets the slope. This walks the Pelvis node's own rotation and
+    the arm looks like; the shoulder sets the slope. This walks the Pelvis node's own rotation and
     translation to find the shoulder and the front lip of the back slab, then prints the slope of the line
     from the planted fist up to the shoulder. Anything much past 45 degrees is a wall, not a ramp.
     """

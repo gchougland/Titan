@@ -31,6 +31,15 @@ public final class TitanComponent implements Component<EntityStore> {
     /** {@link #getSiteCell()} for a titan that does not belong to a natural spawn site. */
     public static final long NO_SITE = Long.MIN_VALUE;
 
+    /**
+     * How long a node may be missing before the titan concludes it is being torn down.
+     *
+     * <p>Long enough that a genuine kill is never read as an unload, since the death watcher and the node's
+     * removal from the world are separate steps and may land in either order. Nothing about the titan
+     * changes while the clock runs.
+     */
+    private static final float LOST_GRACE_SECONDS = 2f;
+
     public static ComponentType<EntityStore, TitanComponent> getComponentType() {
         return TitanRegistry.getTitanComponentType();
     }
@@ -69,7 +78,7 @@ public final class TitanComponent implements Component<EntityStore> {
     private Ref<EntityStore> pendingAttacker;
     private float provokedTimer;
     private float attackCooldown;
-    /** Kept apart from the ordinary cooldown so being climbed cannot answer itself. See the variant field. */
+    /** Held separately from the ordinary cooldown so a plow cannot immediately follow another. */
     private float plowCooldown;
     /** {@code -1} for the left arm, {@code +1} for the right. */
     private int attackSide = 1;
@@ -129,11 +138,9 @@ public final class TitanComponent implements Component<EntityStore> {
         this.pose = new TitanPose(skeleton.getBoneCount());
         this.animator = new TitanAnimator(skeleton.getBoneCount());
         this.pose.resetToBind(skeleton);
-        // Nothing the size of a hill gets to pretend it is a rock formation, so a variant can opt out of
-        // the disguise and be found already on its feet.
         this.state = variant.isStartAwake() ? TitanState.IDLE : TitanState.SLEEPING;
-        // Left at zero until the spawner reports how many nodes it actually placed; the count is rolled at
-        // spawn time, so the variant cannot supply it here.
+        // The weakpoint tally stays at zero until the spawner reports how many nodes it placed, since the
+        // count is rolled at spawn time.
         initChains(skeleton);
     }
 
@@ -238,9 +245,8 @@ public final class TitanComponent implements Component<EntityStore> {
     /**
      * The natural spawn site this titan was built for, or {@link #NO_SITE} if it was spawned by hand.
      *
-     * <p>Only needed so that a death can be attributed back to a place. Whether a titan is standing
-     * somewhere is worked out from the world seed every time, but the fact that one was killed there has
-     * to be written down, and this is the link between the corpse and the record.
+     * <p>Site occupancy is derived from the world seed on demand, but a kill has to be recorded, so this
+     * links the titan back to the site entry that stores it.
      */
     public long getSiteCell() {
         return siteCell;
@@ -265,10 +271,9 @@ public final class TitanComponent implements Component<EntityStore> {
     /**
      * Rations how often a sleeping titan's pose is rebuilt.
      *
-     * <p>Asleep, a titan is a boulder with a twelve-second breathing swell in it. Re-posing that twenty
-     * times a second rewrites a couple of hundred voxel transforms and ships every one to every client in
-     * range, for motion measured in fractions of a block. Running it a few times a second instead is
-     * indistinguishable and is what makes it affordable to leave several of them standing around the world.
+     * <p>A sleeping titan only carries a twelve-second breathing swell, so re-posing it twenty times a
+     * second would rewrite hundreds of voxel transforms and replicate them all for motion measured in
+     * fractions of a block. A few times a second is visually identical and far cheaper.
      *
      * @return seconds of animation to advance by, or {@code 0} when this tick should be skipped entirely
      */
@@ -295,8 +300,8 @@ public final class TitanComponent implements Component<EntityStore> {
     }
 
     /**
-     * The spot the titan was built on. It will chase a player away from here but only so far, and it walks
-     * back to it once it gives up, so a titan stays the landmark its spawn site made it.
+     * The spot the titan was built on. It leashes to this point and walks back once it gives up a chase,
+     * so it stays at the site it spawned on.
      */
     @Nonnull
     public Vector3d getHome() {
@@ -315,9 +320,8 @@ public final class TitanComponent implements Component<EntityStore> {
     /**
      * Notes whoever just hurt one of the ore nodes.
      *
-     * <p>Written from the damage watcher, which runs off the AI's thread, and read back by the AI on its
-     * next tick rather than acted on here. Waiting a tick costs nothing and means the state machine is
-     * still the only thing that ever changes the titan's state.
+     * <p>Written by the damage watcher, which runs off the AI's thread, and consumed by the AI on its next
+     * tick. Deferring by one tick keeps the state machine the only writer of the titan's state.
      */
     public synchronized void reportAttacker(@Nonnull final Ref<EntityStore> attacker) {
         pendingAttacker = attacker;
@@ -333,9 +337,8 @@ public final class TitanComponent implements Component<EntityStore> {
     /**
      * Whether the titan is still angry about being hit.
      *
-     * <p>While it is, it holds onto its target out to its full leash range instead of the much shorter
-     * distance it would otherwise lose interest at. Without that, shooting one from across a clearing would
-     * wake it and then be forgotten on the very next tick.
+     * <p>While provoked it holds its target out to the full leash range rather than the much shorter range
+     * it normally loses interest at, so a titan shot from across a clearing stays engaged.
      */
     public boolean isProvoked() {
         return provokedTimer > 0f;
@@ -395,10 +398,10 @@ public final class TitanComponent implements Component<EntityStore> {
     /**
      * A repeating clock for whatever the current state wants to do at intervals rather than every tick.
      *
-     * <p>Two things use it and they never overlap. A windup flashes its marker on the ground, with the
-     * interval shortening as the attack nears — how fast the ring is beating is how a player reads the
-     * timing. A plough in progress uses it to space out the damage it shovels, since the blade sweeps its
-     * own width several times a second and hitting on every tick would multiply the attack twentyfold.
+     * <p>Two states use it and they never overlap. A windup flashes its ground marker on a shortening
+     * interval, which is how the player reads the remaining time. A plow in progress uses it to space out
+     * the damage it deals, since the blade sweeps its own width several times a second and damaging on
+     * every tick would multiply the attack twentyfold.
      *
      * <p>Reset by {@link #setState}, so the first pulse of a state lands on the tick it begins.
      *
@@ -457,11 +460,11 @@ public final class TitanComponent implements Component<EntityStore> {
     }
 
     /**
-     * Picks the leg nearest {@code point}, by where its foot is actually standing rather than by where the
-     * rig says the leg is bolted on: the answer wanted is which foot has the least distance to travel.
+     * Picks the leg nearest {@code point}, measured from where the foot is standing rather than where the
+     * leg attaches, so the result is the foot with the least distance to travel.
      *
-     * <p>Legs the gait has not planted yet are skipped. Their contact points are still at the origin, which
-     * would otherwise read as the closest foot in the world and drop the attack there.
+     * <p>Legs the gait has not planted yet are skipped, since their contact points are still at the origin
+     * and would otherwise always measure as nearest.
      *
      * @return an index into {@link #getFeet()}, or {@code -1} when no leg is standing on anything
      */
@@ -517,15 +520,6 @@ public final class TitanComponent implements Component<EntityStore> {
         return handChains.length > 0 ? 0 : -1;
     }
 
-    /**
-     * How long a node may be missing before the titan concludes it is being torn down.
-     *
-     * <p>Long enough that a genuine kill can never be read as an unload. The death watcher and the node's
-     * removal from the world are separate steps, and this covers the gap between them whatever order they
-     * land in. Nothing about the titan changes while the clock runs.
-     */
-    private static final float LOST_GRACE_SECONDS = 2f;
-
     /** What {@link #auditWeakpoints} found. */
     public enum WeakpointStatus {
         /** Nodes still standing, or all accounted for and the titan is fighting on. */
@@ -543,8 +537,8 @@ public final class TitanComponent implements Component<EntityStore> {
     /**
      * How many breaks it takes to kill this titan, which can be fewer than it carries.
      *
-     * <p>Always at least one and never more than the number that actually spawned, so a variant asking for
-     * more than its sockets could supply still dies rather than becoming invulnerable.
+     * <p>Clamped to at least one and to no more than the number that actually spawned, so a variant asking
+     * for more breaks than it has sockets is still killable.
      */
     public int getWeakpointsToKill() {
         return weakpointsToKill;
@@ -565,8 +559,8 @@ public final class TitanComponent implements Component<EntityStore> {
     }
 
     /**
-     * The full length of the boss bar: what the nodes needed for a kill are worth, not every node on the
-     * body. A titan carrying spares would otherwise show a bar that could never be emptied.
+     * The full length of the boss bar, counting only the nodes needed for a kill. Including spares would
+     * show a bar that could never be emptied.
      */
     public float getTotalHealth() {
         return nodeHealth * weakpointsToKill;
@@ -582,12 +576,11 @@ public final class TitanComponent implements Component<EntityStore> {
     }
 
     /**
-     * Corrects the tally to the number of ore nodes that actually spawned. Without this a variant whose
-     * model asset is missing would count nodes that do not exist and could never be killed.
+     * Corrects the tally to the number of ore nodes that actually spawned, so a variant with a missing
+     * model asset does not count nodes that do not exist and become unkillable.
      *
-     * @param toKill how many of them have to break, or anything {@code <= 0} for all of them. Clamped to
-     *               what actually spawned, so a variant asking for more breaks than it has nodes is a
-     *               harder fight rather than an unkillable one.
+     * @param toKill how many must break, or {@code <= 0} for all of them. Clamped to the number that
+     *               spawned.
      */
     public synchronized void setWeakpointCount(final int count, final int toKill) {
         weakpointsTotal = count;
@@ -596,10 +589,10 @@ public final class TitanComponent implements Component<EntityStore> {
     }
 
     /**
-     * Books in a node that was seen to die, so it stops being something the titan expects to find.
+     * Records a node that was seen to die, removing it from the set the titan expects to find.
      *
-     * <p>Called from the death watcher, which can fire for several nodes of the same titan on different
-     * threads in one tick, hence the lock.
+     * <p>Called from the death watcher, which can fire for several nodes of one titan on different threads
+     * in the same tick, hence the lock.
      */
     public synchronized void recordWeakpointBroken(@Nonnull final Ref<EntityStore> node) {
         if (!weakpoints.remove(node)) return;
@@ -609,20 +602,18 @@ public final class TitanComponent implements Component<EntityStore> {
     /**
      * Decides whether the titan has been beaten, torn down, or neither.
      *
-     * <p>The distinction is the whole point. A node can leave the world for reasons that have nothing to do
-     * with a player: a titan is wide enough to straddle two chunk columns, and when one of them stops
-     * ticking its nodes are destroyed while the root carries on. Reading that as a kill is what used to
-     * leave a pile of ore sitting at an untouched spawn site with nobody around. So a death is only ever
-     * credited from {@link #recordWeakpointBroken}, which fires on an actual death event, and a node that
-     * simply goes missing is read as the rig coming apart instead.
+     * <p>A node can leave the world without any player involvement: a titan is wide enough to straddle two
+     * chunk columns, and when one stops ticking its nodes are destroyed while the root continues. Treating
+     * that as a kill would drop loot at an untouched spawn site, so a kill is only ever credited from
+     * {@link #recordWeakpointBroken}, which fires on a real death event. A node that merely goes missing is
+     * reported as {@link WeakpointStatus#LOST} instead.
      */
     @Nonnull
     public synchronized WeakpointStatus auditWeakpoints(@Nonnull final Store<EntityStore> store, final float dt) {
-        // A titan that never managed to spawn a node is broken, not dead; killing it here would make the
-        // failure look like a working boss that dies on sight.
+        // A titan that never spawned a node is misconfigured rather than dead, and killing it here would
+        // disguise the failure as a boss that dies on sight.
         if (weakpointsTotal <= 0) return WeakpointStatus.INTACT;
-        // Not every node, only the ones this variant asks for. Anything past that is a spare and the titan
-        // goes down with it still attached.
+        // Only the breaks the variant asks for. Any node beyond that is a spare and stays attached.
         if (weakpointsBroken >= weakpointsToKill) return WeakpointStatus.DESTROYED;
 
         boolean missing = false;
@@ -656,9 +647,9 @@ public final class TitanComponent implements Component<EntityStore> {
     /**
      * Copies the surviving nodes into {@code out}, replacing whatever was there.
      *
-     * <p>For readers that walk the list rather than glance at it. The death watcher removes entries under
-     * this component's lock, which is enough to make a plain iteration on another thread throw partway
-     * through; taking a copy under the same lock keeps the walk off the live list.
+     * <p>For callers that iterate the list. The death watcher removes entries under this component's lock,
+     * so iterating the live list from another thread can throw partway through. Copying under the same lock
+     * avoids that.
      */
     public synchronized void copyWeakpoints(@Nonnull final List<Ref<EntityStore>> out) {
         out.clear();
@@ -705,7 +696,7 @@ public final class TitanComponent implements Component<EntityStore> {
     @Nonnull
     @Override
     public Component<EntityStore> clone() {
-        // Cloning a titan would duplicate the root without its parts; hand back a fresh shell instead.
+        // Cloning would duplicate the root without its parts, so return an empty shell instead.
         final var copy = new TitanComponent();
         copy.variantId = variantId;
         return copy;

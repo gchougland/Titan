@@ -1,5 +1,5 @@
 {
-  "$Comment": "Top tier. The toughest ore nodes in the game on the largest body, so the climb has to be made several times over before it goes down.",
+  "$Comment": "Top tier: the toughest weakpoints in the set at 700 health each, on the largest body at BodyScale 1.5, so the climb has to be made several times over before it dies.",
   "Skeleton": "Stone_Talus",
   "DisplayName": "Mithril Talus",
   "BodyScale": 1.5,

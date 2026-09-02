@@ -59,10 +59,12 @@ public final class TitanClipEntry {
         return file;
     }
 
+    /** Whether playback wraps back to the start at the end of the clip. */
     public boolean isLooping() {
         return looping;
     }
 
+    /** Playback rate multiplier; {@code 1} plays the file at its authored speed. */
     public float getSpeed() {
         return speed;
     }
@@ -75,9 +77,8 @@ public final class TitanClipEntry {
     /**
      * Multiplies the clip's translation keys, for a clip authored against a rig of a different size.
      *
-     * <p>Rotations need no such treatment, which is why an animation borrowed from another creature is
-     * mostly usable as-is: an elbow bend is an elbow bend at any scale. Only the translations are in the
-     * source rig's units, so lifting the player's dance onto a titan needs them divided down by the ratio
+     * <p>Rotations need no such treatment, since a joint angle is scale-independent. Only the translations
+     * carry the source rig's units, so a clip lifted from the player rig needs them divided by the ratio
      * of the two rigs' heights.
      */
     public float getPositionScale() {
@@ -85,11 +86,11 @@ public final class TitanClipEntry {
     }
 
     /**
-     * Whether the clip was authored on a rig facing the opposite way, and needs turning around.
+     * Whether the clip was authored on a rig facing the opposite way and needs turning around.
      *
      * <p>The vanilla player rig puts {@code +X} on the left and {@code +Z} forwards; titans use the
      * opposite of both, which is the same rig yawed by half a turn. Without this a borrowed animation
-     * plays as its own mirror image, leaning backwards where it should lean forwards.
+     * plays mirrored, leaning backwards where it should lean forwards.
      */
     public boolean isFlipFacing() {
         return flipFacing;

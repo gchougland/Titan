@@ -1,8 +1,8 @@
 {
   "$Comment": [
     "Stone Talus rig. Offsets are model units (one prefab block) in titan-local space: +X right, +Y up, -Z forward. The root entity sits on the ground, so Pelvis's offset is the hip height.",
-    "Bone names and parenting deliberately mirror the vanilla player rig (Common/Characters/Player.blockymodel), minus everything a talus does not have: no head, neck, face, hair or clothing. Matching it costs nothing and means any character .blockyanim can be pointed at a talus and will drive the bones it recognises. Belly, Chest and the two shoulders carry no prefab and no offset; they exist only so that a borrowed animation rotating a player's spine or shoulder moves the parts hanging off them here too.",
-    "WeakpointSockets is a candidate list rather than a fixed set: each titan rolls WeakpointCountMin..Max of them at random, so no two of the same variant are climbed the same way. The body slab reaches 4.5 out in X and 2.0 in Y and Z, and every socket sits on that surface. The spawner centres a node on its socket and sinks it by the variant's WeakpointEmbed, so authoring one short of the surface would bury it completely."
+    "Bone names and parenting mirror the vanilla player rig (Common/Characters/Player.blockymodel), minus everything a talus does not have: no head, neck, face, hair or clothing. Any character .blockyanim can then be pointed at a talus and will drive the bones it recognises. Belly, Chest and the two shoulders carry no prefab and no offset; they exist so that a borrowed animation rotating a player's spine or shoulder moves the parts hanging off them here too.",
+    "WeakpointSockets is a candidate list rather than a fixed set: each titan rolls WeakpointCountMin..Max of them at random. The body slab reaches 4.5 out in X and 2.0 in Y and Z, and every socket sits on that surface. The spawner centres a node on its socket and sinks it by the variant's WeakpointEmbed, so authoring one short of the surface would bury it completely."
   ],
   "ClipSet": "Stone_Talus",
   "BodyBone": "Pelvis",
@@ -13,13 +13,13 @@
 
   "Bones": [
     {
-      "$Comment": "Origin is skipped on purpose. The player rig has one above Pelvis, but character clips use it to hold a fixed quarter-turn that would leave a talus dancing side-on to whoever it is facing.",
+      "$Comment": "Origin is skipped. The player rig has one above Pelvis, but character clips use it to hold a fixed quarter-turn that would leave a talus dancing side-on to its target.",
       "Name": "Pelvis",
       "Offset": { "X": 0, "Y": 5.0, "Z": 0 },
       "Detachable": false
     },
     {
-      "$Comment": "Spine joints, zero-length. A talus torso is one slab with no anatomy to space out, but the names have to be here or a borrowed clip's chest sway would stop at the hips.",
+      "$Comment": "Spine joints, zero-length. A talus torso is one slab with no anatomy to space out, but the names have to be present or a borrowed clip's chest sway stops at the hips.",
       "Name": "Belly",
       "Parent": "Pelvis",
       "Offset": { "X": 0, "Y": 0, "Z": 0 },
@@ -44,7 +44,7 @@
     },
 
     {
-      "$Comment": "Shoulders are zero-length pivots, as on the player rig, where the arm hangs off the shoulder at no offset. Arm segments are a 2x4x2 prefab. A bone's Scale sets both its thickness and its length, so the segment is authored long and narrow: at 0.85 it is 1.7 blocks thick and spans the 3.4 to the next joint. Shoulder (6.3) to wrist is 6.8, enough for the smash to plant a fist on the ground with the elbow still bent. The arms are the way up onto the back, so they run ColliderAllFaces with no thinning: an arm held out at an angle has no upward-facing voxels in its own prefab space, and anything less than every segment leaves a gap the player cannot cross.",
+      "$Comment": "Shoulders are zero-length pivots, as on the player rig, where the arm hangs off the shoulder at no offset. Arm segments are a 2x4x2 prefab. A bone's Scale sets both its thickness and its length, so the segment is authored long and narrow: at 0.85 it is 1.7 blocks thick and spans the 3.4 to the next joint. Shoulder (6.3) to wrist is 6.8, enough for the smash to plant a fist on the ground with the elbow still bent. The arms are the route up onto the back, so they run ColliderAllFaces with no thinning: an arm held out at an angle has no upward-facing voxels in its own prefab space, and thinning any segment leaves a gap the player cannot cross.",
       "Name": "L-Shoulder",
       "Parent": "Chest",
       "Offset": { "X": -4.0, "Y": 1.3, "Z": 0 },
@@ -200,7 +200,7 @@
       "RestOffset": { "X": 2.2, "Y": -5.0, "Z": 0 }
     },
     {
-      "$Comment": "The chain starts at the arm rather than the shoulder: the shoulder is a fixed pivot and giving the solver a zero-length first bone would leave it dividing by nothing.",
+      "$Comment": "The chain starts at the arm rather than the shoulder: the shoulder is a fixed pivot and a zero-length first bone would make the solver divide by zero.",
       "Name": "Arm_L",
       "Kind": "TwoBone",
       "Role": "Hand",

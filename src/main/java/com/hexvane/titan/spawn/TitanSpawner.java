@@ -48,9 +48,9 @@ public final class TitanSpawner {
     private static final double ROOT_BOX_RADIUS = 1.0;
 
     /**
-     * How far apart two ore nodes must sit, as a fraction of a node's own width. Well under 1 on purpose:
-     * the body is only a few nodes wide, so demanding no contact at all would reject most of the socket
-     * list and push the picker into its unspaced fallback. Letting neighbours graze keeps the spread.
+     * How far apart two ore nodes must sit, as a fraction of a node's own width. Well under 1: the body is
+     * only a few nodes wide, so demanding no contact at all would reject most of the socket list and push
+     * the picker into its unspaced fallback. Letting neighbours graze keeps the spread.
      */
     private static final double SOCKET_SPACING = 0.6;
 
@@ -95,10 +95,10 @@ public final class TitanSpawner {
      * Spawns {@code variantId} at {@code position} facing {@code yaw} radians.
      *
      * @param colliderMode which voxels become climbable hard collision
-     * @param seed         drives how many ore nodes the titan gets and where they sit. Pass a value derived
-     *                     from the titan's place in the world and it will be rebuilt identically every time,
-     *                     which is what lets a naturally sited titan survive being unloaded and reloaded
-     *                     without being saved. Pass a random one for a throwaway spawn.
+     * @param seed         drives how many ore nodes the titan gets and where they sit. A value derived from
+     *                     the titan's place in the world rebuilds it identically every time, so a naturally
+     *                     sited titan survives being unloaded and reloaded without being saved. Pass a
+     *                     random one for a throwaway spawn.
      */
     @Nonnull
     public static Result spawn(@Nonnull final Store<EntityStore> store,
@@ -129,12 +129,11 @@ public final class TitanSpawner {
         rootHolder.addComponent(TitanComponent.getComponentType(), titan);
         rootHolder.ensureComponent(EntityStore.REGISTRY.getNonSerializedComponentType());
 
-        // The root carries nothing to look at, but the boss bar needs an entity to point at: the client
-        // draws the bar from the tracked entity's own Health, which is why the invisible root ends up
-        // holding the pooled total of every ore node. A stat map is also what makes something a legal
-        // attack target, and the root's box sits between the legs where a stray swing would find it, so
-        // TitanRootDamageSystem refuses damage to it. Deliberately not the Invulnerable marker: that is
-        // replicated, and the client answers it by drawing the boss bar in its white indestructible style.
+        // The root renders nothing, but the client draws the boss bar from the tracked entity's own Health,
+        // so the invisible root holds the pooled total of every ore node. A stat map also makes an entity a
+        // legal attack target, and the root's box sits between the legs where a stray swing would find it,
+        // so TitanRootDamageSystem refuses damage to it. The Invulnerable marker is not used for that: it
+        // is replicated, and the client answers it by drawing the boss bar in its white indestructible style.
         rootHolder.addComponent(NetworkId.getComponentType(), new NetworkId(store.getExternalData().takeNextNetworkId()));
         rootHolder.ensureComponent(EntityModule.get().getVisibleComponentType());
         rootHolder.ensureAndGetComponent(EntityStatMap.getComponentType()).update();
@@ -153,8 +152,8 @@ public final class TitanSpawner {
         titan.setWeakpointCount(weakpoints, variant.getWeakpointsToKill());
         titan.setNodeHealth(nodeHealth);
 
-        // The bar reads full while every node is untouched, and empties as they break. Its length is what
-        // a kill costs rather than what the titan carries, so a variant with spares still empties it.
+        // The bar reads full while every node is untouched and empties as they break. Its length is what a
+        // kill costs rather than what the titan carries, so a variant with spare nodes still empties it.
         final var rootStats = store.getComponent(root, EntityStatMap.getComponentType());
         if (rootStats != null && weakpoints > 0) {
             TitanPartBuilder.applyHealth(rootStats, titan.getTotalHealth());
@@ -209,22 +208,22 @@ public final class TitanSpawner {
 
             pose.getWorldRotation(bone.getIndex(), rotation);
 
-            // Collected and handed over in one go rather than added one at a time. Adding an entity walks
-            // every holder and ref system that could care about it and then drains a command buffer, and
-            // paying that per voxel is most of the hitch when a titan this size appears. The bulk call does
-            // the walk once for the whole bone. Sized to the voxel count, which is the most it can produce.
+            // Collected and handed over in one go. Adding an entity walks every holder and ref system that
+            // could care about it and then drains a command buffer; paying that per voxel is most of the
+            // hitch when a titan appears, and the bulk call does the walk once for the whole bone. Sized to
+            // the voxel count, which is the most this loop can produce.
             @SuppressWarnings("unchecked")
             final Holder<EntityStore>[] holders = new Holder[voxels.size()];
             int holderCount = 0;
 
             int index = -1;
-            // Counted separately from `index` so the stride thins the candidates evenly. Keying it off the
-            // raw voxel index instead would interact with the shape of the prefab and could pick none at all.
+            // Counted separately from `index` so the collider stride thins the candidates evenly. Keying it
+            // off the raw voxel index would interact with the prefab's shape and could pick none at all.
             int colliderCandidate = -1;
 
             for (final PrefabVoxels.Voxel voxel : voxels.getVoxels()) {
-                // Ahead of the stride count so a part budget thins the shell evenly rather than being
-                // spent on filling that is never going to be spawned.
+                // Ahead of the stride count so a part budget thins the shell evenly instead of being spent
+                // on filling that is never spawned.
                 if (hollow && !voxel.surface()) continue;
 
                 index++;
@@ -299,10 +298,10 @@ public final class TitanSpawner {
             if (bone < 0) continue;
 
             // Sockets are authored on the body surface, so the direction from the bone's pivot out to one
-            // is the surface normal there. Aiming the ore's growth axis along it makes a node on the chest
-            // jut forwards and one on the flank jut sideways, and backing the node down that same axis
-            // beds it into the rock whichever face it landed on. A socket on a bone that pivots at its
-            // joint rather than its centre says which way is out for itself.
+            // is the surface normal there. Aiming the ore's growth axis along it makes a chest node jut
+            // forwards and a flank node jut sideways, and backing the node down that axis beds it into the
+            // rock whichever face it landed on. A socket on a bone that pivots at its joint rather than its
+            // centre declares its own normal instead.
             local.set(socket.getOffset());
             outward.set(socket.getNormal() != null ? socket.getNormal() : local);
             if (outward.lengthSquared() > 1.0e-6) {
@@ -334,11 +333,10 @@ public final class TitanSpawner {
     /**
      * Rolls how many ore nodes this titan gets and which sockets they land on.
      *
-     * <p>Sockets are authored all over the body — back, top, front and flanks — so shuffling them and taking
-     * a handful means two titans of the same variant are climbed and attacked differently. Picks closer
-     * together than {@code minSeparation} model units are skipped on the first pass so the ore clusters do
-     * not grow through each other; a second pass without that rule guarantees the quota is still met on a
-     * skeleton whose sockets are all crowded together.
+     * <p>Sockets are authored all over the body, so shuffling them and taking a handful means two titans of
+     * the same variant are climbed and attacked differently. The first pass skips picks closer together
+     * than {@code minSeparation} model units so the ore clusters do not grow through each other; a second
+     * pass without that rule still meets the quota on a skeleton whose sockets are crowded together.
      */
     @Nonnull
     private static int[] chooseSockets(@Nonnull final TitanVariantAsset variant,
@@ -391,9 +389,9 @@ public final class TitanSpawner {
         final int bone = sockets[candidate].getBoneIndex();
         for (int i = 0; i < count; i++) {
             final TitanSocketDef other = sockets[chosen[i]];
-            // Offsets are bone-local, so only two sockets on the same bone are in the same space. On a rig
-            // whose sockets are spread over four identical limbs, comparing across bones would read the
-            // matching spot on every leg as the same point and reject all but one of them.
+            // Offsets are bone-local, so only sockets on the same bone share a space. On a rig with four
+            // identical limbs, comparing across bones would read the matching spot on every leg as the same
+            // point and reject all but one.
             if (other.getBoneIndex() != bone) continue;
             if (other.getOffset().distanceSquared(offset) < minSq) return false;
         }

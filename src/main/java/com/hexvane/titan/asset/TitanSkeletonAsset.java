@@ -160,8 +160,8 @@ public final class TitanSkeletonAsset implements JsonAssetWithMap<String, Defaul
     }
 
     /**
-     * Topologically orders bones so every parent precedes its children. Cycles (which would otherwise hang
-     * the animation pass) are broken by appending whatever is left in declaration order.
+     * Topologically orders bones so every parent precedes its children. A cycle would otherwise stall the
+     * pass, so anything left unemitted is appended in declaration order.
      */
     @Nonnull
     private int[] buildEvaluationOrder() {
@@ -197,25 +197,30 @@ public final class TitanSkeletonAsset implements JsonAssetWithMap<String, Defaul
         return id;
     }
 
+    /** Bones in declaration order; the index into this array identifies a bone everywhere else. */
     @Nonnull
     public TitanBoneDef[] getBones() {
         return bones;
     }
 
+    /** @return the number of bones in the rig. */
     public int getBoneCount() {
         return bones.length;
     }
 
+    /** Limbs solved with IK instead of raw clip rotations. */
     @Nonnull
     public TitanIkChainDef[] getIkChains() {
         return ikChains;
     }
 
+    /** Attachment points that ore weakpoints are spawned onto. */
     @Nonnull
     public TitanSocketDef[] getWeakpointSockets() {
         return weakpointSockets;
     }
 
+    /** {@code TitanClipSetAsset} id supplying this rig's animations, or {@code null} for none. */
     @Nullable
     public String getClipSet() {
         return clipSet;
@@ -253,10 +258,12 @@ public final class TitanSkeletonAsset implements JsonAssetWithMap<String, Defaul
         return drawOrder;
     }
 
+    /** @return the index of the named bone, or {@code -1} if the rig has no such bone. */
     public int indexOfBone(@Nonnull final String name) {
         return boneIndexByName.getOrDefault(name, -1);
     }
 
+    /** @return the skeleton with this id, or {@code null} if it is not loaded. */
     @Nullable
     public static TitanSkeletonAsset find(@Nullable final String id) {
         return id == null ? null : ASSET_MAP.getAsset(id);

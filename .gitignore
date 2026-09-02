@@ -33,7 +33,7 @@ build/
 
 ### Misc ###
 /run/
-/Docs/
+/docs/
 /.cursor/
 .cursorrules
 /scripts/__pycache__/

@@ -17,25 +17,24 @@ import java.util.logging.Level;
 /**
  * Reads Blockbench {@code .blockyanim} files into {@link TitanBoneTrack}s.
  *
- * <p>The server's own {@code BlockyAnimationCache} only reads {@code duration} because clips are evaluated
- * client-side. Titans are posed on the server, so we parse the keyframes ourselves. The schema is the
- * stock one — {@code duration} in 60fps frames, then {@code nodeAnimations[bone].position} (xyz deltas)
- * and {@code nodeAnimations[bone].orientation} (xyzw quaternions) — which keeps the files editable in
- * Blockbench against a stand-in model whose node names match the titan's bone names.
+ * <p>The server's own {@code BlockyAnimationCache} only reads {@code duration}, because clips are
+ * evaluated client-side. Titans are posed on the server, so the keyframes are parsed here instead. The
+ * schema is the stock one: {@code duration} in 60fps frames, then {@code nodeAnimations[bone].position}
+ * (xyz deltas) and {@code nodeAnimations[bone].orientation} (xyzw quaternions). Files therefore stay
+ * editable in Blockbench against a stand-in model whose node names match the titan's bone names.
  */
 public final class BlockyAnimParser {
 
     @Nonnull
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
+    /** Keyframe times in a {@code .blockyanim} are frame indices at this rate. */
     private static final double FRAMES_PER_SECOND = 60.0;
 
     private BlockyAnimParser() {
     }
 
-    /**
-     * A parsed file before it is bound to a particular skeleton.
-     */
+    /** A parsed file before it is bound to a particular skeleton; tracks are keyed by source node name. */
     public record ParsedAnimation(float duration, boolean holdLastKeyframe, @Nonnull Map<String, TitanBoneTrack> tracks) {
     }
 
@@ -62,6 +61,12 @@ public final class BlockyAnimParser {
         }
     }
 
+    /**
+     * Parses clip JSON that has already been read into memory.
+     *
+     * @param name label used in log messages only
+     * @return {@code null} when the document is not valid JSON
+     */
     @Nullable
     public static ParsedAnimation parse(@Nonnull final String name, @Nonnull final String json) {
         final BsonDocument root;

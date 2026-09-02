@@ -1,8 +1,8 @@
 package com.hexvane.titan.combat;
 
+import com.hexvane.titan.anim.TitanPose;
 import com.hexvane.titan.asset.TitanSkeletonAsset;
 import com.hexvane.titan.asset.TitanSocketDef;
-import com.hexvane.titan.anim.TitanPose;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -19,17 +19,12 @@ import java.util.List;
 /**
  * Finds the players standing on a titan's back.
  *
- * <p>Climbing up there is the whole fight — the ore is on the back and nowhere else — so the titan needs to
- * know when someone has managed it. The test is exact rather than a radius around the body: a player
- * hanging off the side of an arm has not got up there, and a player crouched between the shoulders very
- * much has, and the two are barely a block apart in world space.
+ * <p>The test has to be exact rather than a radius around the body, since a player hanging off an arm and
+ * a player standing between the shoulders can be barely a block apart in world space.
  *
- * <p>It works by putting the player into the slab's own frame of reference. The pose already holds a matrix
- * that takes a point on the body and says where in the world it is; running that backwards takes a player
- * in the world and says where on the body they are, at which point "on the back" is a box comparison. That
- * stays true no matter how the titan is standing, which matters here more than anywhere else: the move this
- * feeds pitches the whole rig forward, and a check made in world space would lose the rider the moment the
- * back stopped being level.
+ * <p>Players are therefore transformed into the back bone's local space by inverting the pose matrix, which
+ * reduces the test to a box comparison. Working in bone space keeps the result correct while the rig is
+ * pitched over, which a world-space check would not: the plow attack tips the whole body forward.
  */
 public final class TitanRider {
 
@@ -54,10 +49,9 @@ public final class TitanRider {
     /**
      * Works out which bone the ore sits on and how far the surface it sits on reaches.
      *
-     * <p>Read off the skeleton's ore sockets rather than named in a constant. The sockets are placed on the
-     * climbable surface by definition — that is what they are for — so the outermost of them describes the
-     * platform exactly, and a titan built on a different rig with a differently shaped back gets the right
-     * answer without anyone writing its dimensions down twice.
+     * <p>Measured from the skeleton's ore sockets rather than declared separately. Sockets always sit on
+     * the climbable surface, so the outermost of them describes the platform, and a rig with a differently
+     * shaped back needs no extra configuration.
      *
      * @return {@code null} for a skeleton with no ore sockets, which has no back to stand on
      */

@@ -573,11 +573,13 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return id;
     }
 
+    /** {@code TitanSkeletonAsset} id this variant is built from. Required. */
     @Nonnull
     public String getSkeleton() {
         return skeleton;
     }
 
+    /** Name shown for this titan, falling back to {@link #getId()} when unset. */
     @Nonnull
     public String getDisplayName() {
         return displayName == null ? id : displayName;
@@ -592,9 +594,8 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
      * Rock the titan is carved from, as a suffix appended to every bone's prefab: a {@code RockType} of
      * {@code Basalt} turns {@code Titan/Talus/Talus_Body} into {@code Titan/Talus/Talus_Body_Basalt}.
      *
-     * <p>Unset means the skeleton's own prefabs are used as authored, which is the plain stone look. A
-     * variant whose suffixed prefab is missing falls back to the unsuffixed one, so a rock type only has to
-     * ship the parts it actually changes.
+     * <p>Unset uses the skeleton's own prefabs as authored, the plain stone look. A missing suffixed prefab
+     * falls back to the unsuffixed one, so a rock type need only ship the parts it changes.
      */
     @Nullable
     public String getRockType() {
@@ -607,6 +608,7 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return weakpointModel;
     }
 
+    /** Multiplies the size of each ore node's model. */
     public float getWeakpointScale() {
         return weakpointScale;
     }
@@ -622,12 +624,10 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     }
 
     /**
-     * How many nodes have to be broken to kill this titan, or {@code 0} for all of them.
+     * How many nodes must be broken to kill this titan, or {@code 0} for all of them.
      *
-     * <p>Set below the node count to leave spares. The fight stops being a checklist of every crystal on
-     * the creature and becomes a matter of picking off enough of them, so a node on a leg that never turns
-     * towards the player is an inconvenience rather than a wall. The boss bar follows the same rule and
-     * measures only the nodes still needed, never the spares.
+     * <p>Setting this below the node count leaves spares, so a node on a limb that never faces the player
+     * cannot stall the fight. The boss bar counts only the nodes still needed.
      */
     public int getWeakpointsToKill() {
         return weakpointsToKill;
@@ -636,15 +636,14 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     /**
      * How far past the body surface an ore node's centre is pushed, in model units.
      *
-     * <p>Sockets are authored on the surface and a node is centred on its socket, so zero already buries
-     * half of it. Positive values sink it further; negative values leave it standing proud, which is what
-     * the variants use to keep a doubled-size node reading as a cluster growing out of the rock rather than
-     * a lump swallowed by it.
+     * <p>Nodes are centred on sockets authored on the surface, so {@code 0} already buries half of one.
+     * Positive values sink it further; negative values leave it standing proud of the rock.
      */
     public float getWeakpointEmbed() {
         return weakpointEmbed;
     }
 
+    /** Damage a single ore node absorbs before it breaks, before the server config multiplier. */
     public float getWeakpointHealth() {
         return weakpointHealth;
     }
@@ -653,10 +652,8 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
      * How much ground a natural spawn needs, in blocks either side of the site, or {@code 0} to take the
      * spawner's default.
      *
-     * <p>The default is sized for a titan a few blocks across, which is most of them. Something the size of
-     * a walking island is not: checked over four blocks it will happily be sited with its middle on a knoll
-     * and two legs reaching for a ravine, because nothing ever looked as far out as its legs go. A variant
-     * that wide has to say so, and pay for it by being much fussier about where it will stand.
+     * <p>The default is sized for a titan a few blocks across. A wider variant has to say so, or it can be
+     * sited with its middle on a knoll and two legs reaching for a ravine.
      */
     public int getSpawnFootprintRadius() {
         return spawnFootprintRadius;
@@ -673,16 +670,11 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     }
 
     /**
-     * Whether to stand the body over the lowest ground in its footprint rather than the middle of it.
+     * Whether to stand the body over the lowest ground in its footprint instead of the middle of it.
      *
-     * <p>For anything on tall legs this is what makes rough ground usable. A leg can only reach a couple of
-     * blocks past its rest length before the foot hangs in the air, but it can fold a long way, so the
-     * failure is entirely one-sided: ground below the body is the problem and ground above it is not.
-     * Levelling to the lowest corner means every other foot is above its rest height and merely bends,
-     * which turns a couple of blocks of tolerance into most of the leg's travel.
-     *
-     * <p>Wrong for a titan that sits directly on the ground, which would end up partly buried on a slope,
-     * so it is off unless a variant asks.
+     * <p>A leg reaches only a couple of blocks past its rest length before the foot hangs in the air, but
+     * it folds a long way, so levelling to the lowest corner leaves every other foot merely bent. Off by
+     * default, since a titan that sits directly on the ground would end up partly buried on a slope.
      */
     public boolean isSpawnLevelToLowest() {
         return spawnLevelToLowest;
@@ -701,60 +693,49 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     /**
      * How close a player must get before a sleeping titan stands up, in blocks from its root.
      *
-     * <p>Deliberately short. Titans placed by world generation spend most of their life curled up looking
-     * like scenery, and the disguise only works if a player can walk past one at a distance and never learn
-     * it was a titan. Widening this turns them back into monsters that are visibly monsters.
+     * <p>Kept short: titans placed by world generation spend most of their life curled up looking like
+     * scenery, and the disguise only holds if a player can walk past one at a distance.
      */
     public float getWakeRadius() {
         return wakeRadius;
     }
 
+    /** How far a target may get before the titan loses interest, in blocks. Also its search radius awake. */
     public float getLoseTargetRadius() {
         return loseTargetRadius;
     }
 
     /**
-     * How far from its spawn spot a titan will follow anyone, in blocks. Measured from where it was built,
-     * not from where it currently is, so no chase can walk it away one step at a time. Step outside the
-     * circle and it stops caring and heads back. {@code 0} lets it roam without limit.
+     * How far from its spawn spot a titan will follow anyone, in blocks, or {@code 0} for no limit.
+     * Measured from where it was built rather than where it stands, so no chase can walk it away one step
+     * at a time; a target outside the circle is dropped and the titan heads back.
      */
     public float getLeashRadius() {
         return leashRadius;
     }
 
     /**
-     * Whether the titan is on its feet the moment it is built, rather than curled up waiting to be walked
-     * near. A talus is a boulder until it is not, and the surprise is the point; something the size of a
-     * hill that is visibly walking around cannot pretend to be scenery, so it skips the trick.
+     * Whether the titan is on its feet the moment it is built, instead of curled up waiting to be walked
+     * near. Off by default, so a titan small enough to pass for a boulder keeps that disguise.
      */
     public boolean isStartAwake() {
         return startAwake;
     }
 
     /**
-     * Whether the titan ignores anyone who has not hit it yet.
-     *
-     * <p>Proximity alone will not give it a target, so it can be walked under and stood on indefinitely.
-     * Damage to a weakpoint provokes it, and it stays angry for as long as that lasts before losing
-     * interest again.
+     * Whether the titan ignores anyone who has not hit it yet. Proximity alone will not give it a target;
+     * damage to a weakpoint provokes it, and it loses interest again once that wears off.
      */
     public boolean isPassive() {
         return passive;
     }
 
-    /**
-     * Whether the titan closes the distance to its target. With this off it holds its ground and only
-     * answers whoever comes within reach, which is what separates something defending itself from
-     * something hunting.
-     */
+    /** Whether the titan closes the distance to its target; with this off it only answers what comes to it. */
     public boolean isChase() {
         return chase;
     }
 
-    /**
-     * How far from its spawn spot the titan drifts while it has nothing to fight, in blocks. {@code 0}
-     * leaves it standing where it was built, which is what every talus does.
-     */
+    /** How far the titan drifts from its spawn spot while idle, in blocks. {@code 0} leaves it where built. */
     public float getWanderRadius() {
         return wanderRadius;
     }
@@ -770,65 +751,63 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     }
 
     /**
-     * Environments the titan will not wander out of. Empty lets it go anywhere its leash reaches.
-     *
-     * <p>Checked against the ground at the far end of a wander leg before it sets off, so it turns back at
-     * the treeline rather than walking out of its biome and having to be dragged home.
+     * Environments the titan will not wander out of. Empty lets it go anywhere its leash reaches. Checked
+     * against the ground at the far end of a wander leg before it sets off, so it turns back at the border.
      */
     @Nullable
     public String[] getEnvironments() {
         return environments;
     }
 
+    /** How close the titan closes before it stops and attacks, in blocks. */
     public float getAttackRange() {
         return attackRange;
     }
 
+    /** Damage an arm smash or body slam deals at the impact point. */
     public float getAttackDamage() {
         return attackDamage;
     }
 
+    /** Blast radius of an arm smash, in blocks. */
     public float getAttackRadius() {
         return attackRadius;
     }
 
+    /** How hard a smash throws whoever it catches; the plough sweep uses it too. */
     public float getAttackKnockback() {
         return attackKnockback;
     }
 
+    /** Seconds between attacks, timed from the end of the previous one. */
     public float getAttackCooldown() {
         return attackCooldown;
     }
 
-    /** How long the hand stays embedded after a smash — the window in which the arm is climbable. */
+    /** Seconds the hand stays embedded after a smash, the window in which the arm is climbable. */
     public float getStunSeconds() {
         return stunSeconds;
     }
 
     /**
-     * Relative weight of the plain arm smash, which every other melee chance is measured against.
-     *
-     * <p>Left at 1 this is the fallback the other rolls fall through to. Set to 0 on a titan with no arms,
-     * where the roll has to land on something it can actually perform.
+     * Relative weight of the plain arm smash, which every other melee chance is measured against. Left at
+     * {@code 1} it is the fallback the other rolls fall through to; {@code 0} on a titan with no arms.
      */
     public float getSmashChance() {
         return smashChance;
     }
 
-    /** Odds of answering an attack opportunity with a body slam rather than an arm smash, {@code 0} to {@code 1}. */
+    /** Odds of answering an attack opportunity with a body slam instead of an arm smash, {@code 0} to {@code 1}. */
     public float getSlamChance() {
         return slamChance;
     }
 
-    /**
-     * Blast radius of a body slam. Wider than the arm smash because the whole creature lands, and the
-     * price of that reach is how long it then spends face down.
-     */
+    /** Blast radius of a body slam, in blocks. Wider than the arm smash, since the whole creature lands. */
     public float getSlamRadius() {
         return slamRadius;
     }
 
-    /** How long the titan lies face down after a slam — the window in which its back is within jumping range. */
+    /** Seconds the titan lies face down after a slam, with its back within jumping range. */
     public float getSlamProneSeconds() {
         return slamProneSeconds;
     }
@@ -838,28 +817,22 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return poundChance;
     }
 
-    /**
-     * Blast radius of a ground pound. The widest of the three melee attacks: both fists land at once and
-     * the shock goes out from between them, so getting out of the circle is the only answer to it.
-     */
+    /** Blast radius of a ground pound, in blocks. The widest melee attack: both fists land at once. */
     public float getPoundRadius() {
         return poundRadius;
     }
 
-    /**
-     * Damage a pound deals directly. Low next to the other attacks on purpose — the pound is not meant to
-     * kill you, it is meant to put you somewhere high up and let the fall do it.
-     */
+    /** Damage a pound deals directly; low, since most of its threat is the {@link #getPoundLaunch()} fall. */
     public float getPoundDamage() {
         return poundDamage;
     }
 
-    /** How hard a pound throws you, almost all of it straight up. */
+    /** How hard a pound throws whoever it catches, almost all of it straight up. */
     public float getPoundLaunch() {
         return poundLaunch;
     }
 
-    /** How long both fists stay embedded after a pound — the widest climbing window in the fight. */
+    /** Seconds both fists stay embedded after a pound, the longest window in which the arms are climbable. */
     public float getPoundStunSeconds() {
         return poundStunSeconds;
     }
@@ -869,12 +842,7 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return hurlChance;
     }
 
-    /**
-     * How far away a target has to be before the titan will throw at it, in blocks.
-     *
-     * <p>Comfortably outside melee range. Inside it the titan has better answers, and a boulder lobbed at
-     * something standing between its feet would be thrown almost straight down.
-     */
+    /** How far away a target has to be before the titan will throw at it, in blocks. Outside melee range. */
     public float getHurlMinRange() {
         return hurlMinRange;
     }
@@ -882,8 +850,8 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     /**
      * How far the titan will throw, in blocks. Beyond this it walks instead.
      *
-     * <p>Must be kept inside what {@link #getHurlSpeed()} can actually reach, which is {@code speed²/20}.
-     * Set beyond it and the throw silently falls back to forty-five degrees and lands short every time.
+     * <p>Must stay inside what {@link #getHurlSpeed()} can reach, which is {@code speed²/20}. Set beyond
+     * that, the throw silently falls back to forty-five degrees and lands short every time.
      */
     public float getHurlMaxRange() {
         return hurlMaxRange;
@@ -894,56 +862,51 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return hurlSpeed;
     }
 
+    /** Damage a thrown boulder deals where it lands. */
     public float getHurlDamage() {
         return hurlDamage;
     }
 
-    /** Blast radius where a thrown boulder lands. */
+    /** Blast radius where a thrown boulder lands, in blocks. */
     public float getHurlRadius() {
         return hurlRadius;
     }
 
+    /** How hard a landing boulder throws whoever it catches. */
     public float getHurlKnockback() {
         return hurlKnockback;
     }
 
-    /**
-     * Prefab the thrown boulder is built from. Defaults to the skeleton's own hand, which is exactly the
-     * lump of rock the titan just tore out of the ground.
-     */
+    /** Prefab the thrown boulder is built from. Unset uses the skeleton's own hand prefab. */
     @Nullable
     public String getHurlPrefab() {
         return hurlPrefab;
     }
 
-    /**
-     * Odds of answering a player riding the back with a plough, checked each time the titan is ready to
-     * attack. Well under one, so climbing on is not immediately punished every time.
-     */
+    /** Odds of answering a rider on its back with a plough, rolled whenever the titan is ready to attack. */
     public float getPlowChance() {
         return plowChance;
     }
 
     /**
-     * Seconds before the titan will plough again, on top of its ordinary attack cooldown.
-     *
-     * <p>Its own clock, because the plough is the answer to being climbed and a titan being climbed is
-     * being hit, which keeps the ordinary cooldown short. Without this a good climber would be ploughed off
-     * over and over and never reach the ore.
+     * Seconds before the titan will plough again, on top of {@link #getAttackCooldown()}. Needed because a
+     * titan being climbed counts as one being hit, which keeps that cooldown short.
      */
     public float getPlowCooldown() {
         return plowCooldown;
     }
 
-    /** Blocks per second while ploughing. Several times walking speed: this is a charge. */
+    /** Blocks per second while ploughing, several times walking speed. */
     public float getPlowSpeed() {
         return plowSpeed;
     }
 
+    /** How long a plough charge runs, in seconds. */
     public float getPlowSeconds() {
         return plowSeconds;
     }
 
+    /** Damage each sweep of a plough deals. */
     public float getPlowDamage() {
         return plowDamage;
     }
@@ -953,27 +916,17 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return plowRadius;
     }
 
-    /**
-     * How hard a plough throws whoever was riding the back.
-     *
-     * <p>Much harder than anything else the titan does. It has to be: the whole point of the move is to get
-     * a player off, and a rider who lands back on the slab has not been removed from anything.
-     */
+    /** How hard a plough throws whoever was riding the back. Much harder than anything else the titan does. */
     public float getPlowRiderKnockback() {
         return plowRiderKnockback;
     }
 
-    /** How long the titan lies beached at the end of a plough. Its longest opening. */
+    /** Seconds the titan lies beached at the end of a plough, its longest opening. */
     public float getPlowBeachedSeconds() {
         return plowBeachedSeconds;
     }
 
-    /**
-     * Relative weight of the leg stomp among the melee answers, against {@link #getSmashChance()}.
-     *
-     * <p>The attack of something with legs and no arms: it picks up whichever one is nearest whoever hit
-     * it and puts it back down on them.
-     */
+    /** Relative weight of the leg stomp among the melee answers, against {@link #getSmashChance()}. */
     public float getStompChance() {
         return stompChance;
     }
@@ -983,10 +936,12 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return stompRadius;
     }
 
+    /** Damage a stomp deals where the foot lands. */
     public float getStompDamage() {
         return stompDamage;
     }
 
+    /** How hard a stomp throws whoever it catches. */
     public float getStompKnockback() {
         return stompKnockback;
     }
@@ -1001,7 +956,7 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return stompWindupSeconds;
     }
 
-    /** Seconds the leg takes to travel down. The blow lands at the end of it. */
+    /** Seconds the leg takes to travel down; the blow lands at the end of it. */
     public float getStompSeconds() {
         return stompSeconds;
     }
@@ -1011,11 +966,13 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return stompRecoverSeconds;
     }
 
+    /** Sound played when a stomp lands. Falls back to {@link #getImpactSound()}. */
     @Nullable
     public String getStompSound() {
         return stompSound;
     }
 
+    /** Item drop table rolled when the titan dies. */
     @Nullable
     public String getDropList() {
         return dropList;
@@ -1027,29 +984,35 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return dropItem;
     }
 
+    /** Fewest {@link #getDropItem()} a kill may drop. */
     public int getDropCountMin() {
         return dropCountMin;
     }
 
+    /** Most {@link #getDropItem()} a kill may drop; the count is rolled between the two. */
     public int getDropCountMax() {
         return dropCountMax;
     }
 
+    /** Particle effect spawned where a blow lands, and where a broken ore node was. */
     @Nullable
     public String getImpactParticle() {
         return impactParticle;
     }
 
+    /** Sound played where a blow lands, and the fallback for the pound and stomp sounds. */
     @Nullable
     public String getImpactSound() {
         return impactSound;
     }
 
+    /** Sound played as the titan starts to wake. */
     @Nullable
     public String getWakeSound() {
         return wakeSound;
     }
 
+    /** Sound played when the titan dies. */
     @Nullable
     public String getDeathSound() {
         return deathSound;
@@ -1058,9 +1021,8 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     /**
      * Flat ring laid on the ground to show where an attack is about to land.
      *
-     * <p>The engine has no notion of an attack indicator, so this is a particle system shipped with the mod
-     * that happens to be one ring-shaped quad lying face up. Sized in blocks at spawn time, which is what
-     * lets the same asset mark a fist-sized smash and a pound that covers the whole clearing.
+     * <p>The engine has no notion of an attack indicator, so this is a particle system shipped with the
+     * mod: one ring-shaped quad lying face up, sized in blocks at spawn time so one asset marks any attack.
      */
     @Nullable
     public String getTelegraphRingParticle() {
@@ -1073,7 +1035,7 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return telegraphFillParticle;
     }
 
-    /** Narrow ring used to lay out the corridor a plough is about to come down. */
+    /** Narrow ring that lays out the corridor a plough is about to come down. */
     @Nullable
     public String getTelegraphLineParticle() {
         return telegraphLineParticle;
@@ -1085,12 +1047,13 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return telegraphCrackParticle;
     }
 
-    /** Played once when a telegraph first appears, so an attack aimed behind you is still noticed. */
+    /** Played once when a telegraph first appears, so an attack aimed from behind is still noticed. */
     @Nullable
     public String getTelegraphSound() {
         return telegraphSound;
     }
 
+    /** Sound played when a pound lands. Falls back to {@link #getImpactSound()}. */
     @Nullable
     public String getPoundSound() {
         return poundSound;
@@ -1102,11 +1065,13 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return hurlRipSound;
     }
 
+    /** Played as the boulder leaves the hand. */
     @Nullable
     public String getHurlThrowSound() {
         return hurlThrowSound;
     }
 
+    /** Played as a plough charge sets off, once the windup is over. */
     @Nullable
     public String getPlowSound() {
         return plowSound;
@@ -1121,6 +1086,7 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
         return battleMusic;
     }
 
+    /** The variant with this id, or {@code null} if there is none. */
     @Nullable
     public static TitanVariantAsset find(@Nullable final String id) {
         return id == null ? null : ASSET_MAP.getAsset(id);

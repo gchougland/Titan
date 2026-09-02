@@ -12,15 +12,14 @@ import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import java.util.Arrays;
 
 /**
  * Asks the world whether a spot could hold a titan: is it loaded, what terrain is it, is it flat and dry
  * and open enough for something this big to be standing there.
  *
- * <p>Everything here reads already-loaded chunks only and never forces a load. An unloaded column simply
- * reports "no", and the spawn pass tries again on its next sweep once the player has streamed it in.
+ * <p>Everything here reads already-loaded chunks only and never forces a load. An unloaded column reports
+ * no ground, and the spawn pass tries again on its next sweep once the player has streamed it in.
  */
 public final class TitanTerrainProbe {
 
@@ -39,21 +38,20 @@ public final class TitanTerrainProbe {
 
     /**
      * The eight non-centre sample offsets, in units of the footprint radius: four corners then four edge
-     * midpoints. Eight rather than four so that {@link #TRIM_HIGH} has something to spare and is still
-     * measuring the whole footprint afterwards rather than a couple of columns of it.
+     * midpoints. Eight rather than four so that {@link #TRIM_HIGH} still leaves enough samples to measure
+     * the whole footprint.
      */
     private static final int[] RING_X = { -1, 1, -1, 1, -1, 1, 0, 0 };
     private static final int[] RING_Z = { -1, -1, 1, 1, 0, 0, -1, 1 };
 
     /**
-     * How many of the highest samples a footprint is allowed to throw away before measuring its relief.
+     * How many of the highest samples a footprint discards before measuring its relief.
      *
      * <p>The heightmap counts anything that is not {@link com.hypixel.hytale.protocol.Opacity#Transparent},
-     * which includes trunks and leaves, so a column with a tree in it reads as ground fifteen-odd blocks
-     * above the dirt it grows out of. That error is entirely one-sided — vegetation can only ever raise a
-     * reading, never lower it — so discarding the top few samples costs nothing on bare terrain and stops
-     * a scattering of trees from making flat ground look like a cliff. A slope leans on every sample at
-     * once and so survives the trim.
+     * trunks and leaves included, so a wooded column reads as ground fifteen-odd blocks above the dirt.
+     * Vegetation can only raise a reading, never lower it, so discarding the top few samples costs nothing
+     * on bare terrain and stops scattered trees from making flat ground look like a cliff. A slope leans on
+     * every sample at once and survives the trim.
      */
     private static final int TRIM_HIGH = 3;
 
@@ -76,7 +74,7 @@ public final class TitanTerrainProbe {
      * Environment id covering a surface point, e.g. {@code Env_Zone1_Plains}.
      *
      * <p>Read at the block a creature would stand in, falling back to the ground block itself: the column
-     * is authored per terrain segment and the boundary between "surface" and "the air above it" is not
+     * is authored per terrain segment, so the boundary between the surface and the air above it is not
      * always where a single sample lands.
      */
     @Nullable
@@ -104,8 +102,8 @@ public final class TitanTerrainProbe {
     }
 
     /**
-     * A verdict and the measurements behind it, so a rejection can say which check it failed and by how
-     * much rather than only that it failed.
+     * A verdict and the measurements behind it, so a rejection can report which check it failed and by how
+     * much.
      *
      * @param relief       height difference found across the footprint, or {@code -1} if it was not reached
      * @param groundY      the terrain the titan would stand on, which is not the same as the surface it was
@@ -162,8 +160,8 @@ public final class TitanTerrainProbe {
         Arrays.sort(samples, 0, count);
 
         // The median survives up to four wooded columns, so it is the ground even where the centre reading
-        // was a treetop. Siting off this rather than the raw surface is what stops a titan being stood on
-        // top of a tree, which the headroom check cannot catch because there is open air above a canopy.
+        // was a treetop. Siting off the raw surface instead would stand a titan on top of a tree, which the
+        // headroom check cannot catch because there is open air above a canopy.
         final int groundY = samples[count / 2];
         final int lowestY = samples[0];
         final int relief = samples[count - 1 - TRIM_HIGH] - lowestY;

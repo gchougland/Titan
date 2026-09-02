@@ -1,7 +1,7 @@
 {
   "$Comment": [
-    "The disc that floods the ring in over the last moment of a windup. Same face-up trick as the ring and authored to the same Scale 1.0 so radius one, meaning both are spawned with the same scale value and land on top of each other.",
-    "Grows from nothing rather than appearing at full size, so the fill is itself a countdown: how much of the circle is coloured in is how much of the windup is left."
+    "The disc that floods the ring in over the last moment of a windup. Laid face up like the ring and authored to the same Scale 1.0, radius one, so both take the same scale value on the packet and land on top of each other.",
+    "It grows from 0.12 to full scale rather than appearing at size, so how much of the circle is coloured in shows how much of the windup is left."
   ],
   "RenderMode": "Erosion",
   "ParticleRotationInfluence": "None",

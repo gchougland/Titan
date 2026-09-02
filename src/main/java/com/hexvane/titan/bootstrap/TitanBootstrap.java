@@ -13,10 +13,10 @@ import com.hexvane.titan.spawn.TitanEnvironment;
 import com.hexvane.titan.spawn.TitanSiteMemory;
 import com.hexvane.titan.system.TitanAiSystem;
 import com.hexvane.titan.system.TitanAnimationSystem;
+import com.hexvane.titan.system.TitanBossBarSystem;
 import com.hexvane.titan.system.TitanBoulderSystem;
 import com.hexvane.titan.system.TitanPartSyncSystem;
 import com.hexvane.titan.system.TitanRagdollSystem;
-import com.hexvane.titan.system.TitanBossBarSystem;
 import com.hexvane.titan.system.TitanRootDamageSystem;
 import com.hexvane.titan.system.TitanSyncStats;
 import com.hexvane.titan.system.TitanWeakpointDamageBonusSystem;
@@ -38,8 +38,8 @@ import javax.annotation.Nullable;
 /**
  * Single place where the mod hands itself to the engine: asset types, components, systems and commands.
  *
- * <p>Called from {@code TitanPlugin.setup()}. Order matters — components must exist before the systems
- * that query them are constructed, because a system builds its query in its constructor.
+ * <p>Called from {@code TitanPlugin.setup()}. Order matters: components must exist before the systems that
+ * query them are constructed, because a system builds its query in its constructor.
  */
 public final class TitanBootstrap {
 
@@ -72,14 +72,12 @@ public final class TitanBootstrap {
     /**
      * Pushes the config's engine-wide settings onto the engine.
      *
-     * <p>Only the entity level-of-detail ratio so far, and it needs saying that this is a global shared
-     * with everything else that has a small bounding box. The engine stops sending a client any entity
-     * whose thickness is small next to its distance, which for a titan's one-block voxels lands at about
-     * 169 blocks — inside the default view distance, so a titan on the horizon comes apart while its
-     * silhouette is still perfectly legible. An owner who would rather see the whole thing can say so, and
-     * pays for it in every dropped item that now also stays visible further out. Left alone unless asked,
-     * and set back to the engine's own default when it is not, so a config edit that removes the value
-     * actually removes the override.
+     * <p>Only the entity level-of-detail ratio so far, and it is a global shared with everything else that
+     * has a small bounding box. The engine stops sending a client any entity whose thickness is small next
+     * to its distance, which for a titan's one-block voxels lands at about 169 blocks, inside the default
+     * view distance, so a titan on the horizon comes apart while its silhouette is still legible. Raising
+     * it costs every dropped item staying visible further out, so the engine's own default is restored
+     * when the config carries no value.
      */
     private static void applyEngineGlobals() {
         final double ratio = TitanConfig.get().getEntityLodRatio();
@@ -135,10 +133,7 @@ public final class TitanBootstrap {
         PrefabVoxelReader.invalidate();
     }
 
-    /**
-     * The wander fence caches the environment names it was given resolved to indexes, so a variant whose
-     * environment list was wrong is only actually fixed once that resolution is thrown away.
-     */
+    /** The wander fence caches variant environment names resolved to indexes, so a reload has to drop it. */
     private static void onVariantsLoaded(@Nonnull final LoadedAssetsEvent<String, TitanVariantAsset, DefaultAssetMap<String, TitanVariantAsset>> event) {
         TitanEnvironment.invalidate();
     }
@@ -152,9 +147,9 @@ public final class TitanBootstrap {
         final var registry = plugin.getEntityStoreRegistry();
         TitanRegistry.register(registry);
 
-        // Which sites the players have already cleared is the one thing about a titan that cannot be
-        // recovered from the world seed, so it rides along in the world's save directory. Registered
-        // before the systems, because both the AI and the spawner are handed the type.
+        // Cleared sites are the one thing about a titan that cannot be recovered from the world seed, so
+        // they ride along in the world's save directory. Registered before the systems: both the AI and the
+        // spawner are handed the type.
         siteMemoryType = registry.registerResource(
             TitanSiteMemory.class, TitanSiteMemory.ID, TitanSiteMemory.CODEC);
 

@@ -9,8 +9,8 @@ import javax.annotation.Nonnull;
  * Analytic two-segment IK: given a shoulder/hip position, two segment lengths and a goal, works out where
  * the elbow/knee has to sit.
  *
- * <p>Uses the law of cosines rather than an iterative solve because arms and legs are always exactly two
- * segments, and an exact answer keeps the pose stable frame to frame.
+ * <p>Arms and legs are always exactly two segments, so the law of cosines gives a closed-form answer. An
+ * exact result also keeps the pose stable frame to frame.
  */
 public final class TwoBoneIkSolver {
 

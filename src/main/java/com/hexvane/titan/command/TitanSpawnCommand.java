@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 public final class TitanSpawnCommand extends AbstractPlayerCommand {
 
-    /** Spawns a little way in front of the caller so the titan does not materialise on top of them. */
+    /** How far in front of the caller a titan spawns, in blocks, so it does not appear on top of them. */
     private static final double SPAWN_AHEAD = 12.0;
 
     @Nonnull
@@ -100,7 +100,7 @@ public final class TitanSpawnCommand extends AbstractPlayerCommand {
             ? positionArg.get(context).getRelativePosition(context, world, store)
             : aheadOf(transform.getPosition(), transform.getRotation().yaw());
 
-        // Face the caller rather than away from them, so a spawned titan immediately looks at you.
+        // Turned to face the caller rather than away, so a spawned titan is looking at whoever summoned it.
         final var result = TitanSpawner.spawn(store, variantId, position, (float) (yaw + Math.PI), colliderMode);
 
         if (!result.ok()) {

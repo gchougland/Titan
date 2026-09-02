@@ -21,9 +21,8 @@ import javax.annotation.Nullable;
  * Tells a titan who just hit one of its ore nodes.
  *
  * <p>Damage never lands on the titan itself, only on the nodes bolted to it, so without this a sleeping
- * titan could be whittled down from a safe distance and never so much as open an eye. Sitting in the
- * inspect group means the hit has already been applied and cannot have been cancelled by something else by
- * the time it is reported.
+ * titan could be whittled down from a safe distance without ever waking. Sitting in the inspect group means
+ * the hit has already been applied and can no longer be cancelled by the time it is reported.
  *
  * <p>Only the attacker is recorded here; {@link TitanAiSystem} decides what to do about it on its next
  * tick, so waking and target selection stay in one place.
@@ -54,8 +53,8 @@ public final class TitanWeakpointDamageSystem extends DamageEventSystem {
 
         if (damage.isCancelled() || damage.getAmount() <= 0f) return;
 
-        // ProjectileSource extends EntitySource and reports the shooter rather than the arrow, so an
-        // archer is blamed the same way a swordsman is.
+        // ProjectileSource extends EntitySource and reports the shooter, not the arrow, so an archer is
+        // blamed the same way a swordsman is.
         if (!(damage.getSource() instanceof Damage.EntitySource entitySource)) return;
 
         final Ref<EntityStore> attacker = entitySource.getRef();

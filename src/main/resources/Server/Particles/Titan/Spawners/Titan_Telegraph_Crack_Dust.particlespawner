@@ -1,6 +1,6 @@
 {
   "$Comment": [
-    "Grit thrown up out of the hole as the boulder comes free. Aimed straight up with a wide spread so it falls back around the break rather than jetting off in one direction."
+    "Grit thrown up out of the hole as the boulder comes free. Pitched 45 to 90 degrees over the full yaw range so it falls back around the break rather than jetting off in one direction."
   ],
   "RenderMode": "BlendLinear",
   "ParticleRotationInfluence": "Billboard",

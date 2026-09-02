@@ -18,9 +18,8 @@ import java.util.logging.Level;
  * Answers whether a point stands in one of a named set of environments.
  *
  * <p>Used to fence a wandering titan into the biome it belongs to. A titan is far wider than the ground it
- * is asked about, so this is a test of one spot rather than of a footprint: it is enough to stop one
- * drifting out of the plains over the course of an afternoon, and not enough to stop a foot landing in the
- * trees at the edge, which is the correct amount of precision for something that size.
+ * is asked about, so this tests a single spot rather than a footprint: enough to stop one drifting out of
+ * the plains over an afternoon, not enough to stop a foot landing in the trees at the edge.
  */
 public final class TitanEnvironment {
 
@@ -28,8 +27,8 @@ public final class TitanEnvironment {
     private static final FluentLogger LOGGER = FluentLogger.forEnclosingClass();
 
     /**
-     * Resolved environment indexes per name set. Resolution walks the whole asset map, and the wander check
-     * runs on a titan every few seconds, so the answer is worth keeping.
+     * Resolved environment indexes per name set. Resolution walks the whole asset map and the wander check
+     * runs on every titan every few seconds.
      */
     @Nonnull
     private static final Map<String, int[]> CACHE = new ConcurrentHashMap<>();
@@ -45,9 +44,8 @@ public final class TitanEnvironment {
     /**
      * Whether the ground at {@code position} is in one of {@code environments}.
      *
-     * <p>An empty or absent list means the titan is not fenced in at all and everywhere passes. An
-     * unloaded chunk fails instead: the caller is choosing somewhere to walk, and refusing to commit to
-     * ground nobody has generated yet is what keeps a titan inside the part of the world that exists.
+     * <p>An empty or absent list means the titan is not fenced in and everywhere passes. An unloaded chunk
+     * fails instead, so a titan picking somewhere to walk stays inside the generated part of the world.
      */
     public static boolean matches(@Nonnull final ChunkStore chunkStore,
                                   @Nullable final String[] environments,
@@ -79,7 +77,7 @@ public final class TitanEnvironment {
         return blockChunk.getEnvironment(position);
     }
 
-    /** Environment id at {@code position}, for command output. {@code null} when the chunk is not loaded. */
+    /** @return environment id at {@code position} for command output, or {@code null} if the chunk is not loaded. */
     @Nullable
     public static String nameAt(@Nonnull final ChunkStore chunkStore, @Nonnull final Vector3d position) {
         final int index = environmentAt(chunkStore, position);
@@ -93,9 +91,8 @@ public final class TitanEnvironment {
     private static int[] resolve(@Nonnull final String[] environments) {
         return CACHE.computeIfAbsent(String.join("\u0000", environments), key -> {
             for (final String name : environments) {
-                // Worth saying out loud. A name that resolves to nothing leaves the fence with nothing to
-                // check, which reads in game as a titan wandering wherever it likes rather than as an
-                // error, and that is a very slow way to find a typo.
+                // A name that resolves to nothing leaves the fence with nothing to check, which in game
+                // looks like a titan wandering freely rather than like a typo.
                 if (Environment.getAssetMap().getIndex(name) < 0) {
                     LOGGER.at(Level.WARNING).log(
                         "Titan environment '%s' does not exist; it will not fence anything in", name);

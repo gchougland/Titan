@@ -13,10 +13,9 @@ public final class PrefabVoxels {
     /**
      * One block of the prefab.
      *
-     * @param rotation  the block's own orientation, as a {@code RotationTuple} index; what tells a slab
-     *                  which way up it is or a stair which way it faces
+     * @param rotation  the block's own orientation, as a {@code RotationTuple} index
      * @param surface   at least one face is not hidden behind a solid cube, so this block is visible
-     * @param standable nothing sits directly above, so this block's top face is one a player could land on
+     * @param standable nothing sits directly above, so a player could land on this block's top face
      */
     public record Voxel(int x, int y, int z, @Nonnull String blockKey, int rotation, boolean surface,
                         boolean standable) {
@@ -61,14 +60,14 @@ public final class PrefabVoxels {
         return voxels.size();
     }
 
-    /** How many voxels have at least one exposed face, which is all a hollow bone spawns. */
+    /** @return how many voxels have at least one exposed face; a hollow bone spawns only these. */
     public int surfaceSize() {
         return surfaceSize;
     }
 
     /**
-     * Default pivot for a bone that does not declare one: the bottom centre of the prefab's bounds, which
-     * is where a limb segment naturally hinges.
+     * @return default pivot for a bone that does not declare one: the bottom centre of the prefab's bounds,
+     *         where a limb segment hinges
      */
     @Nonnull
     public Vector3d defaultPivot() {
@@ -79,7 +78,7 @@ public final class PrefabVoxels {
         );
     }
 
-    /** Centre of the prefab's bounds, used for spreading debris outwards on death. */
+    /** @return centre of the prefab's bounds, used to spread debris outwards on death. */
     @Nonnull
     public Vector3d center() {
         return new Vector3d(

@@ -13,8 +13,8 @@ import javax.annotation.Nonnull;
  * Mutable skeleton state for one titan: a local transform per bone plus the world matrices derived from
  * them.
  *
- * <p>Everything is pre-allocated and reused every tick — a titan re-poses ~20 bones 20 times a second and
- * allocating here would dominate its cost.
+ * <p>Everything is pre-allocated and reused every tick. A titan re-poses around 20 bones 20 times a
+ * second, so allocating here would dominate its cost.
  */
 public final class TitanPose {
 
@@ -49,11 +49,12 @@ public final class TitanPose {
             localRotation[i] = new Quaterniond();
             world[i] = new Matrix4d();
             settled[i] = new Matrix4d();
-            // Nothing has been captured yet, so assume the worst and let the first tick sort it out.
+            // Nothing captured yet, so report every bone as moved until the first tick settles.
             moved[i] = true;
         }
     }
 
+    /** @return the number of bones this pose holds transforms for. */
     public int getBoneCount() {
         return world.length;
     }
@@ -79,6 +80,7 @@ public final class TitanPose {
         return localTranslation[bone];
     }
 
+    /** Local rotation of a bone relative to its parent. */
     @Nonnull
     public Quaterniond getLocalRotation(final int bone) {
         return localRotation[bone];
@@ -159,17 +161,15 @@ public final class TitanPose {
     /**
      * Records which bones ended this tick somewhere other than where they ended the last one.
      *
-     * <p>Call once the pose is finished. {@link #computeWorld} runs more than once a tick — an IK solver
-     * needs world matrices to work from before it can correct them — and only the last of those is the
-     * pose anything downstream should be comparing against.
+     * <p>Call once the pose is finished. {@link #computeWorld} runs more than once a tick, since an IK
+     * solver needs world matrices to work from before it can correct them, and only the last of those is
+     * the pose downstream systems should compare against.
      *
-     * <p>The comparison is exact rather than approximate, which sounds too strict to ever match and is
-     * the point: bone matrices are built by the same arithmetic from the same inputs, so a bone the
-     * animation did not touch this tick lands on bit-identical numbers and can be recognised for free.
-     * That covers rather more than idling. Everything a titan does other than walk holds most of its body
-     * still — during the Roaming Temple's stomp one leg swings and the other three plus the body do not,
-     * so most of its voxels can be left alone. A bone that genuinely is moving slightly is not caught
-     * here; that is what the per-part tolerance in the sync system is for.
+     * <p>The comparison is exact rather than approximate. Bone matrices are built by the same arithmetic
+     * from the same inputs, so a bone the animation did not touch this tick lands on bit-identical numbers
+     * and is recognised for free. That covers more than idling: most actions hold the majority of the body
+     * still, leaving most of a titan's voxels untouched. Bones that are moving only slightly still count
+     * as moved here; the per-part tolerance in the sync system handles those.
      */
     public void captureMotion() {
         for (int i = 0; i < world.length; i++) {
@@ -178,7 +178,7 @@ public final class TitanPose {
         }
     }
 
-    /** @see #captureMotion */
+    /** @return {@code true} when the bone moved at the last {@link #captureMotion}, or the index is out of range. */
     public boolean hasBoneMoved(final int bone) {
         return bone < 0 || bone >= moved.length || moved[bone];
     }
@@ -219,9 +219,9 @@ public final class TitanPose {
     /**
      * As {@link #getWorldRotation(int, Rotation3f)}, working in scratch the caller owns.
      *
-     * <p>Needed because a titan's parts can be synced in parallel, and thousands of threads asking one pose
-     * for a bone's orientation cannot share the pose's own scratch. The pose itself is only read here, so
-     * with the intermediates handed in this is safe to call from any number of threads at once.
+     * <p>Titan parts are synced in parallel, so callers cannot share the pose's own scratch fields. With
+     * the intermediates passed in, this only reads the pose and is safe to call from several threads at
+     * once.
      */
     @Nonnull
     public Rotation3f getWorldRotation(final int bone,

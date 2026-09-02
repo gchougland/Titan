@@ -10,11 +10,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Plays a variant's sound by asset id, tolerating the id being unset or unknown.
+ * Plays a variant's sound by asset id, tolerating an id that is unset or unknown.
  *
- * <p>Every sound a titan makes is named in its variant JSON, which means every one of them can be absent,
- * misspelt or left over from an asset that has since been renamed. Resolving through here keeps that from
- * being an exception in the middle of an attack.
+ * <p>Every titan sound is named in variant JSON, so any of them can be absent, misspelt, or left pointing
+ * at a renamed asset. Resolving through here keeps that from throwing mid-attack.
  */
 public final class TitanSound {
 
@@ -28,6 +27,7 @@ public final class TitanSound {
         play(accessor, sound, position.x, position.y, position.z);
     }
 
+    /** As {@link #play(ComponentAccessor, String, Vector3d)}, for callers holding loose coordinates. */
     public static void play(@Nonnull final ComponentAccessor<EntityStore> accessor,
                             @Nullable final String sound,
                             final double x,

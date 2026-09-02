@@ -27,9 +27,9 @@ import javax.annotation.Nullable;
 /**
  * {@code /titan debug <mode> [--particle=<system>] [--radius=n]}
  *
- * <p>Reports the nearest titan's rig as chat text, and additionally draws it in the world when a particle
- * system is supplied. Particles are opt-in because the right effect to use depends on the asset packs the
- * server has loaded.
+ * <p>Development aid that reports the nearest titan's rig as chat text, and also draws it in the world when
+ * a particle system is named. Particles are opt-in because which effect reads well depends on the asset
+ * packs the server has loaded.
  */
 public final class TitanDebugCommand extends AbstractPlayerCommand {
 
@@ -38,7 +38,7 @@ public final class TitanDebugCommand extends AbstractPlayerCommand {
         BONES,
         /** Foot contact points, hand goals and IK weights. */
         IK,
-        /** Which voxels carry hard collision, i.e. what the player can actually stand on. */
+        /** Which voxels carry hard collision, and so what a player can stand on. */
         COLLIDERS,
         /** State machine, target and weakpoint tally. */
         STATE

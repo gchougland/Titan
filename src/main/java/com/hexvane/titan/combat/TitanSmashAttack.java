@@ -21,19 +21,18 @@ import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 
 /**
- * The area damage every titan impact goes through, whether it is a fist, the whole body, or a rock that
- * arrived a second after being thrown.
+ * Area damage shared by every titan impact, whether it comes from a fist, the whole body, or a thrown
+ * boulder.
  *
- * <p>Damage is a cylinder rather than a sphere so standing on higher ground near the impact does not save
- * you, and the knockback is aimed outwards and up to fling players clear. How much of the throw is upwards
- * is the main thing that distinguishes the attacks from each other: a smash is mostly outwards and shoves
- * you away from the fist, while a ground pound is almost entirely vertical and the damage it deals is
- * beside the point next to where you come down.
+ * <p>The hit volume is a cylinder rather than a sphere, so higher ground near the impact offers no cover.
+ * Knockback is aimed outwards and up; the vertical share is what separates the attacks, since a smash
+ * mostly shoves outwards while a ground pound throws almost straight up.
  *
- * <p>Every knockback figure passed in here is a speed in blocks per second, in every direction. See {@link
- * #write}, which is what makes that true.
+ * <p>Knockback values are speeds in blocks per second on every axis. See {@link #write} for how the
+ * horizontal axes are normalized to make that hold.
  */
 public final class TitanSmashAttack {
 
@@ -59,7 +58,7 @@ public final class TitanSmashAttack {
         return execute(store, commandBuffer, titanRef, variant, impactPoint, variant.getAttackRadius());
     }
 
-    /** As {@link #execute}, with the blast radius overridden — a body slam covers more ground than a fist. */
+    /** As {@link #execute}, with the blast radius overridden, since a body slam covers more ground than a fist. */
     public static int execute(@Nonnull final Store<EntityStore> store,
                               @Nonnull final CommandBuffer<EntityStore> commandBuffer,
                               @Nonnull final Ref<EntityStore> titanRef,
@@ -73,15 +72,13 @@ public final class TitanSmashAttack {
     }
 
     /**
-     * The impact every other overload comes down to, with nothing read from a variant.
+     * The impact every other overload delegates to, taking raw numbers instead of a variant.
      *
-     * <p>Taking the numbers rather than the asset is what lets a boulder still land properly after the
-     * titan that threw it has died, and what lets the ground pound aim its throw straight up without
-     * changing what a smash does.
+     * <p>Passing the numbers lets a boulder land correctly after the titan that threw it has died, and
+     * lets the ground pound override the vertical share without affecting a smash.
      *
      * @param source        who to credit the damage to, and whose parts to spare. An invalid reference
-     *                      means the attacker is gone, in which case the effects still play but nothing is
-     *                      hurt — there is no one left to blame it on.
+     *                      means the attacker is gone, so the effects still play but nothing is hurt.
      * @param damage        before the server's damage multiplier
      * @param knockback     before the server's knockback multiplier
      * @param verticalShare how much of the knockback goes straight up, from 0 to 1
@@ -105,9 +102,9 @@ public final class TitanSmashAttack {
             final float scaledDamage = damage * config.getAttackDamageMultiplier();
             final float scaledKnockback = knockback * config.getAttackKnockbackMultiplier();
 
-            // The spatial query hands back a shared thread-local list, and dealing damage can run queries of
-            // its own, so take a snapshot before touching anything.
-            final var victims = new java.util.ArrayList<>(
+            // The spatial query returns a shared thread-local list and dealing damage can run queries of its
+            // own, so snapshot the results first.
+            final var victims = new ArrayList<>(
                 TargetUtil.getAllEntitiesInCylinder(impactPoint, radius, radius * HEIGHT_FACTOR, store));
 
             for (final Ref<EntityStore> victim : victims) {
@@ -129,19 +126,18 @@ public final class TitanSmashAttack {
                                          @Nonnull final Ref<EntityStore> victim,
                                          @Nonnull final Ref<EntityStore> titanRef) {
         if (!victim.isValid() || victim.getIndex() == titanRef.getIndex()) return false;
-        // The titan's own voxels and ore nodes sit inside the blast; hitting them would kill the boss on
-        // its own attack. A boulder's voxels carry the same part marker once they shatter, so a rock landing
-        // on top of the rubble from the last one does not blow it apart either.
+        // The titan's own voxels and ore nodes sit inside the blast, and hitting them would kill the boss
+        // with its own attack. Shattered boulder voxels carry the same part marker, so rubble is spared too.
         if (store.getComponent(victim, TitanPartComponent.getComponentType()) != null) return false;
         if (store.getComponent(victim, TitanWeakpointComponent.getComponentType()) != null) return false;
         return store.getComponent(victim, EntityStatMap.getComponentType()) != null;
     }
 
     /**
-     * Throws one entity along a given vector, ignoring where it happens to be standing.
+     * Throws one entity along a given vector, ignoring where it is standing.
      *
-     * <p>Separate from the blast knockback because not every throw radiates from a point. Scraping a rider
-     * off a titan's back has one direction — off the back — and it is the same for everyone up there.
+     * <p>Separate from the blast knockback because not every throw radiates from a point. Scraping riders
+     * off a titan's back uses a single shared direction for everyone up there.
      */
     public static void impulse(@Nonnull final CommandBuffer<EntityStore> commandBuffer,
                                @Nonnull final Ref<EntityStore> victim,
@@ -177,15 +173,14 @@ public final class TitanSmashAttack {
      * Hands one throw to the engine, in blocks per second.
      *
      * <p>The horizontal components are divided back down on the way out. {@link
-     * DamageSystems.HackKnockbackValues} multiplies X and Z by {@code PLAYER_KNOCKBACK_SCALE} — twenty-five
-     * — before the velocity system ever sees them, and leaves Y untouched. Undoing it here is what lets a
-     * single number in a variant file mean one thing: without it the same {@code 6} is a small hop upwards
-     * and a hundred and fifty blocks sideways, and no amount of tuning makes an attack read right while its
-     * two halves are in different units.
+     * DamageSystems.HackKnockbackValues} multiplies X and Z by {@code PLAYER_KNOCKBACK_SCALE} before the
+     * velocity system sees them and leaves Y untouched, so without this a knockback of {@code 6} would
+     * mean a small hop upwards and a hundred and fifty blocks sideways. Dividing it out keeps all three
+     * axes in the same units.
      *
-     * <p>Duration zero because {@code KnockbackSystems} re-applies the velocity every tick until the timer
-     * passes the duration, so anything longer would multiply the throw by the tick count. Zero is the
-     * engine's own convention for a single impulse, and the component is dropped the tick it lands.
+     * <p>Duration is zero because {@code KnockbackSystems} re-applies the velocity every tick until the
+     * timer passes the duration, so any larger value would multiply the throw by the tick count. Zero is
+     * the engine's convention for a single impulse.
      */
     private static void write(@Nonnull final CommandBuffer<EntityStore> commandBuffer,
                               @Nonnull final Ref<EntityStore> victim,
@@ -214,9 +209,7 @@ public final class TitanSmashAttack {
         TitanSound.play(commandBuffer, sound, impactPoint);
     }
 
-    /**
-     * Where a smash should land: just in front of the titan, on the line towards its target.
-     */
+    /** Where a smash should land: just in front of the titan, on the line towards its target. */
     @Nonnull
     public static Vector3d resolveImpactPoint(@Nonnull final Vector3d titanPosition,
                                               @Nullable final Vector3d targetPosition,

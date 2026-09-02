@@ -1,6 +1,6 @@
 {
   "$Comment": [
-    "Hauling both fists overhead. 57 frames, 0.95 seconds. The body rears back as the arms come up, which is what sells the weight of them; the fists themselves are placed by hand IK, so the arm tracks here only set the pose the IK blends out of."
+    "Hauling both fists overhead. 57 frames, 0.95 seconds. The body rears back as the arms come up to sell their weight. The fists are placed by hand IK, so the arm tracks here only set the pose the IK blends out of."
   ],
   "formatVersion": 1,
   "duration": 57,

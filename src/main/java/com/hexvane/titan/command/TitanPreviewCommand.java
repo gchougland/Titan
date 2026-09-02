@@ -23,27 +23,20 @@ import javax.annotation.Nonnull;
 /**
  * {@code /titan preview <prefab> [yaw] [layers]}
  *
- * <p>Stands one of a titan's prefabs up as a prefab preview — the engine's own hologram primitive — so that
- * the one question standing between the mod and a very large saving can be answered by looking at it.
+ * <p>Development aid that stands one of a titan's prefabs up as a {@link PersistentPrefabPreview}, the
+ * engine's hologram primitive. A preview is a single entity carrying a whole block list; the blocks are
+ * immutable once resolved and a viewer is sent them once, on first seeing the entity, after which the
+ * client re-meshes locally. Building bones this way would take the Roaming Temple from around 4,700
+ * replicated transforms a tick to thirteen.
  *
- * <p>The saving: a {@code PrefabPreview} is a single entity carrying a whole block list. Its javadoc says
- * the blocks are immutable once resolved and a viewer is sent them once, on first seeing the entity, after
- * which the client re-meshes locally. One of those per bone would take the Roaming Temple from around 4,700
- * replicated transforms a tick to thirteen, which is not an optimisation of the current approach so much as
- * a different approach that happens not to have the problem.
- *
- * <p>The question: whether the client turns that cached mesh when the entity's rotation changes. Prefab
- * previews exist to show a builder where a paste will land, and a paste lands on the block grid, so there
- * is a fair chance the client draws the blocks axis-aligned and ignores rotation entirely. A titan is
- * articulated limbs; if the mesh cannot turn, this is only ever usable for parts that do not, and the
- * temple's body yaws along with everything else. None of that is answerable from this end — the client in
- * the source drop is network interop bindings with no renderer in it.
- *
- * <p>Why this rather than the engine's {@code /prefabpreview spawn}, which is otherwise the same thing:
- * that one hardcodes an identity rotation, so it cannot ask the question. Spawn two of these at different
- * yaws and the answer is whichever you see. Worth noting while looking: whether it draws solid or as a
- * translucent ghost, since a ghost titan is not a titan, and that a preview carries no collision at all, so
- * the climbable voxels would have to stay whatever happens.
+ * <p>Whether that is usable turns on something the source cannot answer: previews exist to show a builder
+ * where a paste will land, and a paste lands on the block grid, so the client may draw the blocks
+ * axis-aligned and ignore the entity's rotation. A titan is articulated limbs and the Roaming Temple yaws
+ * its whole body, so a mesh that cannot turn would only serve the parts that never move. The client in the
+ * source drop is network interop bindings with no renderer, so the remaining way to answer it is to spawn
+ * two of these at different yaws and compare; the engine's own {@code /prefabpreview spawn} hardcodes an
+ * identity rotation. The same comparison shows whether the blocks draw solid or as a translucent ghost.
+ * Either way a preview carries no collision, so climbable voxels would still be needed.
  *
  * <p>These are persistent entities and outlive a restart. Clean up with the engine's
  * {@code /prefabpreview remove --radius=64}.
@@ -78,9 +71,8 @@ public final class TitanPreviewCommand extends AbstractPlayerCommand {
         if (transform == null) return;
 
         final String prefab = prefabArg.get(context);
-        // Checked here rather than left to the resolver, which logs a warning to the console and spawns an
-        // entity showing nothing at all — the most confusing possible outcome for a command whose entire
-        // purpose is that you look at the result and believe what you see.
+        // Checked here because the resolver only logs a console warning and then spawns an entity showing
+        // nothing, which is indistinguishable from a preview that failed to draw.
         if (PrefabStore.get().findBrowsablePrefabPath(prefab) == null) {
             context.sendMessage(Message.translation("titan_commands.commands.titan.preview.unknownPrefab")
                 .param("prefab", prefab));

@@ -18,8 +18,8 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Turns a dead titan into a pile of ore.
  *
- * <p>A variant can use a drop list, a flat item id, or both; the fixed item is what makes a Mithril talus
- * reliably worth killing while the list adds variety on top.
+ * <p>A variant may declare a drop list, a flat item id, or both. The flat item guarantees a minimum reward
+ * for the kill and the list adds variety on top of it.
  */
 public final class TitanLoot {
 
@@ -29,6 +29,7 @@ public final class TitanLoot {
     private TitanLoot() {
     }
 
+    /** Spawns the variant's drops just above {@code position}. Does nothing if it declares none. */
     public static void drop(@Nonnull final CommandBuffer<EntityStore> commandBuffer,
                             @Nonnull final TitanVariantAsset variant,
                             @Nonnull final Vector3d position) {

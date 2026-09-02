@@ -74,7 +74,6 @@ public final class TitanWeakpointSystem extends EntityTickingSystem<EntityStore>
         }
 
         if (titan.getState() == TitanState.DYING) {
-            // The body is coming apart; take the surviving nodes with it.
             commandBuffer.removeEntity(self, RemoveReason.REMOVE);
             return;
         }

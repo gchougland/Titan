@@ -1,8 +1,8 @@
 {
   "$Comment": [
-    "Zone 1 is where a player meets their first talus, so the pair here are the two softest. Copper dominates; iron is the occasional nastier surprise on ground the player already thinks is safe.",
-    "Environments covers every open surface zone 1 has, not just the plains tiles. Gating on Env_Zone1_Plains alone catches only the handful of tiles literally named Plains, and the noise patches that overwrite the surface with Env_Zone1_Encounters punch holes even in those, so most of a walk through zone 1 matched nothing at all. Swamps and shores are left out: one is wet and the other is a beach.",
-    "The plains themselves are not here; they are in Zone1_Plains, which spawns this same pair plus the temple. An environment may only be claimed by one rule, so wanting the temple in the plains and nowhere else means the plains needs a rule of its own rather than an extra line in this one."
+    "Zone 1 is where a player meets their first talus, so the pair here are the two softest, with copper three times as likely as iron.",
+    "Environments covers every open surface zone 1 has, not just the plains tiles. Env_Zone1_Plains matches only the handful of tiles literally named Plains, and the noise patches that overwrite the surface with Env_Zone1_Encounters punch holes even in those, so gating on it alone leaves most of zone 1 unmatched. Swamps and shores are left out as wet ground and beach.",
+    "The plains are covered by Zone1_Plains, which spawns this same pair plus the temple. An environment may only be claimed by one rule, so the plains needs a rule of its own rather than an extra line here."
   ],
 
   "Environments": [

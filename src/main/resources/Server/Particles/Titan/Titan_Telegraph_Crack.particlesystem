@@ -1,5 +1,5 @@
 {
-  "$Comment": "Not a telegraph so much as the consequence of one: this is what the ground looks like after a titan has pulled a boulder out of it.",
+  "$Comment": "Plays after a titan tears a boulder free, marking the broken ground it came out of. It follows the attack rather than warning of one, so IsImportant is off.",
   "Spawners": [
     {
       "SpawnerId": "Titan_Telegraph_Crack"

@@ -23,18 +23,16 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Builds the boulder a titan throws.
  *
- * <p>It is the titan's own hand: the same prefab, the same rock type, and the same trick of a transform-less
- * root with scaled blocks hung off it. That is not a shortcut so much as the point of the move — a titan
- * reaches into the ground and comes up with a lump of exactly the material it is made of.
+ * <p>A boulder reuses the titan's own hand prefab and rock type, and is assembled the same way the body is:
+ * a root entity holding the transform with scaled blocks hung off it.
  */
 public final class TitanBoulder {
 
     /**
      * Gravity on a thrown boulder, in blocks per second squared.
      *
-     * <p>Its own figure rather than the world's or the debris system's. This is the number that decides how
-     * high the arc goes for a given throwing speed, and the arc is the attack: a rock that gets there fast
-     * cannot be dodged and a rock that floats is not frightening.
+     * <p>Kept separate from world and debris gravity because it sets the height of the arc for a given
+     * throwing speed, and the arc is what gives the player time to leave the marked circle.
      */
     public static final double GRAVITY = 20.0;
 
@@ -44,6 +42,8 @@ public final class TitanBoulder {
     private static final float ARM_SECONDS = 0.2f;
     /** Ceiling on how many blocks one boulder is made of, so a large prefab cannot flood the entity count. */
     private static final int MAX_VOXELS = 48;
+    /** Launch angle used when the target is out of range, which is the angle of maximum distance. */
+    private static final double MAX_RANGE_ANGLE = Math.PI / 4;
 
     private TitanBoulder() {
     }
@@ -52,9 +52,8 @@ public final class TitanBoulder {
      * Throws a boulder from {@code origin} at {@code target}.
      *
      * <p>Assembling the rock writes entities to the store, which a ticking system may not do, so the build
-     * is handed to the world to run between ticks — the same route natural titan spawning takes. The launch
-     * itself is solved here and now, because by the time the deferred work runs the titan's hand has moved
-     * on and the throw would come out crooked.
+     * is deferred to the world the same way natural titan spawning is. The launch is solved immediately,
+     * because the titan's hand will have moved by the time the deferred work runs.
      *
      * @param voxelScale world size of one prefab block, which for a titan's own hand is its body scale
      */
@@ -83,18 +82,15 @@ public final class TitanBoulder {
      * Aims a throw of fixed speed so it lands on the target, taking the flatter of the two arcs that get
      * there.
      *
-     * <p>Both arcs land on the same spot; the difference is how long they take and how high they go. The
-     * lofted one hangs for a couple of seconds and peaks a dozen blocks up, which turned out to read as the
-     * titan shelling the sky rather than throwing a rock at somebody. The flat one still arcs — around
-     * twenty-five degrees at the far end of a variant's range — and arrives in about a second, which is
-     * enough to step out of a marked circle and not enough to stroll.
+     * <p>Both arcs land on the same spot, but the lofted one hangs for a couple of seconds and peaks a
+     * dozen blocks up. The flat solution still arcs to roughly twenty-five degrees at maximum range and
+     * arrives in about a second, which is enough time to leave the marked circle at a walk.
      *
-     * <p>This is why {@code HurlSpeed} and {@code HurlMaxRange} in the variants are not independent: the
-     * flat solution only exists out to {@code speed² / GRAVITY}, and past that the throw falls back to
-     * forty-five degrees and lands short. Each variant's range is set inside that limit with room to spare.
+     * <p>{@code HurlSpeed} and {@code HurlMaxRange} in the variant files are therefore coupled: the flat
+     * solution only exists out to {@code speed² / GRAVITY}, and beyond that the throw falls back to
+     * forty-five degrees and lands short. Each variant's range is set inside that limit.
      *
-     * <p>Aimed at where the target is right now rather than where it is going. Leading the flight would land
-     * the rock on a player who did everything right.
+     * <p>Aimed at the target's current position rather than a lead, so a player who keeps moving is not hit.
      *
      * @return {@code false} if the target is out of range at this speed, in which case {@code dest} holds
      *         the furthest throw towards it
@@ -117,9 +113,9 @@ public final class TitanBoulder {
         final double v2 = speed * speed;
         final double discriminant = v2 * v2 - GRAVITY * (GRAVITY * horizontal * horizontal + 2 * rise * v2);
 
-        // 45 degrees is the angle that throws furthest, so it is the honest answer to "as close as I can".
+        // Out of range: 45 degrees throws furthest, so it gets the rock as close as the speed allows.
         final double angle = discriminant < 0
-            ? Math.PI / 4
+            ? MAX_RANGE_ANGLE
             : Math.atan((v2 - Math.sqrt(discriminant)) / (GRAVITY * horizontal));
 
         final double flat = speed * Math.cos(angle) / horizontal;
@@ -209,8 +205,8 @@ public final class TitanBoulder {
     /**
      * The prefab a variant throws: whatever it names, or the caller's fallback when it names nothing.
      *
-     * <p>The fallback is the skeleton's own hand, so a new titan built on a different rig throws a piece of
-     * itself without anyone having to remember to say so.
+     * <p>The fallback is the skeleton's own hand, so a titan built on a new rig throws a piece of itself
+     * without the variant having to declare a prefab.
      */
     @Nullable
     public static String resolvePrefab(@Nonnull final TitanVariantAsset variant, @Nullable final String fallback) {

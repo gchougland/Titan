@@ -19,10 +19,10 @@ import java.util.logging.Level;
 /**
  * Which titans turn up in which terrain, and how thickly.
  *
- * <p>Rules are keyed on the engine's {@code Environment} ids rather than biome tiles, because that is the
- * same granularity the vanilla ambient spawner works at and it already distinguishes a zone's plains from
- * its caves and shores. One rule owns an environment outright; a second rule naming the same environment
- * is ignored so the mapping stays unambiguous.
+ * <p>Rules are keyed on the engine's {@code Environment} ids rather than biome tiles. That is the
+ * granularity the vanilla ambient spawner works at, and it already separates a zone's plains from its
+ * caves and shores. One rule owns an environment outright; a second rule naming the same environment is
+ * ignored so the mapping stays unambiguous.
  */
 public final class TitanSpawnRuleAsset implements JsonAssetWithMap<String, DefaultAssetMap<String, TitanSpawnRuleAsset>> {
 
@@ -82,11 +82,13 @@ public final class TitanSpawnRuleAsset implements JsonAssetWithMap<String, Defau
         return id;
     }
 
+    /** Engine {@code Environment} ids this rule claims. */
     @Nonnull
     public String[] getEnvironments() {
         return environments;
     }
 
+    /** Weighted variants this rule may roll. */
     @Nonnull
     public TitanSpawnEntry[] getVariants() {
         return variants;
@@ -96,14 +98,15 @@ public final class TitanSpawnRuleAsset implements JsonAssetWithMap<String, Defau
      * Odds that any one candidate site in this environment actually hosts a titan, {@code 0} to {@code 1}.
      *
      * <p>Sites sit on a fixed grid of {@link com.hexvane.titan.spawn.TitanSite#CELL_BLOCKS} blocks, so this
-     * reads directly as spacing: at {@code 0.25} roughly one cell in four is occupied, which across
-     * unbroken matching terrain averages one titan every five hundred blocks or so. Most terrain is not
-     * unbroken, and a site still has to survive the flatness check, so the number seen in play is lower.
+     * reads directly as spacing: at {@code 0.25} roughly one cell in four is occupied, averaging one titan
+     * every five hundred blocks or so across unbroken matching terrain. Real density is lower, since
+     * terrain is rarely unbroken and a site still has to pass the flatness check.
      */
     public float getChance() {
         return chance;
     }
 
+    /** Whether the rule takes part in the environment index at all. */
     public boolean isEnabled() {
         return enabled;
     }
@@ -111,8 +114,8 @@ public final class TitanSpawnRuleAsset implements JsonAssetWithMap<String, Defau
     /**
      * Picks a variant by weight, skipping any the server owner has switched off.
      *
-     * <p>A disabled variant is treated as weightless rather than as an empty result, so turning off one tier
-     * hands its share of the sites to the tiers left standing instead of thinning the zone out.
+     * <p>A disabled variant is treated as weightless rather than as an empty result, so turning off one
+     * tier hands its share of the sites to the remaining tiers instead of thinning the zone out.
      *
      * @param roll a value in {@code [0,1)}; the same roll always yields the same variant
      * @return {@code null} if the rule has nothing left it is allowed to spawn
@@ -143,6 +146,7 @@ public final class TitanSpawnRuleAsset implements JsonAssetWithMap<String, Defau
         return !index().isEmpty();
     }
 
+    /** @return the rule owning this environment, or {@code null} when none claims it. */
     @Nullable
     public static TitanSpawnRuleAsset findForEnvironment(@Nullable final String environmentId) {
         return environmentId == null ? null : index().get(environmentId);

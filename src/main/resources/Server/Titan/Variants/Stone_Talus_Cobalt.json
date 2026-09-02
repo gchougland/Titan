@@ -1,5 +1,5 @@
 {
-  "$Comment": "Shares Thorium's rung on the ore ladder, so it is tuned as a slightly meaner sibling rather than a full tier up.",
+  "$Comment": "Shares Thorium's rung on the ore ladder, so it is tuned a little above Thorium rather than as a full tier up.",
   "Skeleton": "Stone_Talus",
   "DisplayName": "Cobalt Talus",
   "BodyScale": 1.25,

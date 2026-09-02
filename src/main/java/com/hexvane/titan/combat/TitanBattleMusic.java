@@ -17,14 +17,12 @@ import java.util.logging.Level;
 /**
  * Takes over a player's music for the duration of a titan fight.
  *
- * <p>Forced music is a single number per player, set on a component that a stock system watches and turns
- * into a packet when it changes. So there is nothing here to start or stop — only a value to hold while the
- * fight is on and put back to zero when it is over, and zero is what hands the player back to whatever the
- * zone would have been playing.
+ * <p>Forced music is a single container index per player, held on a component that a stock system turns
+ * into a packet when it changes. Writing the index starts the track and writing {@link #NONE} hands the
+ * player back to the zone soundtrack.
  *
- * <p>Because it is one number, two titans agree by construction: they write the same index and neither can
- * tell it was not the only one. What they cannot do is disagree about when to stop, which is why clearing
- * only ever happens when the player is still on the index this titan put there.
+ * <p>Since it is one shared index, overlapping fights cannot conflict while starting, only while stopping.
+ * {@link #clear} therefore only resets a player still sitting on the index this titan wrote.
  */
 public final class TitanBattleMusic {
 
@@ -35,20 +33,16 @@ public final class TitanBattleMusic {
     public static final int NONE = 0;
 
     /**
-     * Resolved once and remembered, including the failure.
+     * Resolved once and cached, including the failure.
      *
-     * <p>The component belongs to a built-in plugin rather than to the server core, and asking for its type
-     * before that plugin has loaded — or on a server running without it — throws. A titan should still be a
-     * perfectly good fight on such a server, just a quiet one.
+     * <p>The component belongs to a built-in plugin rather than the server core, so requesting its type
+     * throws on a server that has not loaded that plugin. Titans stay fully playable there, just silent.
      */
     @Nullable
     private static volatile ComponentType<EntityStore, ForcedMusicTracker> trackerType;
     private static volatile boolean trackerUnavailable;
 
-    /**
-     * The last track id that failed to resolve, so a variant naming a container that is not there is
-     * complained about once rather than on every tick of every fight.
-     */
+    /** Last track id that failed to resolve, so a missing container is logged once rather than per tick. */
     @Nullable
     private static volatile String unknownTrack;
 
@@ -70,8 +64,8 @@ public final class TitanBattleMusic {
         final int index = MusicContainer.getAssetMap().getIndex(id);
         if (index > NONE) return index;
 
-        // Worth saying out loud. A misspelled or removed track is indistinguishable in play from the music
-        // simply not working, and there is nothing else anywhere that would mention it.
+        // A misspelled or removed track is indistinguishable in play from music that is simply off, so it
+        // has to be reported here.
         if (!id.equals(unknownTrack)) {
             unknownTrack = id;
             LOGGER.at(Level.WARNING).log(
@@ -96,8 +90,8 @@ public final class TitanBattleMusic {
     /**
      * Hands a player back to the zone's music, but only if they are still on the track this titan set.
      *
-     * <p>The guard is what stops a titan clearing music it did not start — a player who walked out of one
-     * fight and into a trigger volume that set its own track should keep the new one.
+     * <p>The guard stops a titan clearing music it did not start, such as a track a trigger volume set
+     * after the player left the fight.
      */
     public static void clear(@Nonnull final ComponentAccessor<EntityStore> accessor,
                              @Nonnull final Ref<EntityStore> player,

@@ -103,21 +103,25 @@ public final class TitanIkChainDef {
 
     private transient int[] boneIndices = new int[0];
 
+    /** Chain name, used in logs and to look the chain up. */
     @Nonnull
     public String getName() {
         return name;
     }
 
+    /** Which solver drives the chain. */
     @Nonnull
     public Kind getKind() {
         return kind;
     }
 
+    /** What the runtime does with the solved effector. */
     @Nonnull
     public Role getRole() {
         return role;
     }
 
+    /** Bone names making up the chain, root first. */
     @Nonnull
     public String[] getBones() {
         return bones;
@@ -134,10 +138,12 @@ public final class TitanIkChainDef {
         return side;
     }
 
+    /** How far the body may drag a planted foot, in model units, before it takes a step. */
     public float getStrideLength() {
         return strideLength;
     }
 
+    /** Peak height of the step arc above the ground, in model units. */
     public float getStepHeight() {
         return stepHeight;
     }
@@ -156,6 +162,7 @@ public final class TitanIkChainDef {
         return restOffset;
     }
 
+    /** Bone indices for {@link #getBones()}, or empty when a name failed to resolve. */
     @Nonnull
     public int[] getBoneIndices() {
         return boneIndices;
@@ -166,6 +173,7 @@ public final class TitanIkChainDef {
         return boneIndices.length == 0 ? -1 : boneIndices[0];
     }
 
+    /** Index of the effector bone at the tip of the chain. */
     public int getEndBoneIndex() {
         return boneIndices.length == 0 ? -1 : boneIndices[boneIndices.length - 1];
     }

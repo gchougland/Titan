@@ -1,7 +1,7 @@
 {
   "$Comment": [
     "Grinding forward with the front edge buried. Loops, because how long a plough runs for is a variant setting and the clip cannot know it.",
-    "The pitch does not sit still. It grinds a few degrees deeper and shallower and rolls side to side over a couple of seconds, which is the difference between a titan shovelling through the ground and a titan sliding across it on a fixed angle."
+    "The pitch grinds a few degrees deeper and shallower and rolls side to side over a couple of seconds, so the titan reads as shovelling through the ground rather than sliding across it at a fixed angle."
   ],
   "formatVersion": 1,
   "duration": 132,

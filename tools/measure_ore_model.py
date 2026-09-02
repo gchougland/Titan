@@ -5,7 +5,7 @@ place and is struck in another, and the spawner reads the box back to seat a nod
 
 The grid resolution is not recorded in the file and differs by model kind: block and item art is authored
 at 32 units per block, character and creature art at 64. Both were confirmed against models whose declared
-HitBox is a close fit — NPC_Spawner_Block is a 2-block post that only measures 2 blocks at 32, and the
+HitBox is a close fit: NPC_Spawner_Block is a 2-block post that only measures 2 blocks at 32, and the
 grizzly bear's 1.8-block hitbox only matches its mesh at 64.
 
 Usage:  python tools/measure_ore_model.py [path.blockymodel] [units-per-block]

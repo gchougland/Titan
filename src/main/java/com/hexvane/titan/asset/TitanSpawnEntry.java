@@ -6,9 +6,7 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 
 import javax.annotation.Nonnull;
 
-/**
- * One variant a spawn rule may roll, and how often it wins against its siblings.
- */
+/** One variant a spawn rule may roll, and how often it wins against its siblings. */
 public final class TitanSpawnEntry {
 
     @Nonnull
@@ -35,8 +33,8 @@ public final class TitanSpawnEntry {
     }
 
     /**
-     * Share of the rule's rolls this entry takes, relative to its siblings. Weights are not percentages:
-     * a 20 against a 1 means the second variant turns up on roughly one site in twenty.
+     * Share of the rule's rolls this entry takes, relative to its siblings. Weights are relative, not
+     * percentages: a 20 against a 1 gives the second variant roughly one site in twenty.
      */
     public float getWeight() {
         return weight;

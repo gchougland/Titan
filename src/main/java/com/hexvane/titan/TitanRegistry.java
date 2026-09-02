@@ -28,8 +28,8 @@ public final class TitanRegistry {
 
     /**
      * Registers every titan component. All of them are runtime-only: a titan is a cluster of entities wired
-     * together by references, so persisting one half-built would leave orphaned voxels behind. The same
-     * goes for a boulder, which is the same trick in miniature and only exists for a few seconds anyway.
+     * together by references, so persisting one half-built would leave orphaned voxels behind. Boulders are
+     * the same arrangement in miniature and live for seconds.
      */
     public static void register(@Nonnull final IComponentRegistry<EntityStore> registry) {
         titanComponentType = registry.registerComponent(TitanComponent.class, TitanComponent::new);
