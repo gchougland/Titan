@@ -8,11 +8,17 @@ import com.hexvane.titan.asset.TitanSpawnRuleAsset;
 import com.hexvane.titan.asset.TitanVariantAsset;
 import com.hexvane.titan.command.TitanCommand;
 import com.hexvane.titan.spawn.PrefabVoxelReader;
+import com.hexvane.titan.spawn.TitanEnvironment;
 import com.hexvane.titan.spawn.TitanSiteMemory;
 import com.hexvane.titan.system.TitanAiSystem;
 import com.hexvane.titan.system.TitanAnimationSystem;
+import com.hexvane.titan.system.TitanBoulderSystem;
 import com.hexvane.titan.system.TitanPartSyncSystem;
 import com.hexvane.titan.system.TitanRagdollSystem;
+import com.hexvane.titan.system.TitanBossBarSystem;
+import com.hexvane.titan.system.TitanRootDamageSystem;
+import com.hexvane.titan.system.TitanWeakpointDamageBonusSystem;
+import com.hexvane.titan.system.TitanWeakpointDamageSystem;
 import com.hexvane.titan.system.TitanWeakpointDeathSystem;
 import com.hexvane.titan.system.TitanWeakpointSystem;
 import com.hexvane.titan.system.TitanWorldSpawnSystem;
@@ -93,6 +99,7 @@ public final class TitanBootstrap {
         // the assets behind them are reloaded.
         plugin.getEventRegistry().register(LoadedAssetsEvent.class, TitanClipSetAsset.class, TitanBootstrap::onClipSetsLoaded);
         plugin.getEventRegistry().register(LoadedAssetsEvent.class, TitanSkeletonAsset.class, TitanBootstrap::onSkeletonsLoaded);
+        plugin.getEventRegistry().register(LoadedAssetsEvent.class, TitanVariantAsset.class, TitanBootstrap::onVariantsLoaded);
         plugin.getEventRegistry().register(LoadedAssetsEvent.class, TitanSpawnRuleAsset.class, TitanBootstrap::onSpawnRulesLoaded);
     }
 
@@ -103,6 +110,14 @@ public final class TitanBootstrap {
     private static void onSkeletonsLoaded(@Nonnull final LoadedAssetsEvent<String, TitanSkeletonAsset, DefaultAssetMap<String, TitanSkeletonAsset>> event) {
         TitanClipLibrary.invalidate();
         PrefabVoxelReader.invalidate();
+    }
+
+    /**
+     * The wander fence caches the environment names it was given resolved to indexes, so a variant whose
+     * environment list was wrong is only actually fixed once that resolution is thrown away.
+     */
+    private static void onVariantsLoaded(@Nonnull final LoadedAssetsEvent<String, TitanVariantAsset, DefaultAssetMap<String, TitanVariantAsset>> event) {
+        TitanEnvironment.invalidate();
     }
 
     private static void onSpawnRulesLoaded(@Nonnull final LoadedAssetsEvent<String, TitanSpawnRuleAsset, DefaultAssetMap<String, TitanSpawnRuleAsset>> event) {
@@ -125,7 +140,14 @@ public final class TitanBootstrap {
         registry.registerSystem(new TitanPartSyncSystem());
         registry.registerSystem(new TitanWeakpointSystem());
         registry.registerSystem(new TitanWeakpointDeathSystem());
+        registry.registerSystem(new TitanRootDamageSystem());
+        registry.registerSystem(new TitanBossBarSystem());
+        registry.registerSystem(new TitanBossBarSystem.Removal());
+        registry.registerSystem(new TitanWeakpointDamageBonusSystem());
+        registry.registerSystem(new TitanWeakpointDamageSystem());
         registry.registerSystem(new TitanRagdollSystem());
+        registry.registerSystem(new TitanBoulderSystem());
+        registry.registerSystem(new TitanBoulderSystem.Parts());
 
         worldSpawnSystem = new TitanWorldSpawnSystem(siteMemoryType);
         registry.registerSystem(worldSpawnSystem);

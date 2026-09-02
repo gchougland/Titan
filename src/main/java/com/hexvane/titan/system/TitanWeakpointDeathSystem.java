@@ -23,9 +23,9 @@ import javax.annotation.Nonnull;
  * can miss the zero-health window entirely and never notice the node was destroyed. Watching for
  * {@code DeathComponent} being added catches every kill exactly once, whatever dealt it.
  *
- * <p>This only fires the break effect. The titan's own death is decided by
- * {@link TitanComponent#auditWeakpoints}, which counts surviving node entities and therefore also covers
- * nodes lost to something other than damage.
+ * <p>This is also the only place a titan is told it has lost a node. Nothing else may credit a break:
+ * {@link TitanComponent#auditWeakpoints} reads a missing node as the rig being torn down rather than as a
+ * kill, so a death has to arrive from an actual death event to count.
  */
 public final class TitanWeakpointDeathSystem extends DeathSystems.OnDeathSystem {
 
@@ -47,14 +47,16 @@ public final class TitanWeakpointDeathSystem extends DeathSystems.OnDeathSystem 
         final var weakpoint = store.getComponent(ref, TitanWeakpointComponent.getComponentType());
         if (weakpoint == null || !weakpoint.markBroken()) return;
 
-        final var transform = store.getComponent(ref, TransformComponent.getComponentType());
-        if (transform == null) return;
-
         final Ref<EntityStore> owner = weakpoint.getOwner();
         final TitanComponent titan = owner != null && owner.isValid()
             ? store.getComponent(owner, TitanComponent.getComponentType())
             : null;
         if (titan == null) return;
+
+        titan.recordWeakpointBroken(ref);
+
+        final var transform = store.getComponent(ref, TransformComponent.getComponentType());
+        if (transform == null) return;
 
         final var variant = titan.getVariant();
         if (variant == null) return;

@@ -19,7 +19,7 @@ commands.titan.kill.result=Killed {count, plural, one {1 titan} other {{count, n
 commands.titan.list.desc=List nearby titans and known variants
 commands.titan.list.radius.desc=Search radius in blocks
 commands.titan.list.variants=Known variants: {variants}
-commands.titan.list.entry={variant} - {state}, clip {clip}, {weakpoints, number}/{total, number} ore nodes, {distance, number} blocks away
+commands.titan.list.entry={variant} - {state}, clip {clip}, {weakpoints, number}/{total, number} ore nodes ({toKill, number} to kill), {distance, number} blocks away
 commands.titan.list.count={count, plural, one {1 titan} other {{count, number} titans}} nearby.
 
 commands.titan.sites.desc=Show the natural spawn sites around you and why each is or is not occupied
@@ -47,4 +47,4 @@ commands.titan.debug.bone={bone} at ({x, number}, {y, number}, {z, number})
 commands.titan.debug.foot=foot {chain}: stepping={stepping} progress={progress, number} at ({x, number}, {y, number}, {z, number})
 commands.titan.debug.hand=hand {chain}: weight={weight, number} goal ({x, number}, {y, number}, {z, number})
 commands.titan.debug.colliders={parts, number} parts, {colliders, number} of them climbable.
-commands.titan.debug.state={variant}: {state} for {stateTime, number}s, clip {clip}, yaw {yaw, number}, attack cooldown {cooldown, number}s, next arm {side}, {weakpoints, number}/{total, number} ore nodes
+commands.titan.debug.state={variant}: {state} for {stateTime, number}s, clip {clip}, yaw {yaw, number}, attack cooldown {cooldown, number}s, next arm {side}, {weakpoints, number}/{total, number} ore nodes ({toKill, number} to kill)

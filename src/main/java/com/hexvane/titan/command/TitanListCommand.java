@@ -63,6 +63,7 @@ public final class TitanListCommand extends AbstractPlayerCommand {
                 .param("clip", titan.getAnimator() == null ? "<none>" : titan.getAnimator().getCurrentName())
                 .param("weakpoints", titan.getWeakpointsRemaining())
                 .param("total", titan.getWeakpointsTotal())
+                .param("toKill", titan.getWeakpointsStillNeeded())
                 .param("distance", origin.distance(titanTransform.getPosition())));
         }
 

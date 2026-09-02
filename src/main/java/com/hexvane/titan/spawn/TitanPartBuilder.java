@@ -2,6 +2,7 @@ package com.hexvane.titan.spawn;
 
 import com.hexvane.titan.entity.TitanPartComponent;
 import com.hexvane.titan.entity.TitanWeakpointComponent;
+import com.hexvane.titan.system.TitanPartSyncSystem;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -17,6 +18,7 @@ import com.hypixel.hytale.server.core.modules.entity.component.EntityScaleCompon
 import com.hypixel.hytale.server.core.modules.entity.component.ModelComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.PersistentModel;
 import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
+import com.hypixel.hytale.server.core.modules.entity.component.RespondToHit;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.hitboxcollision.HitboxCollision;
 import com.hypixel.hytale.server.core.modules.entity.hitboxcollision.HitboxCollisionConfig;
@@ -28,12 +30,14 @@ import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
 import com.hypixel.hytale.server.core.modules.entityui.UIComponentList;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Assembles the entities a titan is made of.
@@ -45,9 +49,9 @@ import java.util.UUID;
  */
 public final class TitanPartBuilder {
 
-    /** Stat modifier key used to lift an ore node's health to the variant's value. */
+    /** Stat modifier key used to lift an entity's health ceiling off the stat type's default. */
     @Nonnull
-    private static final String WEAKPOINT_HEALTH_MODIFIER = "TITAN_WEAKPOINT_MAX";
+    private static final String HEALTH_MODIFIER = "TITAN_MAX_HEALTH";
 
     private TitanPartBuilder() {
     }
@@ -55,7 +59,9 @@ public final class TitanPartBuilder {
     /**
      * Builds one voxel of a bone.
      *
-     * @param collider whether this voxel gets hard collision, making it climbable
+     * @param rotation      the bone's world rotation; the block's own orientation is folded onto it
+     * @param blockRotation the block's authored orientation, as a {@code RotationTuple} index
+     * @param collider      whether this voxel gets hard collision, making it climbable
      */
     @Nonnull
     public static Holder<EntityStore> buildVoxel(@Nonnull final Store<EntityStore> store,
@@ -63,27 +69,63 @@ public final class TitanPartBuilder {
                                                  @Nonnull final String blockKey,
                                                  @Nonnull final Vector3d worldPosition,
                                                  @Nonnull final Rotation3f rotation,
+                                                 final int blockRotation,
                                                  final float scale,
                                                  final int boneIndex,
                                                  @Nonnull final Vector3d localOffset,
                                                  final boolean collider,
                                                  @Nullable final HitboxCollisionConfig colliderConfig) {
 
+        // The caller's rotation is a scratch object shared by every voxel of the bone, so the block
+        // composes into its own copy rather than turning the rest of the limb with it.
+        final var worldRotation = new Rotation3f(rotation);
+        BlockRotations.compose(worldRotation, blockRotation, new Quaterniond(), new Vector3d());
+
+        final var holder = buildBlock(store, blockKey, worldPosition, worldRotation, scale);
+
+        holder.addComponent(TitanPartComponent.getComponentType(),
+            new TitanPartComponent(owner, boneIndex, localOffset, blockRotation, scale,
+                ThreadLocalRandom.current().nextFloat() * TitanPartSyncSystem.SCALE_REFRESH_SECONDS));
+
+        if (collider && colliderConfig != null) {
+            holder.addComponent(HitboxCollision.getComponentType(), new HitboxCollision(colliderConfig));
+        }
+
+        return holder;
+    }
+
+    /**
+     * Builds a bare rendered block with no notion of what it belongs to.
+     *
+     * <p>Split out from {@link #buildVoxel} because a thrown boulder is made of the same thing a titan is —
+     * scaled blocks whose transforms something else owns — but it is emphatically not a titan part. Giving
+     * it the part marker up front would have the sync system look for a skeleton on a rock, not find one,
+     * and delete the boulder in mid-air.
+     */
+    @Nonnull
+    public static Holder<EntityStore> buildBlock(@Nonnull final Store<EntityStore> store,
+                                                 @Nonnull final String blockKey,
+                                                 @Nonnull final Vector3d worldPosition,
+                                                 @Nonnull final Rotation3f rotation,
+                                                 final float scale) {
+
         final var holder = EntityStore.REGISTRY.newHolder();
 
         holder.addComponent(BlockEntity.getComponentType(), new BlockEntity(blockKey));
         holder.addComponent(TransformComponent.getComponentType(), new TransformComponent(new Vector3d(worldPosition), rotation));
         holder.addComponent(EntityScaleComponent.getComponentType(), new EntityScaleComponent(scale));
-        holder.addComponent(TitanPartComponent.getComponentType(), new TitanPartComponent(owner, boneIndex, localOffset));
 
         // Sized to the scaled block. Left without a base model box on purpose so the engine's rotation pass
         // is a no-op and the box stays exactly one scaled cube.
         final double half = scale * 0.5;
         holder.addComponent(BoundingBox.getComponentType(), new BoundingBox(new Box(-half, -half, -half, half, half, half)));
 
-        if (collider && colliderConfig != null) {
-            holder.addComponent(HitboxCollision.getComponentType(), new HitboxCollision(colliderConfig));
-        }
+        // Without this the voxel is not a legal attack target and the engine drops it: Interaction's
+        // invulnerability check treats anything with neither EntityStatMap nor RespondToHit as unhittable.
+        // A player's swing is resolved from the hit list their client reports, so the rock was already in
+        // it and was being discarded here, leaving only the ore node behind it to take the blow. The
+        // marker makes a sword or arrow land on the body; no stat map means it still takes no damage.
+        holder.addComponent(RespondToHit.getComponentType(), RespondToHit.INSTANCE);
 
         holder.addComponent(NetworkId.getComponentType(), new NetworkId(store.getExternalData().takeNextNetworkId()));
         holder.ensureComponent(EntityModule.get().getVisibleComponentType());
@@ -157,15 +199,15 @@ public final class TitanPartBuilder {
     }
 
     /**
-     * Raises the node's health ceiling to {@code health} and fills it. Health is expressed as a modifier
+     * Raises an entity's health ceiling to {@code health} and fills it. Health is expressed as a modifier
      * because {@code EntityStatType} assets own the base range.
      */
-    private static void applyHealth(@Nonnull final EntityStatMap stats, final float health) {
+    public static void applyHealth(@Nonnull final EntityStatMap stats, final float health) {
         final int healthIndex = DefaultEntityStatTypes.getHealth();
         final var statType = EntityStatType.getAssetMap().getAsset(healthIndex);
         if (statType == null) return;
 
-        stats.putModifier(healthIndex, WEAKPOINT_HEALTH_MODIFIER,
+        stats.putModifier(healthIndex, HEALTH_MODIFIER,
             new StaticModifier(Modifier.ModifierTarget.MAX, StaticModifier.CalculationType.ADDITIVE, health - statType.getMax()));
         stats.maximizeStatValue(healthIndex);
     }

@@ -185,7 +185,8 @@ public final class TitanDebugCommand extends AbstractPlayerCommand {
             .param("cooldown", titan.getAttackCooldown())
             .param("side", titan.getAttackSide() < 0 ? "L" : "R")
             .param("weakpoints", titan.getWeakpointsRemaining())
-            .param("total", titan.getWeakpointsTotal()));
+            .param("total", titan.getWeakpointsTotal())
+            .param("toKill", titan.getWeakpointsStillNeeded()));
     }
 
     private static void mark(@Nonnull final Store<EntityStore> store,

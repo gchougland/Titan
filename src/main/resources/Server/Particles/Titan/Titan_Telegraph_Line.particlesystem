@@ -1,0 +1,10 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Titan_Telegraph_Line"
+    }
+  ],
+  "BoundingRadius": 16,
+  "CullDistance": 96,
+  "IsImportant": true
+}

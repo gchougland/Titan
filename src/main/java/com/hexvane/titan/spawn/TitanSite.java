@@ -19,18 +19,25 @@ public final class TitanSite {
     /**
      * Edge length of one cell, in blocks. At most one titan stands in a cell.
      *
-     * <p>Sized against how far the world is simulated around a player, roughly 190 blocks. Cells much
-     * bigger than that and a player can stand still with no cell fully in reach, which is what makes a
-     * titan feel like something that does not exist rather than something that is rare.
+     * <p>This is the density knob: a cell holds at most one titan, so how many there are per acre is the
+     * rule's chance over this squared. It is deliberately larger than the roughly 190 blocks the world is
+     * simulated out to around a player, which means a player standing still may have no site in reach at
+     * all. That is the intent — a titan should be something walked into rather than something waiting at
+     * the edge of every view — but it is also the floor: cells very much larger than this and the odds of
+     * a given walk crossing one at all stop being worth the rule existing.
      */
-    public static final int CELL_BLOCKS = 160;
+    public static final int CELL_BLOCKS = 256;
 
     /**
      * How far a site is kept from its cell's edges, in blocks. Without it two titans in adjacent cells
-     * could land back to back on the shared border. Kept well under half the cell, or every titan ends up
-     * near its cell's centre and the grid becomes visible on a map.
+     * could land back to back on the shared border.
+     *
+     * <p>This, and not the cell size, is what sets how close two titans can ever get: sites in neighbouring
+     * cells are at worst twice this apart, however the rolls land, so raising the cell size alone thins
+     * them out on average while leaving the awkward close pairs exactly as close as they were. Kept well
+     * under half the cell, or every titan ends up near its cell's centre and the grid becomes visible.
      */
-    private static final int CELL_MARGIN = 32;
+    private static final int CELL_MARGIN = 64;
 
     private static final long GOLDEN = 0x9E3779B97F4A7C15L;
 

@@ -94,18 +94,21 @@ public final class TitanSitesCommand extends AbstractPlayerCommand {
                     continue;
                 }
 
+                final String picked = rule.pickVariant(roll.variant());
+                if (picked == null) {
+                    lines.add(entry(blockX, blockZ, distance, "every variant here is disabled in config.json", environment, "-"));
+                    continue;
+                }
+
                 sited++;
-                final String variant = String.valueOf(rule.pickVariant(roll.variant()));
+                final String variant = picked;
 
                 if (memory != null && memory.isCleared(key)) {
                     lines.add(entry(blockX, blockZ, distance, "already killed, still on cooldown", environment, variant));
                     continue;
                 }
 
-                if (!TitanTerrainProbe.isBuildable(chunkStore, blockX, surfaceY, blockZ,
-                    TitanWorldSpawnSystem.FOOTPRINT_RADIUS,
-                    TitanWorldSpawnSystem.FOOTPRINT_RELIEF,
-                    TitanWorldSpawnSystem.HEADROOM)) {
+                if (!TitanWorldSpawnSystem.isBuildableFor(chunkStore, blockX, surfaceY, blockZ, variant)) {
                     lines.add(entry(blockX, blockZ, distance, "ground too rough to stand on", environment, variant));
                     continue;
                 }

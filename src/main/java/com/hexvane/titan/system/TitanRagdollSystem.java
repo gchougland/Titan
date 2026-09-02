@@ -25,8 +25,9 @@ import java.util.Set;
  * Integrates the debris a dead titan leaves behind.
  *
  * <p>The pieces are simulated here rather than handed to the engine's block-entity physics because they
- * need to tumble, settle into a pile and then disappear together — engine physics would keep them alive
- * indefinitely and each one is a full entity.
+ * need to tumble, settle into a pile and then disappear again — engine physics would keep them alive
+ * indefinitely and each one is a full entity. How long each one lasts is rolled per block when it comes
+ * loose, so the pile thins out rather than vanishing all at once.
  */
 public final class TitanRagdollSystem extends EntityTickingSystem<EntityStore> {
 
@@ -40,8 +41,6 @@ public final class TitanRagdollSystem extends EntityTickingSystem<EntityStore> {
     /** Below this speed a bouncing piece is considered settled. */
     private static final double REST_SPEED = 0.8;
     private static final double TERMINAL_SPEED = 60.0;
-    /** Seconds a settled piece stays before it is cleaned up. */
-    private static final float DEBRIS_LIFETIME = 14f;
 
     @Nonnull
     private final Query<EntityStore> query = Archetype.of(TitanPartComponent.getComponentType(), TransformComponent.getComponentType());
@@ -77,7 +76,7 @@ public final class TitanRagdollSystem extends EntityTickingSystem<EntityStore> {
         if (transform == null) return;
 
         part.addLifetime(dt);
-        if (part.getLifetime() >= DEBRIS_LIFETIME) {
+        if (part.getLifetime() >= part.getDespawnAfter()) {
             commandBuffer.removeEntity(archetypeChunk.getReferenceTo(index), RemoveReason.REMOVE);
             return;
         }

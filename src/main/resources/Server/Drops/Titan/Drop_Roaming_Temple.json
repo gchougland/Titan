@@ -1,0 +1,24 @@
+{
+  "$Comment": "The one-off half of the payout: the Heart of Orbis the temple was built around, and the diamond under it. Both guaranteed and both single, because the reason to kill one of these is that there is exactly one of each in it. The bulk crystal comes from the variant's DropItem, and the rubble is thrown in so the pile looks like a building came down rather than a chest opening.",
+  "Container": {
+    "Type": "Multiple",
+    "Containers": [
+      {
+        "Type": "Single",
+        "Item": { "ItemId": "Bench_Memories", "QuantityMin": 1, "QuantityMax": 1 }
+      },
+      {
+        "Type": "Single",
+        "Item": { "ItemId": "Rock_Gem_Diamond", "QuantityMin": 1, "QuantityMax": 1 }
+      },
+      {
+        "Type": "Single",
+        "Item": { "ItemId": "Rubble_Marble", "QuantityMin": 8, "QuantityMax": 16 }
+      },
+      {
+        "Type": "Single",
+        "Item": { "ItemId": "Rock_Crystal_Blue_Large", "QuantityMin": 2, "QuantityMax": 4 }
+      }
+    ]
+  }
+}

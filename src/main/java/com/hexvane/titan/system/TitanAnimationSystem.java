@@ -203,7 +203,17 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
             else groupOneStepping = true;
         }
 
+        final int stomping = titan.getStompFoot();
+
         for (int i = 0; i < feet.length; i++) {
+            // A leg mid-stomp belongs to the AI, which is holding it in the air over a marked spot. Handing
+            // it to the planner as well would have the gait quietly walking it back to where it thinks the
+            // foot should be, and the attack would never leave the ground.
+            if (i == stomping) {
+                feet[i].current.set(titan.getStompGoal());
+                continue;
+            }
+
             final var chain = ikChains[chains[i]];
             final boolean blocked = feet[i].gaitGroup == 0 ? groupOneStepping : groupZeroStepping;
             TitanFootPlanner.update(feet[i], chain, bodyPosition, forward, right,

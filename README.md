@@ -22,7 +22,9 @@ in the zone 4 wastes. Mithril is out there too, but you will walk a long way bef
 
 ## Fighting one
 
-A Talus has two attacks and both of them are openings.
+A Talus has five attacks and every one of them is an opening. Every one of them is also announced first:
+an amber ring burns onto the ground where the blow is going to land and fills in as the windup runs out, so
+nothing it does should catch you twice.
 
 When it smashes down with an arm, the hand sticks in the ground for a moment. That hand is a step. Run up
 the forearm and you are on its back.
@@ -30,8 +32,21 @@ the forearm and you are on its back.
 When it slams its whole body forward it lies there winded for several seconds, back low and completely
 exposed. This is the best opening in the fight.
 
-Both attacks hit hard and throw you a long way, so underneath it and behind it are the safe places. The legs
-are far enough apart to run between.
+When it raises both fists and drives them in together, the ring is enormous and the blow is almost harmless.
+What it does is throw you straight up, and the ground is what kills you. Both arms end up buried, which is
+two ramps at once and the widest way up it will ever give you.
+
+Back away and it stops walking after you. It reaches down instead, tears a boulder out of the earth in a
+burst of dust and cracked ground, and lobs it on a slow high arc, with the spot it is going to land on
+ringed the whole way down. There is time to walk out of that ring. There is not time to think about it.
+
+Get on its back and it may answer by planting the front edge of its slab into the dirt and driving forward
+like a plough, arms flung out behind it, tearing a corridor through everything in front. Anyone still
+standing on it goes over the front. It does this rarely and it will not do it twice in a row, but it ends
+the run beached face-down, and that is a long time to be standing on something that cannot get up.
+
+Everything except the boulder hits hard and throws you a long way, so underneath it and behind it are the
+safe places. The legs are far enough apart to run between.
 
 ## Worth knowing
 
@@ -48,6 +63,22 @@ walk away, though, and it will be whole again next time.
 clears them out. `/ti` works as a shorthand.
 
 `/titan dance` is not useful, but a titan doing a player emote is worth seeing once.
+
+## Server settings
+
+`mods/Hexvane_Titan/config.json` holds a handful of switches. `WeakpointHealthMultiplier`,
+`AttackDamageMultiplier`, `AttackKnockbackMultiplier`, `PickaxeDamageMultiplier` and `MaceDamageMultiplier`
+scale the whole ladder at once, and `DisabledVariants` keeps named variants out of the world.
+
+`BattleMusic` decides whether a fight takes over the music for everyone in it, and `Telegraphs` whether the
+ground markers are drawn at all. Both default to on. Turning telegraphs off makes the fight considerably
+harder rather than merely quieter, since the boulder's landing spot and the plough's corridor are the only
+warning either one gives.
+
+Individual variants can be retuned in their own files under `Server/Titan/Variants`. Every number the three
+new attacks use is there — chance, reach, damage, radius, timing — along with the particle system and sound
+for each telegraph and the music track the fight plays. Emptying any of those strings turns off that one
+piece for that one variant.
 
 ## Installation
 

@@ -13,14 +13,18 @@ public final class PrefabVoxels {
     /**
      * One block of the prefab.
      *
-     * @param surface   at least one face is exposed
+     * @param rotation  the block's own orientation, as a {@code RotationTuple} index; what tells a slab
+     *                  which way up it is or a stair which way it faces
+     * @param surface   at least one face is not hidden behind a solid cube, so this block is visible
      * @param standable nothing sits directly above, so this block's top face is one a player could land on
      */
-    public record Voxel(int x, int y, int z, @Nonnull String blockKey, boolean surface, boolean standable) {
+    public record Voxel(int x, int y, int z, @Nonnull String blockKey, int rotation, boolean surface,
+                        boolean standable) {
     }
 
     @Nonnull
     private final List<Voxel> voxels;
+    private final int surfaceSize;
     private final int minX;
     private final int minY;
     private final int minZ;
@@ -31,6 +35,11 @@ public final class PrefabVoxels {
     public PrefabVoxels(@Nonnull final List<Voxel> voxels, final int minX, final int minY, final int minZ,
                         final int maxX, final int maxY, final int maxZ) {
         this.voxels = voxels;
+        int surface = 0;
+        for (final Voxel voxel : voxels) {
+            if (voxel.surface()) surface++;
+        }
+        this.surfaceSize = surface;
         this.minX = minX;
         this.minY = minY;
         this.minZ = minZ;
@@ -50,6 +59,11 @@ public final class PrefabVoxels {
 
     public int size() {
         return voxels.size();
+    }
+
+    /** How many voxels have at least one exposed face, which is all a hollow bone spawns. */
+    public int surfaceSize() {
+        return surfaceSize;
     }
 
     /**

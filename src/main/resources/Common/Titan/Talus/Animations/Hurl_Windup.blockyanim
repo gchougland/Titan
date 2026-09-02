@@ -1,0 +1,53 @@
+{
+  "$Comment": [
+    "Reaching into the ground for a boulder and tearing it out. 78 frames at 60fps, so 1.3 seconds.",
+    "Only the spine is animated. The legs are replanted by foot IK every tick whatever this says, and the arm doing the digging is driven to its goal by hand IK, so the two arm tracks here are the counterweight the other one swings out behind: whichever arm the throw picks simply overrides its own.",
+    "Rotations are about the bone's X axis unless stated. Negative pitches the top of the body forward, which is why the crouch is negative and the rear back at the end is positive."
+  ],
+  "formatVersion": 1,
+  "duration": 78,
+  "holdLastKeyframe": true,
+  "nodeAnimations": {
+    "Pelvis": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 26, "delta": { "x": -0.190809, "y": 0.0, "z": 0.0, "w": 0.981627 }, "interpolationType": "smooth" },
+        { "time": 52, "delta": { "x": -0.121869, "y": 0.0, "z": 0.0, "w": 0.992546 }, "interpolationType": "smooth" },
+        { "time": 78, "delta": { "x": 0.139173, "y": 0.0, "z": 0.0, "w": 0.990268 }, "interpolationType": "smooth" }
+      ]
+    },
+    "Belly": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 26, "delta": { "x": 0.0, "y": 0.173648, "z": 0.0, "w": 0.984808 }, "interpolationType": "smooth" },
+        { "time": 78, "delta": { "x": 0.0, "y": -0.121869, "z": 0.0, "w": 0.992546 }, "interpolationType": "smooth" }
+      ]
+    },
+    "Chest": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 26, "delta": { "x": -0.104528, "y": 0.0, "z": 0.0, "w": 0.994522 }, "interpolationType": "smooth" },
+        { "time": 78, "delta": { "x": 0.104528, "y": 0.0, "z": 0.0, "w": 0.994522 }, "interpolationType": "smooth" }
+      ]
+    },
+    "L-Arm": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 40, "delta": { "x": -0.216440, "y": 0.0, "z": 0.0, "w": 0.976296 }, "interpolationType": "smooth" },
+        { "time": 78, "delta": { "x": -0.342020, "y": 0.0, "z": 0.0, "w": 0.939693 }, "interpolationType": "smooth" }
+      ]
+    },
+    "R-Arm": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 40, "delta": { "x": -0.216440, "y": 0.0, "z": 0.0, "w": 0.976296 }, "interpolationType": "smooth" },
+        { "time": 78, "delta": { "x": -0.342020, "y": 0.0, "z": 0.0, "w": 0.939693 }, "interpolationType": "smooth" }
+      ]
+    }
+  }
+}

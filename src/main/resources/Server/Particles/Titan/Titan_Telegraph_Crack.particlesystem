@@ -1,0 +1,15 @@
+{
+  "$Comment": "Not a telegraph so much as the consequence of one: this is what the ground looks like after a titan has pulled a boulder out of it.",
+  "Spawners": [
+    {
+      "SpawnerId": "Titan_Telegraph_Crack"
+    },
+    {
+      "SpawnerId": "Titan_Telegraph_Crack_Dust",
+      "FixedRotation": false
+    }
+  ],
+  "BoundingRadius": 12,
+  "CullDistance": 96,
+  "IsImportant": false
+}

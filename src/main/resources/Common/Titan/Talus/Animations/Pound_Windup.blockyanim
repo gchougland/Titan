@@ -1,0 +1,47 @@
+{
+  "$Comment": [
+    "Hauling both fists overhead. 57 frames, 0.95 seconds. The body rears back as the arms come up, which is what sells the weight of them; the fists themselves are placed by hand IK, so the arm tracks here only set the pose the IK blends out of."
+  ],
+  "formatVersion": 1,
+  "duration": 57,
+  "holdLastKeyframe": true,
+  "nodeAnimations": {
+    "Pelvis": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 30, "delta": { "x": 0.087156, "y": 0.0, "z": 0.0, "w": 0.996195 }, "interpolationType": "smooth" },
+        { "time": 57, "delta": { "x": 0.156434, "y": 0.0, "z": 0.0, "w": 0.987688 }, "interpolationType": "smooth" }
+      ]
+    },
+    "Belly": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 57, "delta": { "x": 0.069756, "y": 0.0, "z": 0.0, "w": 0.997564 }, "interpolationType": "smooth" }
+      ]
+    },
+    "Chest": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 30, "delta": { "x": 0.104528, "y": 0.0, "z": 0.0, "w": 0.994522 }, "interpolationType": "smooth" },
+        { "time": 57, "delta": { "x": 0.173648, "y": 0.0, "z": 0.0, "w": 0.984808 }, "interpolationType": "smooth" }
+      ]
+    },
+    "L-Arm": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 57, "delta": { "x": -0.573576, "y": 0.0, "z": 0.0, "w": 0.819152 }, "interpolationType": "smooth" }
+      ]
+    },
+    "R-Arm": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 57, "delta": { "x": -0.573576, "y": 0.0, "z": 0.0, "w": 0.819152 }, "interpolationType": "smooth" }
+      ]
+    }
+  }
+}

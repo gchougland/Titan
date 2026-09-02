@@ -4,6 +4,7 @@ import com.hypixel.hytale.assetstore.AssetExtraInfo;
 import com.hypixel.hytale.assetstore.codec.AssetBuilderCodec;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
 import com.hypixel.hytale.assetstore.map.JsonAssetWithMap;
+import com.hexvane.titan.config.TitanConfig;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
@@ -94,8 +95,10 @@ public final class TitanSpawnRuleAsset implements JsonAssetWithMap<String, Defau
     /**
      * Odds that any one candidate site in this environment actually hosts a titan, {@code 0} to {@code 1}.
      *
-     * <p>Sites sit on a fixed grid, so this reads directly as spacing: at {@code 0.25} roughly one cell in
-     * four is occupied, which across unbroken matching terrain averages a titan every few hundred blocks.
+     * <p>Sites sit on a fixed grid of {@link com.hexvane.titan.spawn.TitanSite#CELL_BLOCKS} blocks, so this
+     * reads directly as spacing: at {@code 0.25} roughly one cell in four is occupied, which across
+     * unbroken matching terrain averages one titan every five hundred blocks or so. Most terrain is not
+     * unbroken, and a site still has to survive the flatness check, so the number seen in play is lower.
      */
     public float getChance() {
         return chance;
@@ -106,25 +109,33 @@ public final class TitanSpawnRuleAsset implements JsonAssetWithMap<String, Defau
     }
 
     /**
-     * Picks a variant by weight.
+     * Picks a variant by weight, skipping any the server owner has switched off.
+     *
+     * <p>A disabled variant is treated as weightless rather than as an empty result, so turning off one tier
+     * hands its share of the sites to the tiers left standing instead of thinning the zone out.
      *
      * @param roll a value in {@code [0,1)}; the same roll always yields the same variant
+     * @return {@code null} if the rule has nothing left it is allowed to spawn
      */
     @Nullable
     public String pickVariant(final double roll) {
+        final TitanConfig config = TitanConfig.get();
+
         float total = 0f;
         for (final TitanSpawnEntry entry : variants) {
-            if (entry.getWeight() > 0f) total += entry.getWeight();
+            if (entry.getWeight() > 0f && config.isVariantEnabled(entry.getVariant())) total += entry.getWeight();
         }
         if (total <= 0f) return null;
 
         double remaining = roll * total;
+        String last = null;
         for (final TitanSpawnEntry entry : variants) {
-            if (entry.getWeight() <= 0f) continue;
+            if (entry.getWeight() <= 0f || !config.isVariantEnabled(entry.getVariant())) continue;
+            last = entry.getVariant();
             remaining -= entry.getWeight();
-            if (remaining < 0) return entry.getVariant();
+            if (remaining < 0) return last;
         }
-        return variants[variants.length - 1].getVariant();
+        return last;
     }
 
     /** Whether any rule is loaded at all, so the spawn system can skip its scan entirely. */

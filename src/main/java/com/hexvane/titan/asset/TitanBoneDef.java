@@ -77,6 +77,21 @@ public final class TitanBoneDef {
             o -> o.maxParts
         ).add()
         .append(
+            new KeyedCodec<>("Hollow", Codec.BOOLEAN),
+            (o, v) -> o.hollow = v,
+            o -> o.hollow
+        ).add()
+        .append(
+            new KeyedCodec<>("SliceMinY", Codec.INTEGER),
+            (o, v) -> o.sliceMinY = v,
+            o -> o.sliceMinY
+        ).add()
+        .append(
+            new KeyedCodec<>("SliceMaxY", Codec.INTEGER),
+            (o, v) -> o.sliceMaxY = v,
+            o -> o.sliceMaxY
+        ).add()
+        .append(
             new KeyedCodec<>("Detachable", Codec.BOOLEAN),
             (o, v) -> o.detachable = v,
             o -> o.detachable
@@ -99,6 +114,9 @@ public final class TitanBoneDef {
     private int colliderStride;
     private boolean colliderAllFaces;
     private int maxParts;
+    private boolean hollow;
+    private int sliceMinY = Integer.MIN_VALUE;
+    private int sliceMaxY = Integer.MAX_VALUE;
     private boolean detachable = true;
 
     /** Resolved at load time by {@link TitanSkeletonAsset}. */
@@ -176,6 +194,36 @@ public final class TitanBoneDef {
     /** Upper bound on spawned voxel entities for this bone; {@code 0} means unlimited. */
     public int getMaxParts() {
         return maxParts;
+    }
+
+    /**
+     * Drops every voxel that is completely walled in by its neighbours, leaving only the shell.
+     *
+     * <p>Free on anything solid, because a block with all six faces buried is never drawn and never
+     * touched. The saving scales with bulk: a limb segment a couple of blocks thick is nearly all shell
+     * already, but a body the size of a small island is mostly filling, and paying an entity for each of
+     * those is what puts a titan of that size out of reach. The one visible difference is the death
+     * ragdoll, which crumbles into a hollow shell rather than a solid mass.
+     */
+    public boolean isHollow() {
+        return hollow;
+    }
+
+    /**
+     * Lowest prefab layer this bone takes, inclusive, in the prefab's own block coordinates.
+     *
+     * <p>Slicing lets one authored prefab serve several bones: a leg modelled as a single pillar becomes a
+     * thigh, a calf and a foot by cutting it at two heights, which is what gives it a knee to bend without
+     * anyone having to cut the asset up by hand. Each slice is skinned independently, so the cut faces are
+     * treated as exposed and survive {@link #isHollow()}.
+     */
+    public int getSliceMinY() {
+        return sliceMinY;
+    }
+
+    /** Highest prefab layer this bone takes, inclusive. See {@link #getSliceMinY()}. */
+    public int getSliceMaxY() {
+        return sliceMaxY;
     }
 
     /** Whether this bone's voxels tumble away during the death ragdoll. */

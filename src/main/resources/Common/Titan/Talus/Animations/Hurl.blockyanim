@@ -1,0 +1,51 @@
+{
+  "$Comment": [
+    "The throw. 36 frames, 0.6 seconds. Starts exactly where Hurl_Windup left the body so the two read as one motion, then unwinds the whole spine forward at once: the rear-back becomes a lean, the twist reverses, and both arms swing through.",
+    "The boulder leaves the hand partway through rather than at the end, so the follow-through is the titan having already let go."
+  ],
+  "formatVersion": 1,
+  "duration": 36,
+  "holdLastKeyframe": true,
+  "nodeAnimations": {
+    "Pelvis": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.139173, "y": 0.0, "z": 0.0, "w": 0.990268 }, "interpolationType": "smooth" },
+        { "time": 14, "delta": { "x": -0.087156, "y": 0.0, "z": 0.0, "w": 0.996195 }, "interpolationType": "smooth" },
+        { "time": 36, "delta": { "x": -0.173648, "y": 0.0, "z": 0.0, "w": 0.984808 }, "interpolationType": "smooth" }
+      ]
+    },
+    "Belly": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": -0.121869, "z": 0.0, "w": 0.992546 }, "interpolationType": "smooth" },
+        { "time": 14, "delta": { "x": 0.0, "y": 0.087156, "z": 0.0, "w": 0.996195 }, "interpolationType": "smooth" },
+        { "time": 36, "delta": { "x": 0.0, "y": 0.156434, "z": 0.0, "w": 0.987688 }, "interpolationType": "smooth" }
+      ]
+    },
+    "Chest": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.104528, "y": 0.0, "z": 0.0, "w": 0.994522 }, "interpolationType": "smooth" },
+        { "time": 14, "delta": { "x": -0.130526, "y": 0.0, "z": 0.0, "w": 0.991445 }, "interpolationType": "smooth" },
+        { "time": 36, "delta": { "x": -0.190809, "y": 0.0, "z": 0.0, "w": 0.981627 }, "interpolationType": "smooth" }
+      ]
+    },
+    "L-Arm": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": -0.342020, "y": 0.0, "z": 0.0, "w": 0.939693 }, "interpolationType": "smooth" },
+        { "time": 18, "delta": { "x": 0.087156, "y": 0.0, "z": 0.0, "w": 0.996195 }, "interpolationType": "smooth" },
+        { "time": 36, "delta": { "x": 0.173648, "y": 0.0, "z": 0.0, "w": 0.984808 }, "interpolationType": "smooth" }
+      ]
+    },
+    "R-Arm": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": -0.342020, "y": 0.0, "z": 0.0, "w": 0.939693 }, "interpolationType": "smooth" },
+        { "time": 18, "delta": { "x": 0.087156, "y": 0.0, "z": 0.0, "w": 0.996195 }, "interpolationType": "smooth" },
+        { "time": 36, "delta": { "x": 0.173648, "y": 0.0, "z": 0.0, "w": 0.984808 }, "interpolationType": "smooth" }
+      ]
+    }
+  }
+}

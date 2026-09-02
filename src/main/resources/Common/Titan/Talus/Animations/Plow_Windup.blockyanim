@@ -1,0 +1,50 @@
+{
+  "$Comment": [
+    "Rearing up and then driving the front of the slab into the ground. 60 frames, one second.",
+    "The rear is the tell. A titan about to plough goes up before it goes down, which is a full third of a second of warning that something is coming and that it is not another smash, and it happens above the shoulder line where a player standing on the back can see it.",
+    "The pitch is carried on Pelvis, so the whole rig goes with it. The legs come too, but they are put back on the terrain by foot IK before anything is drawn, which is what leaves the body angled while the feet stay under it."
+  ],
+  "formatVersion": 1,
+  "duration": 60,
+  "holdLastKeyframe": true,
+  "nodeAnimations": {
+    "Pelvis": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 22, "delta": { "x": 0.173648, "y": 0.0, "z": 0.0, "w": 0.984808 }, "interpolationType": "smooth" },
+        { "time": 60, "delta": { "x": -0.300706, "y": 0.0, "z": 0.0, "w": 0.953717 }, "interpolationType": "smooth" }
+      ]
+    },
+    "Belly": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 22, "delta": { "x": 0.087156, "y": 0.0, "z": 0.0, "w": 0.996195 }, "interpolationType": "smooth" },
+        { "time": 60, "delta": { "x": -0.173648, "y": 0.0, "z": 0.0, "w": 0.984808 }, "interpolationType": "smooth" }
+      ]
+    },
+    "Chest": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 22, "delta": { "x": 0.104528, "y": 0.0, "z": 0.0, "w": 0.994522 }, "interpolationType": "smooth" },
+        { "time": 60, "delta": { "x": -0.241922, "y": 0.0, "z": 0.0, "w": 0.970296 }, "interpolationType": "smooth" }
+      ]
+    },
+    "L-Arm": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 60, "delta": { "x": -0.537300, "y": 0.0, "z": 0.0, "w": 0.843391 }, "interpolationType": "smooth" }
+      ]
+    },
+    "R-Arm": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 60, "delta": { "x": -0.537300, "y": 0.0, "z": 0.0, "w": 0.843391 }, "interpolationType": "smooth" }
+      ]
+    }
+  }
+}

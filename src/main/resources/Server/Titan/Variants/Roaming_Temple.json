@@ -1,0 +1,73 @@
+{
+  "$Comment": [
+    "A ruin on legs that walks the plains. Roughly four times the height of a talus and nineteen times the block count, which is what it exists to test.",
+    "Everything about it is the opposite of a talus. It does not hide, does not hunt, and does not follow: it is awake from the moment it is built, it ignores anyone who has not hit it, and once hit it plants itself and answers whoever is in reach rather than walking them down. Walking away from one works. Standing next to a leg does not.",
+    "Every talus attack is turned off because it has no arms to perform them with. All it can do is pick up the nearest leg and put it back down, which is slow and enormous and hits for about three times what an arm smash does. AttackRange is generous because it is measured from the middle of a body seventeen blocks wide, so anything less would mean the target has to be standing under the keel before it counts as in reach.",
+    "The crystals are on the legs rather than up top, so this is a fight on foot rather than a climb. There is no way onto it worth taking and it never hands one out.",
+    "Seven crystals, five of which kill it. Two spares, so the fight is a matter of picking off enough of them rather than hunting down every last one: the legs are twenty-five blocks of rock and a crystal on the wrong face of the wrong one, twenty blocks up, is a chore rather than a boss. It also means the two nodes nobody could reach are the two nobody has to.",
+    "The footprint is the leg spread rather than the island, because the island overhangs and only the legs have to find ground. Fourteen out on each corner against the spawner's four, over which the ground may still roll the same six blocks, so it is far fussier in practice: the legs have two blocks of knee slack and a site that rolls more than that under one corner leaves a foot in the air. Headroom is the whole forty-eight it stands, legs and island together."
+  ],
+  "Skeleton": "Roaming_Temple",
+  "DisplayName": "Roaming Temple",
+  "BodyScale": 1.0,
+
+  "WeakpointModel": "Titan_Crystal_Blue",
+  "WeakpointScale": 3.0,
+  "WeakpointCountMin": 7,
+  "WeakpointCountMax": 7,
+  "WeakpointsToKill": 5,
+  "WeakpointEmbed": -0.5,
+  "WeakpointHealth": 200,
+
+  "SpawnFootprintRadius": 14,
+  "SpawnFootprintRelief": 6,
+  "SpawnHeadroom": 48,
+
+  "StartAwake": true,
+  "Passive": true,
+  "Chase": false,
+  "WanderRadius": 50,
+  "WanderPauseMin": 8.0,
+  "WanderPauseMax": 25.0,
+  "Environments": [ "Env_Zone1_Plains" ],
+
+  "MoveSpeed": 0.9,
+  "TurnSpeed": 0.25,
+  "WakeRadius": 0,
+  "LoseTargetRadius": 60,
+  "LeashRadius": 50,
+
+  "AttackRange": 24.0,
+  "AttackCooldown": 6.0,
+
+  "SmashChance": 0,
+  "SlamChance": 0,
+  "PoundChance": 0,
+  "HurlChance": 0,
+  "PlowChance": 0,
+
+  "StompChance": 1.0,
+  "StompRadius": 10.0,
+  "StompDamage": 45,
+  "StompKnockback": 20,
+  "StompLift": 0.35,
+  "StompWindupSeconds": 2.2,
+  "StompSeconds": 0.8,
+  "StompRecoverSeconds": 2.0,
+
+  "DropList": "Drop_Roaming_Temple",
+  "DropItem": "Ingredient_Crystal_Blue",
+  "DropCountMin": 16,
+  "DropCountMax": 28,
+
+  "ImpactParticle": "Block_Land_Hard_Stone",
+  "ImpactSound": "SFX_Golem_Earth_Slam_Impact",
+  "DeathSound": "SFX_Stone_Break",
+
+  "TelegraphRingParticle": "Titan_Telegraph_Ring",
+  "TelegraphFillParticle": "Titan_Telegraph_Fill",
+  "TelegraphSound": "SFX_Golem_Earth_Alerted",
+  "StompSound": "SFX_Golem_Earth_Stomp_Impact",
+
+  "BattleMusic": "Track_Titan_Battle"
+}

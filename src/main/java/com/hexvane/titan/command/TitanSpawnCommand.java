@@ -1,17 +1,23 @@
 package com.hexvane.titan.command;
 
 import com.hexvane.titan.asset.TitanVariantAsset;
+import com.hexvane.titan.config.TitanConfig;
 import com.hexvane.titan.spawn.ColliderMode;
 import com.hexvane.titan.spawn.TitanSpawner;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.CommandSender;
+import com.hypixel.hytale.server.core.command.system.ParseResult;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.arguments.types.RelativeDoublePosition;
+import com.hypixel.hytale.server.core.command.system.arguments.types.SingleArgumentType;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.command.system.suggestion.SuggestionResult;
+import com.hypixel.hytale.server.core.command.system.suggestion.SuggestionUtil;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -20,6 +26,8 @@ import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -31,8 +39,24 @@ public final class TitanSpawnCommand extends AbstractPlayerCommand {
     private static final double SPAWN_AHEAD = 12.0;
 
     @Nonnull
+    private static final List<String> COLLIDER_MODES = Arrays.stream(ColliderMode.values())
+        .map(ColliderMode::argument)
+        .toList();
+
+    /**
+     * Completes to the loaded variant ids.
+     *
+     * <p>Read at completion time rather than captured once, so a variant added by another pack, or one the
+     * owner has since disabled, is reflected without the command being re-registered.
+     */
+    @Nonnull
+    private static final SingleArgumentType<String> VARIANT = suggesting(TitanSpawnCommand::spawnableVariants);
+    @Nonnull
+    private static final SingleArgumentType<String> COLLIDERS = suggesting(() -> COLLIDER_MODES);
+
+    @Nonnull
     private final RequiredArg<String> variantArg =
-        withRequiredArg("variant", "titan_commands.commands.titan.spawn.variant.desc", ArgTypes.STRING);
+        withRequiredArg("variant", "titan_commands.commands.titan.spawn.variant.desc", VARIANT);
     @Nonnull
     private final OptionalArg<RelativeDoublePosition> positionArg =
         withOptionalArg("position", "titan_commands.commands.titan.spawn.position.desc", ArgTypes.RELATIVE_POSITION);
@@ -41,7 +65,42 @@ public final class TitanSpawnCommand extends AbstractPlayerCommand {
         withOptionalArg("yaw", "titan_commands.commands.titan.spawn.yaw.desc", ArgTypes.FLOAT);
     @Nonnull
     private final OptionalArg<String> collidersArg =
-        withOptionalArg("colliders", "titan_commands.commands.titan.spawn.colliders.desc", ArgTypes.STRING);
+        withOptionalArg("colliders", "titan_commands.commands.titan.spawn.colliders.desc", COLLIDERS);
+
+    /**
+     * A string argument that completes from a list looked up when the client asks.
+     *
+     * <p>An argument type rather than the {@code suggest} hook on the argument itself, which looks like the
+     * obvious way to do this and silently does nothing. The client is told each argument's type and how many
+     * values that type can suggest, and it only asks the server for completions when that count says there
+     * are some. {@link ArgTypes#STRING} is the shared free-text type and reports none, so a per-argument
+     * hook hung off it is never called; a type of our own that says otherwise is what puts the list on
+     * screen. The shipped commands that complete strings all do it this way.
+     */
+    @Nonnull
+    private static SingleArgumentType<String> suggesting(@Nonnull final Supplier<List<String>> candidates) {
+        return new SingleArgumentType<>(
+            "server.commands.parsing.argtype.string.name", "server.commands.parsing.argtype.string.usage") {
+
+            @Override
+            public String parse(final String input, final ParseResult parseResult) {
+                return input;
+            }
+
+            @Override
+            public void suggest(@Nonnull final CommandSender sender,
+                                @Nonnull final String textAlreadyEntered,
+                                final int numParametersTyped,
+                                @Nonnull final SuggestionResult result) {
+                SuggestionUtil.suggestFiltered(candidates.get(), textAlreadyEntered, result);
+            }
+
+            @Override
+            public int getSuggestionValueCount() {
+                return candidates.get().size();
+            }
+        };
+    }
 
     public TitanSpawnCommand() {
         super("spawn", "titan_commands.commands.titan.spawn.desc");
@@ -103,6 +162,14 @@ public final class TitanSpawnCommand extends AbstractPlayerCommand {
             .param("x", position.x)
             .param("y", position.y)
             .param("z", position.z));
+    }
+
+    /** The variants a spawn would actually succeed with: everything loaded, minus anything switched off. */
+    @Nonnull
+    private static List<String> spawnableVariants() {
+        return TitanVariantAsset.ASSET_MAP.getAssetMap().keySet().stream()
+            .filter(id -> TitanConfig.get().isVariantEnabled(id))
+            .toList();
     }
 
     @Nonnull

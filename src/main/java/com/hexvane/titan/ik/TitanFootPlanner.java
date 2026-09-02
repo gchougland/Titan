@@ -106,7 +106,12 @@ public final class TitanFootPlanner {
         return true;
     }
 
-    /** Where this limb would stand if the body were at rest, projected onto the ground. */
+    /**
+     * Where this limb would stand if the body were at rest, projected onto the ground.
+     *
+     * <p>{@code RestOffset} is read in the same titan-local space as a bone's {@code Offset}, so a foot's
+     * rest spot is authored by copying the numbers off the leg it belongs to.
+     */
     @Nonnull
     public static Vector3d restPosition(@Nonnull final TitanIkChainDef chain,
                                         @Nonnull final Vector3dc bodyPosition,
@@ -116,7 +121,9 @@ public final class TitanFootPlanner {
                                         @Nonnull final Vector3d dest) {
         final Vector3dc offset = chain.getRestOffset();
         dest.set(bodyPosition);
-        dest.fma(offset.z() * scale, bodyForward);
+        // Negated because bodyForward is -Z: without it a front leg's rest spot lands behind the titan and
+        // the legs on each side reach across one another.
+        dest.fma(-offset.z() * scale, bodyForward);
         dest.fma(offset.x() * scale, bodyRight);
         dest.y += offset.y() * scale;
         return dest;

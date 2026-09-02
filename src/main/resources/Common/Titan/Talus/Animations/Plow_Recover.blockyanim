@@ -1,0 +1,48 @@
+{
+  "$Comment": [
+    "Beached at the end of the run: front still down, back low, heaving. Loops, because how long the titan lies here is a variant setting.",
+    "This is the longest opening in the fight and it is meant to look like one. The motion is slow and shallow, so a player who has just been thrown off has something obviously stationary to run back at."
+  ],
+  "formatVersion": 1,
+  "duration": 90,
+  "holdLastKeyframe": false,
+  "nodeAnimations": {
+    "Pelvis": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": -0.342020, "y": 0.0, "z": 0.0, "w": 0.939693 }, "interpolationType": "smooth" },
+        { "time": 45, "delta": { "x": -0.309017, "y": 0.0, "z": 0.0, "w": 0.951057 }, "interpolationType": "smooth" },
+        { "time": 90, "delta": { "x": -0.342020, "y": 0.0, "z": 0.0, "w": 0.939693 }, "interpolationType": "smooth" }
+      ]
+    },
+    "Belly": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": -0.156434, "y": 0.0, "z": 0.0, "w": 0.987688 }, "interpolationType": "smooth" },
+        { "time": 90, "delta": { "x": -0.156434, "y": 0.0, "z": 0.0, "w": 0.987688 }, "interpolationType": "smooth" }
+      ]
+    },
+    "Chest": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": -0.224951, "y": 0.0, "z": 0.0, "w": 0.974370 }, "interpolationType": "smooth" },
+        { "time": 45, "delta": { "x": -0.190809, "y": 0.0, "z": 0.0, "w": 0.981627 }, "interpolationType": "smooth" },
+        { "time": 90, "delta": { "x": -0.224951, "y": 0.0, "z": 0.0, "w": 0.974370 }, "interpolationType": "smooth" }
+      ]
+    },
+    "L-Arm": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": -0.461749, "y": 0.0, "z": 0.0, "w": 0.887011 }, "interpolationType": "smooth" },
+        { "time": 90, "delta": { "x": -0.461749, "y": 0.0, "z": 0.0, "w": 0.887011 }, "interpolationType": "smooth" }
+      ]
+    },
+    "R-Arm": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": -0.461749, "y": 0.0, "z": 0.0, "w": 0.887011 }, "interpolationType": "smooth" },
+        { "time": 90, "delta": { "x": -0.461749, "y": 0.0, "z": 0.0, "w": 0.887011 }, "interpolationType": "smooth" }
+      ]
+    }
+  }
+}

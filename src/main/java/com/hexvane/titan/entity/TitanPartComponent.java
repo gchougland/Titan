@@ -30,6 +30,16 @@ public final class TitanPartComponent implements Component<EntityStore> {
     @Nonnull
     private final Vector3d localOffset = new Vector3d();
 
+    /**
+     * The block's own orientation as a {@code RotationTuple} index, folded back in every time the bone pose
+     * rewrites this part's transform. Without it a swinging leg flattens every slab and stair on it.
+     */
+    private int blockRotation;
+
+    /** The size this voxel is meant to render at, kept so a drifted or undelivered value can be restored. */
+    private float scale = 1f;
+    private float scaleRefreshTimer;
+
     private boolean detached;
     @Nonnull
     private final Vector3d velocity = new Vector3d();
@@ -37,14 +47,23 @@ public final class TitanPartComponent implements Component<EntityStore> {
     private final Vector3d angularVelocity = new Vector3d();
     private boolean resting;
     private float lifetime;
+    private float despawnAfter;
 
     public TitanPartComponent() {
     }
 
-    public TitanPartComponent(@Nonnull final Ref<EntityStore> owner, final int boneIndex, @Nonnull final Vector3d localOffset) {
+    public TitanPartComponent(@Nonnull final Ref<EntityStore> owner,
+                              final int boneIndex,
+                              @Nonnull final Vector3d localOffset,
+                              final int blockRotation,
+                              final float scale,
+                              final float scaleRefreshPhase) {
         this.owner = owner;
         this.boneIndex = boneIndex;
         this.localOffset.set(localOffset);
+        this.blockRotation = blockRotation;
+        this.scale = scale;
+        this.scaleRefreshTimer = scaleRefreshPhase;
     }
 
     @Nullable
@@ -61,14 +80,42 @@ public final class TitanPartComponent implements Component<EntityStore> {
         return localOffset;
     }
 
+    /** @see #blockRotation */
+    public int getBlockRotation() {
+        return blockRotation;
+    }
+
+    public float getScale() {
+        return scale;
+    }
+
+    /**
+     * Counts down to the next time this voxel should restate its size to the clients watching it.
+     *
+     * <p>The engine sends a block entity's scale once, when the value is marked out of date, and clears
+     * that mark whether or not the packet reached anybody. Miss the window and the voxel renders at the
+     * client's default size forever, which is where the occasional half-size titan full of gaps came from.
+     * Restating it on a slow rotation repairs that, and also puts back a value that something else changed.
+     * The phase is per part so the whole body does not resend on the same tick.
+     *
+     * @return {@code true} when this part is due
+     */
+    public boolean consumeScaleRefresh(final float dt, final float interval) {
+        scaleRefreshTimer -= dt;
+        if (scaleRefreshTimer > 0f) return false;
+        scaleRefreshTimer = interval;
+        return true;
+    }
+
     public boolean isDetached() {
         return detached;
     }
 
-    public void detach(@Nonnull final Vector3d initialVelocity, @Nonnull final Vector3d spin) {
+    public void detach(@Nonnull final Vector3d initialVelocity, @Nonnull final Vector3d spin, final float despawnAfter) {
         this.detached = true;
         this.velocity.set(initialVelocity);
         this.angularVelocity.set(spin);
+        this.despawnAfter = despawnAfter;
     }
 
     @Nonnull
@@ -99,6 +146,11 @@ public final class TitanPartComponent implements Component<EntityStore> {
         lifetime += dt;
     }
 
+    /** Seconds this piece of rubble lasts before it is cleaned up. Rolled per part when it comes loose. */
+    public float getDespawnAfter() {
+        return despawnAfter;
+    }
+
     @Nonnull
     @Override
     public Component<EntityStore> clone() {
@@ -106,11 +158,15 @@ public final class TitanPartComponent implements Component<EntityStore> {
         copy.owner = owner;
         copy.boneIndex = boneIndex;
         copy.localOffset.set(localOffset);
+        copy.blockRotation = blockRotation;
+        copy.scale = scale;
+        copy.scaleRefreshTimer = scaleRefreshTimer;
         copy.detached = detached;
         copy.velocity.set(velocity);
         copy.angularVelocity.set(angularVelocity);
         copy.resting = resting;
         copy.lifetime = lifetime;
+        copy.despawnAfter = despawnAfter;
         return copy;
     }
 }

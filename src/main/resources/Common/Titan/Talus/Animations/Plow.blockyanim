@@ -1,0 +1,55 @@
+{
+  "$Comment": [
+    "Grinding forward with the front edge buried. Loops, because how long a plough runs for is a variant setting and the clip cannot know it.",
+    "The pitch does not sit still. It grinds a few degrees deeper and shallower and rolls side to side over a couple of seconds, which is the difference between a titan shovelling through the ground and a titan sliding across it on a fixed angle."
+  ],
+  "formatVersion": 1,
+  "duration": 132,
+  "holdLastKeyframe": false,
+  "nodeAnimations": {
+    "Pelvis": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": -0.358368, "y": 0.0, "z": 0.0, "w": 0.933580 }, "interpolationType": "smooth" },
+        { "time": 33, "delta": { "x": -0.382683, "y": 0.0, "z": 0.0, "w": 0.923880 }, "interpolationType": "smooth" },
+        { "time": 66, "delta": { "x": -0.342020, "y": 0.0, "z": 0.0, "w": 0.939693 }, "interpolationType": "smooth" },
+        { "time": 99, "delta": { "x": -0.382683, "y": 0.0, "z": 0.0, "w": 0.923880 }, "interpolationType": "smooth" },
+        { "time": 132, "delta": { "x": -0.358368, "y": 0.0, "z": 0.0, "w": 0.933580 }, "interpolationType": "smooth" }
+      ]
+    },
+    "Belly": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 33, "delta": { "x": 0.0, "y": 0.0, "z": 0.043619, "w": 0.999048 }, "interpolationType": "smooth" },
+        { "time": 66, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" },
+        { "time": 99, "delta": { "x": 0.0, "y": 0.0, "z": -0.043619, "w": 0.999048 }, "interpolationType": "smooth" },
+        { "time": 132, "delta": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }, "interpolationType": "smooth" }
+      ]
+    },
+    "Chest": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": -0.258819, "y": 0.0, "z": 0.0, "w": 0.965926 }, "interpolationType": "smooth" },
+        { "time": 33, "delta": { "x": -0.284015, "y": 0.0, "z": 0.0, "w": 0.958820 }, "interpolationType": "smooth" },
+        { "time": 66, "delta": { "x": -0.241922, "y": 0.0, "z": 0.0, "w": 0.970296 }, "interpolationType": "smooth" },
+        { "time": 99, "delta": { "x": -0.284015, "y": 0.0, "z": 0.0, "w": 0.958820 }, "interpolationType": "smooth" },
+        { "time": 132, "delta": { "x": -0.258819, "y": 0.0, "z": 0.0, "w": 0.965926 }, "interpolationType": "smooth" }
+      ]
+    },
+    "L-Arm": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": -0.573576, "y": 0.0, "z": 0.0, "w": 0.819152 }, "interpolationType": "smooth" },
+        { "time": 132, "delta": { "x": -0.573576, "y": 0.0, "z": 0.0, "w": 0.819152 }, "interpolationType": "smooth" }
+      ]
+    },
+    "R-Arm": {
+      "position": [],
+      "orientation": [
+        { "time": 0, "delta": { "x": -0.573576, "y": 0.0, "z": 0.0, "w": 0.819152 }, "interpolationType": "smooth" },
+        { "time": 132, "delta": { "x": -0.573576, "y": 0.0, "z": 0.0, "w": 0.819152 }, "interpolationType": "smooth" }
+      ]
+    }
+  }
+}

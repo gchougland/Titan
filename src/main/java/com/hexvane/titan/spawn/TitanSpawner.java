@@ -5,6 +5,7 @@ import com.hexvane.titan.asset.TitanBoneDef;
 import com.hexvane.titan.asset.TitanSkeletonAsset;
 import com.hexvane.titan.asset.TitanSocketDef;
 import com.hexvane.titan.asset.TitanVariantAsset;
+import com.hexvane.titan.config.TitanConfig;
 import com.hexvane.titan.entity.TitanComponent;
 import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.Ref;
@@ -12,9 +13,12 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.shape.Box;
 import com.hypixel.hytale.math.vector.Rotation3f;
+import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.BoundingBox;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.hitboxcollision.HitboxCollisionConfig;
+import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
+import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Matrix4d;
 import org.joml.Quaterniond;
@@ -105,6 +109,9 @@ public final class TitanSpawner {
 
         final TitanVariantAsset variant = TitanVariantAsset.find(variantId);
         if (variant == null) return Result.failure("unknown variant '" + variantId + '\'');
+        if (!TitanConfig.get().isVariantEnabled(variant.getId())) {
+            return Result.failure("variant '" + variant.getId() + "' is turned off under DisabledVariants in config.json");
+        }
 
         final TitanSkeletonAsset skeleton = TitanSkeletonAsset.find(variant.getSkeleton());
         if (skeleton == null) return Result.failure("variant '" + variantId + "' references unknown skeleton '" + variant.getSkeleton() + '\'');
@@ -112,6 +119,7 @@ public final class TitanSpawner {
 
         final var titan = new TitanComponent(variant, skeleton);
         titan.setYaw(yaw);
+        titan.getHome().set(position);
 
         final var rootHolder = EntityStore.REGISTRY.newHolder();
         rootHolder.addComponent(TransformComponent.getComponentType(), new TransformComponent(new Vector3d(position), new Rotation3f(0, yaw, 0)));
@@ -120,6 +128,16 @@ public final class TitanSpawner {
         rootHolder.addComponent(TitanComponent.getComponentType(), titan);
         rootHolder.ensureComponent(EntityStore.REGISTRY.getNonSerializedComponentType());
 
+        // The root carries nothing to look at, but the boss bar needs an entity to point at: the client
+        // draws the bar from the tracked entity's own Health, which is why the invisible root ends up
+        // holding the pooled total of every ore node. A stat map is also what makes something a legal
+        // attack target, and the root's box sits between the legs where a stray swing would find it, so
+        // TitanRootDamageSystem refuses damage to it. Deliberately not the Invulnerable marker: that is
+        // replicated, and the client answers it by drawing the boss bar in its white indestructible style.
+        rootHolder.addComponent(NetworkId.getComponentType(), new NetworkId(store.getExternalData().takeNextNetworkId()));
+        rootHolder.ensureComponent(EntityModule.get().getVisibleComponentType());
+        rootHolder.ensureAndGetComponent(EntityStatMap.getComponentType()).update();
+
         final Ref<EntityStore> root = store.addEntity(rootHolder, AddReason.SPAWN);
 
         final TitanPose pose = titan.getPose();
@@ -127,12 +145,22 @@ public final class TitanSpawner {
         pose.resetToBind(skeleton);
         pose.computeWorld(skeleton, TitanPose.rootMatrix(position, yaw, titan.getScale(), new Matrix4d()));
 
-        final Counts counts = spawnParts(store, root, titan, variant, skeleton, colliderMode);
-        final int weakpoints = spawnWeakpoints(store, root, titan, variant, skeleton, new Random(seed));
-        titan.setWeakpointCount(weakpoints);
+        final float nodeHealth = variant.getWeakpointHealth() * TitanConfig.get().getWeakpointHealthMultiplier();
 
-        LOGGER.at(Level.INFO).log("Spawned titan '%s' with %d parts (%d climbable, mode %s) and %d weakpoints at %s",
-            variantId, counts.parts, counts.colliders, colliderMode, weakpoints, position);
+        final Counts counts = spawnParts(store, root, titan, variant, skeleton, colliderMode);
+        final int weakpoints = spawnWeakpoints(store, root, titan, variant, skeleton, new Random(seed), nodeHealth);
+        titan.setWeakpointCount(weakpoints, variant.getWeakpointsToKill());
+        titan.setNodeHealth(nodeHealth);
+
+        // The bar reads full while every node is untouched, and empties as they break. Its length is what
+        // a kill costs rather than what the titan carries, so a variant with spares still empties it.
+        final var rootStats = store.getComponent(root, EntityStatMap.getComponentType());
+        if (rootStats != null && weakpoints > 0) {
+            TitanPartBuilder.applyHealth(rootStats, titan.getTotalHealth());
+        }
+
+        LOGGER.at(Level.INFO).log("Spawned titan '%s' with %d parts (%d climbable, mode %s) and %d weakpoints (%d to kill) at %s",
+            variantId, counts.parts, counts.colliders, colliderMode, weakpoints, titan.getWeakpointsToKill(), position);
         return new Result(root, counts.parts, weakpoints, null);
     }
 
@@ -167,13 +195,15 @@ public final class TitanSpawner {
         final var counts = new Counts();
 
         for (final TitanBoneDef bone : skeleton.getBones()) {
-            final PrefabVoxels voxels = PrefabVoxelReader.read(bone.getPrefab(), variant.getRockType());
+            final PrefabVoxels voxels = PrefabVoxelReader.read(
+                bone.getPrefab(), variant.getRockType(), bone.getSliceMinY(), bone.getSliceMaxY());
             if (voxels.isEmpty()) continue;
 
+            final boolean hollow = bone.isHollow();
             final Vector3d pivot = bone.getPivot() != null ? new Vector3d(bone.getPivot()) : voxels.defaultPivot();
             final float boneScale = voxelScale * bone.getScale();
             final double mirror = bone.isMirrorX() ? -1.0 : 1.0;
-            final int stride = decimationStride(voxels.size(), bone.getMaxParts());
+            final int stride = decimationStride(hollow ? voxels.surfaceSize() : voxels.size(), bone.getMaxParts());
             final boolean boneWantsColliders = colliderConfig != null && bone.getColliderStride() > 0;
 
             pose.getWorldRotation(bone.getIndex(), rotation);
@@ -184,6 +214,10 @@ public final class TitanSpawner {
             int colliderCandidate = -1;
 
             for (final PrefabVoxels.Voxel voxel : voxels.getVoxels()) {
+                // Ahead of the stride count so a part budget thins the shell evenly rather than being
+                // spent on filling that is never going to be spawned.
+                if (hollow && !voxel.surface()) continue;
+
                 index++;
                 if (stride > 1 && index % stride != 0) continue;
 
@@ -203,7 +237,8 @@ public final class TitanSpawner {
                 }
 
                 final var holder = TitanPartBuilder.buildVoxel(
-                    store, root, voxel.blockKey(), worldPos, rotation, boneScale, bone.getIndex(), local, collider, colliderConfig);
+                    store, root, voxel.blockKey(), worldPos, rotation, voxel.rotation(), boneScale,
+                    bone.getIndex(), local, collider, colliderConfig);
                 store.addEntity(holder, AddReason.SPAWN);
                 counts.parts++;
                 if (collider) counts.colliders++;
@@ -217,7 +252,8 @@ public final class TitanSpawner {
                                        @Nonnull final TitanComponent titan,
                                        @Nonnull final TitanVariantAsset variant,
                                        @Nonnull final TitanSkeletonAsset skeleton,
-                                       @Nonnull final Random random) {
+                                       @Nonnull final Random random,
+                                       final float nodeHealth) {
 
         final String modelId = variant.getWeakpointModel();
         final TitanSocketDef[] sockets = skeleton.getWeakpointSockets();
@@ -255,9 +291,10 @@ public final class TitanSpawner {
             // Sockets are authored on the body surface, so the direction from the bone's pivot out to one
             // is the surface normal there. Aiming the ore's growth axis along it makes a node on the chest
             // jut forwards and one on the flank jut sideways, and backing the node down that same axis
-            // beds it into the rock whichever face it landed on.
+            // beds it into the rock whichever face it landed on. A socket on a bone that pivots at its
+            // joint rather than its centre says which way is out for itself.
             local.set(socket.getOffset());
-            outward.set(local);
+            outward.set(socket.getNormal() != null ? socket.getNormal() : local);
             if (outward.lengthSquared() > 1.0e-6) {
                 outward.normalize();
                 local.fma(-sink, outward);
@@ -271,7 +308,7 @@ public final class TitanSpawner {
             pose.getWorldRotation(bone, localRotation, worldRotation);
 
             final var holder = TitanPartBuilder.buildWeakpoint(
-                store, root, modelId, variant.getWeakpointScale(), variant.getWeakpointHealth(),
+                store, root, modelId, variant.getWeakpointScale(), nodeHealth,
                 worldPos, worldRotation, bone, new Vector3d(local), localRotation);
             if (holder == null) {
                 LOGGER.at(Level.WARNING).log("Titan variant '%s' references unknown ModelAsset '%s'", variant.getId(), modelId);
@@ -341,8 +378,14 @@ public final class TitanSpawner {
                                      final double minSq) {
 
         final var offset = sockets[candidate].getOffset();
+        final int bone = sockets[candidate].getBoneIndex();
         for (int i = 0; i < count; i++) {
-            if (sockets[chosen[i]].getOffset().distanceSquared(offset) < minSq) return false;
+            final TitanSocketDef other = sockets[chosen[i]];
+            // Offsets are bone-local, so only two sockets on the same bone are in the same space. On a rig
+            // whose sockets are spread over four identical limbs, comparing across bones would read the
+            // matching spot on every leg as the same point and reject all but one of them.
+            if (other.getBoneIndex() != bone) continue;
+            if (other.getOffset().distanceSquared(offset) < minSq) return false;
         }
         return true;
     }

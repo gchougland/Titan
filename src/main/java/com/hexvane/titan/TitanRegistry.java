@@ -1,5 +1,7 @@
 package com.hexvane.titan;
 
+import com.hexvane.titan.entity.TitanBoulderComponent;
+import com.hexvane.titan.entity.TitanBoulderPartComponent;
 import com.hexvane.titan.entity.TitanComponent;
 import com.hexvane.titan.entity.TitanPartComponent;
 import com.hexvane.titan.entity.TitanWeakpointComponent;
@@ -18,18 +20,24 @@ public final class TitanRegistry {
     private static ComponentType<EntityStore, TitanComponent> titanComponentType;
     private static ComponentType<EntityStore, TitanPartComponent> partComponentType;
     private static ComponentType<EntityStore, TitanWeakpointComponent> weakpointComponentType;
+    private static ComponentType<EntityStore, TitanBoulderComponent> boulderComponentType;
+    private static ComponentType<EntityStore, TitanBoulderPartComponent> boulderPartComponentType;
 
     private TitanRegistry() {
     }
 
     /**
-     * Registers every titan component. All three are runtime-only: a titan is a cluster of entities wired
-     * together by references, so persisting one half-built would leave orphaned voxels behind.
+     * Registers every titan component. All of them are runtime-only: a titan is a cluster of entities wired
+     * together by references, so persisting one half-built would leave orphaned voxels behind. The same
+     * goes for a boulder, which is the same trick in miniature and only exists for a few seconds anyway.
      */
     public static void register(@Nonnull final IComponentRegistry<EntityStore> registry) {
         titanComponentType = registry.registerComponent(TitanComponent.class, TitanComponent::new);
         partComponentType = registry.registerComponent(TitanPartComponent.class, TitanPartComponent::new);
         weakpointComponentType = registry.registerComponent(TitanWeakpointComponent.class, TitanWeakpointComponent::new);
+        boulderComponentType = registry.registerComponent(TitanBoulderComponent.class, TitanBoulderComponent::new);
+        boulderPartComponentType =
+            registry.registerComponent(TitanBoulderPartComponent.class, TitanBoulderPartComponent::new);
     }
 
     @Nonnull
@@ -45,6 +53,16 @@ public final class TitanRegistry {
     @Nonnull
     public static ComponentType<EntityStore, TitanWeakpointComponent> getWeakpointComponentType() {
         return require(weakpointComponentType);
+    }
+
+    @Nonnull
+    public static ComponentType<EntityStore, TitanBoulderComponent> getBoulderComponentType() {
+        return require(boulderComponentType);
+    }
+
+    @Nonnull
+    public static ComponentType<EntityStore, TitanBoulderPartComponent> getBoulderPartComponentType() {
+        return require(boulderPartComponentType);
     }
 
     @Nonnull

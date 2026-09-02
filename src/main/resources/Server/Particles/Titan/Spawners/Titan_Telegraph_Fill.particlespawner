@@ -1,0 +1,113 @@
+{
+  "$Comment": [
+    "The disc that floods the ring in over the last moment of a windup. Same face-up trick as the ring and authored to the same Scale 1.0 so radius one, meaning both are spawned with the same scale value and land on top of each other.",
+    "Grows from nothing rather than appearing at full size, so the fill is itself a countdown: how much of the circle is coloured in is how much of the windup is left."
+  ],
+  "RenderMode": "Erosion",
+  "ParticleRotationInfluence": "None",
+  "ParticleRotateWithSpawner": true,
+  "LinearFiltering": true,
+  "LightInfluence": 0,
+  "TrailSpawnerPositionMultiplier": 1,
+  "TrailSpawnerRotationMultiplier": 1,
+  "MaxConcurrentParticles": 1,
+  "ParticleLifeSpan": {
+    "Min": 0.5,
+    "Max": 0.5
+  },
+  "TotalParticles": {
+    "Min": 1,
+    "Max": 1
+  },
+  "SpawnBurst": true,
+  "SpawnRate": {
+    "Min": 1,
+    "Max": 1
+  },
+  "Particle": {
+    "Texture": "Particles/Textures/Circles/Erosion_Circle.png",
+    "ScaleRatioConstraint": "OneToOne",
+    "UVOption": "None",
+    "SoftParticles": "Disable",
+    "InitialAnimationFrame": {
+      "Opacity": 1,
+      "FrameIndex": {
+        "Min": 0,
+        "Max": 0
+      },
+      "Scale": {
+        "X": {
+          "Min": 1.0,
+          "Max": 1.0
+        },
+        "Y": {
+          "Min": 1.0,
+          "Max": 1.0
+        }
+      },
+      "Rotation": {
+        "X": {
+          "Min": 90.0,
+          "Max": 90.0
+        },
+        "Y": {
+          "Min": 0.0,
+          "Max": 0.0
+        },
+        "Z": {
+          "Min": 0.0,
+          "Max": 0.0
+        }
+      },
+      "Color": "#ff7a30"
+    },
+    "Animation": {
+      "0": {
+        "FrameIndex": {
+          "Min": 0,
+          "Max": 0
+        },
+        "Opacity": 0.0,
+        "Color": "#e0a24a",
+        "Scale": {
+          "X": {
+            "Min": 0.12,
+            "Max": 0.12
+          },
+          "Y": {
+            "Min": 0.12,
+            "Max": 0.12
+          }
+        }
+      },
+      "80": {
+        "Opacity": 0.55,
+        "Color": "#ff7a30",
+        "Scale": {
+          "X": {
+            "Min": 1.0,
+            "Max": 1.0
+          },
+          "Y": {
+            "Min": 1.0,
+            "Max": 1.0
+          }
+        }
+      },
+      "100": {
+        "Opacity": 0.0,
+        "Color": "#ff4a14",
+        "Scale": {
+          "X": {
+            "Min": 1.0,
+            "Max": 1.0
+          },
+          "Y": {
+            "Min": 1.0,
+            "Max": 1.0
+          }
+        }
+      }
+    }
+  }
+}

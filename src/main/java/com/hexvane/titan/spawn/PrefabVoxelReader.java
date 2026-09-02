@@ -1,6 +1,7 @@
 package com.hexvane.titan.spawn;
 
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.protocol.Opacity;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.prefab.PrefabRotation;
 import com.hypixel.hytale.server.core.prefab.PrefabStore;
@@ -45,8 +46,22 @@ public final class PrefabVoxelReader {
      */
     @Nonnull
     public static PrefabVoxels read(@Nullable final String prefabKey) {
-        if (prefabKey == null || prefabKey.isEmpty()) return EMPTY;
-        return CACHE.computeIfAbsent(prefabKey, PrefabVoxelReader::load);
+        return read(prefabKey, Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Reads the layers of a prefab between {@code minY} and {@code maxY} inclusive, in the prefab's own
+     * block coordinates, so one authored prefab can be cut up between several bones.
+     *
+     * <p>The slice is skinned in isolation: a voxel is only interior if its neighbours are inside the same
+     * slice, so the faces exposed by the cut are treated as surface and are kept by a hollow bone. Layers
+     * outside the window are not read at all, so cutting a prefab three ways costs no more than reading it
+     * whole.
+     */
+    @Nonnull
+    public static PrefabVoxels read(@Nullable final String prefabKey, final int minY, final int maxY) {
+        if (prefabKey == null || prefabKey.isEmpty() || minY > maxY) return EMPTY;
+        return CACHE.computeIfAbsent(cacheKey(prefabKey, minY, maxY), key -> load(prefabKey, minY, maxY));
     }
 
     /**
@@ -58,13 +73,32 @@ public final class PrefabVoxelReader {
      */
     @Nonnull
     public static PrefabVoxels read(@Nullable final String prefabKey, @Nullable final String suffix) {
-        if (prefabKey == null || prefabKey.isEmpty() || suffix == null || suffix.isEmpty()) return read(prefabKey);
+        return read(prefabKey, suffix, Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+
+    /** Reads a slice of the rock-type variant of a prefab. See {@link #read(String, int, int)}. */
+    @Nonnull
+    public static PrefabVoxels read(@Nullable final String prefabKey,
+                                    @Nullable final String suffix,
+                                    final int minY,
+                                    final int maxY) {
+
+        if (prefabKey == null || prefabKey.isEmpty() || suffix == null || suffix.isEmpty()) {
+            return read(prefabKey, minY, maxY);
+        }
 
         final String suffixed = prefabKey + '_' + suffix;
-        if (!CACHE.containsKey(suffixed) && PrefabStore.get().findBrowsablePrefabPath(suffixed) == null) {
-            return read(prefabKey);
+        if (!CACHE.containsKey(cacheKey(suffixed, minY, maxY))
+            && PrefabStore.get().findBrowsablePrefabPath(suffixed) == null) {
+            return read(prefabKey, minY, maxY);
         }
-        return read(suffixed);
+        return read(suffixed, minY, maxY);
+    }
+
+    @Nonnull
+    private static String cacheKey(@Nonnull final String prefabKey, final int minY, final int maxY) {
+        if (minY == Integer.MIN_VALUE && maxY == Integer.MAX_VALUE) return prefabKey;
+        return prefabKey + '#' + minY + ':' + maxY;
     }
 
     /** Drops the cache so edited prefabs are picked up on the next spawn. */
@@ -73,7 +107,7 @@ public final class PrefabVoxelReader {
     }
 
     @Nonnull
-    private static PrefabVoxels load(@Nonnull final String prefabKey) {
+    private static PrefabVoxels load(@Nonnull final String prefabKey, final int sliceMinY, final int sliceMaxY) {
         final var path = PrefabStore.get().findBrowsablePrefabPath(prefabKey);
         if (path == null) {
             LOGGER.at(Level.WARNING).log("Titan prefab '%s' was not found in any asset pack", prefabKey);
@@ -90,18 +124,31 @@ public final class PrefabVoxelReader {
 
         final var collected = new ArrayList<int[]>();
         final var keys = new ArrayList<String>();
+        // Every cell that holds anything, which is what decides whether a player could land on one.
         final var occupied = new LongOpenHashSet();
+        // Only the cells that actually hide what is behind them. See isOccluder.
+        final var occluders = new LongOpenHashSet();
 
         buffer.forEach(
             IPrefabBuffer.iterateAllColumns(),
             (x, y, z, blockId, holder, supportValue, rotation, filler, call, fluidId, fluidLevel) -> {
+                if (y < sliceMinY || y > sliceMaxY) return;
                 if (blockId == BlockType.EMPTY_ID) return;
                 final BlockType type = BlockType.getAssetMap().getAsset(blockId);
                 if (type == null || type.isUnknown()) return;
 
-                collected.add(new int[]{x, y, z});
-                keys.add(type.getId());
+                // Recorded before the filler test, so the space a whole multi-block takes up is accounted
+                // for and not just its anchor.
                 occupied.add(pack(x, y, z));
+                if (isOccluder(type)) occluders.add(pack(x, y, z));
+
+                // A multi-block covers several cells but is one object: the anchor carries the model and
+                // every other cell is a filler reference back to it. Spawning a voxel per cell renders that
+                // many overlapping copies, which is where a single Bench_Memories turned into nine.
+                if (filler != 0) return;
+
+                collected.add(new int[]{x, y, z, rotation});
+                keys.add(type.getId());
             },
             null,
             null,
@@ -109,7 +156,7 @@ public final class PrefabVoxelReader {
         );
 
         if (collected.isEmpty()) {
-            LOGGER.at(Level.WARNING).log("Titan prefab '%s' contains no blocks", prefabKey);
+            LOGGER.at(Level.WARNING).log("Titan prefab '%s' contains no blocks", cacheKey(prefabKey, sliceMinY, sliceMaxY));
             return EMPTY;
         }
 
@@ -125,25 +172,41 @@ public final class PrefabVoxelReader {
         }
 
         final var voxels = new ArrayList<PrefabVoxels.Voxel>(collected.size());
+        int surfaceCount = 0;
         for (int i = 0; i < collected.size(); i++) {
             final int[] p = collected.get(i);
-            voxels.add(new PrefabVoxels.Voxel(p[0], p[1], p[2], keys.get(i),
-                isSurface(occupied, p[0], p[1], p[2]),
+            final boolean surface = isSurface(occluders, p[0], p[1], p[2]);
+            if (surface) surfaceCount++;
+            voxels.add(new PrefabVoxels.Voxel(p[0], p[1], p[2], keys.get(i), p[3],
+                surface,
                 !occupied.contains(pack(p[0], p[1] + 1, p[2]))));
         }
 
-        LOGGER.at(Level.INFO).log("Loaded Titan prefab '%s': %d blocks", prefabKey, voxels.size());
+        LOGGER.at(Level.INFO).log("Loaded Titan prefab '%s': %d blocks (%d shell)",
+            cacheKey(prefabKey, sliceMinY, sliceMaxY), voxels.size(), surfaceCount);
         return new PrefabVoxels(voxels, minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    /** A block with at least one exposed face; interior blocks never get a collider. */
-    private static boolean isSurface(@Nonnull final LongOpenHashSet occupied, final int x, final int y, final int z) {
-        return !occupied.contains(pack(x + 1, y, z))
-            || !occupied.contains(pack(x - 1, y, z))
-            || !occupied.contains(pack(x, y + 1, z))
-            || !occupied.contains(pack(x, y - 1, z))
-            || !occupied.contains(pack(x, y, z + 1))
-            || !occupied.contains(pack(x, y, z - 1));
+    /**
+     * Whether a block fills its cell densely enough to hide whatever is behind it.
+     *
+     * <p>Only a solid full cube does. A slab, a stair, a vine or a bench leaves most of its cell empty, so
+     * the rock behind one is still in plain sight and culling it punches a hole through the titan — which
+     * is what happened to the wall under the ivy and the floor under the slabs. This is the same test the
+     * engine uses to decide whether a block is a solid cube.
+     */
+    private static boolean isOccluder(@Nonnull final BlockType type) {
+        return type.isCubeDrawType() && type.getOpacity() == Opacity.Solid;
+    }
+
+    /** A block with at least one face not hidden by a solid cube; interior blocks never get a collider. */
+    private static boolean isSurface(@Nonnull final LongOpenHashSet occluders, final int x, final int y, final int z) {
+        return !occluders.contains(pack(x + 1, y, z))
+            || !occluders.contains(pack(x - 1, y, z))
+            || !occluders.contains(pack(x, y + 1, z))
+            || !occluders.contains(pack(x, y - 1, z))
+            || !occluders.contains(pack(x, y, z + 1))
+            || !occluders.contains(pack(x, y, z - 1));
     }
 
     /** Packs a prefab-local coordinate into a long; prefab extents are far below the 21-bit range. */

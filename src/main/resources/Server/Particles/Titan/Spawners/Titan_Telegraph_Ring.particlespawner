@@ -1,0 +1,120 @@
+{
+  "$Comment": [
+    "One flat ring lying face up on the ground, marking where a titan attack is about to land.",
+    "Authored at Scale 1.0, which is a ring of radius one: the scale numbers are half-extents, not widths, so 1.0 reaches one block out from the centre rather than covering one block in total. The scale float on the spawn packet multiplies it, so passing the attack's blast radius draws the ring at exactly the size of the circle that is about to be dangerous. Nothing else about the asset needs to know how big any particular attack is, and getting this wrong is not a crash but a marker that quietly lies about the size of the attack.",
+    "Rotation.X of 90 is what lays it down; the shipped shockwave spawners do the same. ParticleRotationInfluence None keeps it there instead of turning to face the camera, and ParticleRotateWithSpawner lets the yaw on the packet turn it, which only the plough corridor uses.",
+    "It lives less than half a second on purpose. The windup pulses this repeatedly and shortens the gap as the attack nears, so the ring reads as a heartbeat getting faster rather than a static decal.",
+    "Two things will make a marker like this invisible rather than merely wrong, and both have bitten this file. Opacity inside Animation multiplies the InitialAnimationFrame opacity, so a 0 up there zeroes every frame below it no matter what they say; it is 1, as it is in every shipped spawner. And SoftParticles fades whatever is near solid geometry, which for a quad lying on the floor is all of it, so it is off here and on only for the airborne dust."
+  ],
+  "RenderMode": "Erosion",
+  "ParticleRotationInfluence": "None",
+  "ParticleRotateWithSpawner": true,
+  "LinearFiltering": true,
+  "LightInfluence": 0,
+  "TrailSpawnerPositionMultiplier": 1,
+  "TrailSpawnerRotationMultiplier": 1,
+  "MaxConcurrentParticles": 1,
+  "ParticleLifeSpan": {
+    "Min": 0.45,
+    "Max": 0.45
+  },
+  "TotalParticles": {
+    "Min": 1,
+    "Max": 1
+  },
+  "SpawnBurst": true,
+  "SpawnRate": {
+    "Min": 1,
+    "Max": 1
+  },
+  "Particle": {
+    "Texture": "Particles/Textures/Basic/Ring4.png",
+    "ScaleRatioConstraint": "OneToOne",
+    "UVOption": "None",
+    "SoftParticles": "Disable",
+    "InitialAnimationFrame": {
+      "Opacity": 1,
+      "FrameIndex": {
+        "Min": 0,
+        "Max": 0
+      },
+      "Scale": {
+        "X": {
+          "Min": 1.0,
+          "Max": 1.0
+        },
+        "Y": {
+          "Min": 1.0,
+          "Max": 1.0
+        }
+      },
+      "Rotation": {
+        "X": {
+          "Min": 90.0,
+          "Max": 90.0
+        },
+        "Y": {
+          "Min": 0.0,
+          "Max": 0.0
+        },
+        "Z": {
+          "Min": 0.0,
+          "Max": 0.0
+        }
+      },
+      "Color": "#e0a24a"
+    },
+    "Animation": {
+      "0": {
+        "FrameIndex": {
+          "Min": 0,
+          "Max": 0
+        },
+        "Opacity": 0.0,
+        "Color": "#e0a24a",
+        "Scale": {
+          "X": {
+            "Min": 1.08,
+            "Max": 1.08
+          },
+          "Y": {
+            "Min": 1.08,
+            "Max": 1.08
+          }
+        }
+      },
+      "25": {
+        "Opacity": 0.85,
+        "Color": "#f0b45c",
+        "Scale": {
+          "X": {
+            "Min": 1.0,
+            "Max": 1.0
+          },
+          "Y": {
+            "Min": 1.0,
+            "Max": 1.0
+          }
+        }
+      },
+      "70": {
+        "Opacity": 0.6,
+        "Color": "#ff8a3c"
+      },
+      "100": {
+        "Opacity": 0.0,
+        "Color": "#ff5a20",
+        "Scale": {
+          "X": {
+            "Min": 0.94,
+            "Max": 0.94
+          },
+          "Y": {
+            "Min": 0.94,
+            "Max": 0.94
+          }
+        }
+      }
+    }
+  }
+}

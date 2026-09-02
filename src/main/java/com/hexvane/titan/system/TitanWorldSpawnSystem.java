@@ -1,6 +1,7 @@
 package com.hexvane.titan.system;
 
 import com.hexvane.titan.asset.TitanSpawnRuleAsset;
+import com.hexvane.titan.asset.TitanVariantAsset;
 import com.hexvane.titan.entity.TitanComponent;
 import com.hexvane.titan.spawn.ColliderMode;
 import com.hexvane.titan.spawn.TitanSite;
@@ -27,6 +28,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -83,6 +85,9 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
      * <p>Generous on purpose. Natural terrain rolls, the legs are solved with inverse kinematics and the
      * body settles onto whatever is under it, so the check only has to rule out cliff edges and ravines.
      * Demanding genuinely flat ground rejects almost everywhere outside a desert.
+     *
+     * <p>These are the figures for a titan a few blocks across. A variant that needs more room says so
+     * itself; see {@link #isBuildableFor}.
      */
     public static final int FOOTPRINT_RADIUS = 4;
     public static final int FOOTPRINT_RELIEF = 6;
@@ -288,6 +293,29 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
     }
 
     /**
+     * Whether the ground at a site will hold the variant that site rolled.
+     *
+     * <p>Falls back to the shared figures above for anything that has not asked for more, which is every
+     * titan small enough for them to mean the same thing.
+     */
+    public static boolean isBuildableFor(@Nonnull final ChunkStore chunkStore,
+                                         final int blockX,
+                                         final int surfaceY,
+                                         final int blockZ,
+                                         @Nullable final String variantId) {
+
+        final TitanVariantAsset variant = variantId == null ? null : TitanVariantAsset.find(variantId);
+        final int radius = variant != null && variant.getSpawnFootprintRadius() > 0
+            ? variant.getSpawnFootprintRadius() : FOOTPRINT_RADIUS;
+        final int relief = variant != null && variant.getSpawnFootprintRelief() > 0
+            ? variant.getSpawnFootprintRelief() : FOOTPRINT_RELIEF;
+        final int headroom = variant != null && variant.getSpawnHeadroom() > 0
+            ? variant.getSpawnHeadroom() : HEADROOM;
+
+        return TitanTerrainProbe.isBuildable(chunkStore, blockX, surfaceY, blockZ, radius, relief, headroom);
+    }
+
+    /**
      * Runs one candidate through the gates, cheapest first: terrain has to be loaded before it can be
      * identified, identified before the rarity roll means anything, and only a cell that has cleared all of
      * that is worth measuring for flatness.
@@ -321,16 +349,23 @@ public final class TitanWorldSpawnSystem extends TickingSystem<EntityStore> {
             return false;
         }
 
-        if (!TitanTerrainProbe.isBuildable(chunkStore, blockX, surfaceY, blockZ, FOOTPRINT_RADIUS, FOOTPRINT_RELIEF, HEADROOM)) {
-            // Deliberately not marked barren: players reshape terrain, and a hillside that is too steep
-            // today may be flattened tomorrow.
+        // Picked before the ground is measured, because how much ground has to be measured depends on
+        // which titan it is. The roll is the cell's, so this is the same variant either way round.
+        final String variantId = rule.pickVariant(candidate.variantRoll());
+        if (variantId == null) {
+            // Nothing this rule is allowed to spawn. Either it was authored without any variants, which is a
+            // mistake worth pointing out, or the owner has turned all of them off, which is the config
+            // working as intended and should stay quiet.
+            if (rule.getVariants().length == 0) {
+                LOGGER.at(Level.WARNING).log("Titan spawn rule '%s' declares no variants", rule.getId());
+            }
+            sites.barren.add(key);
             return false;
         }
 
-        final String variantId = rule.pickVariant(candidate.variantRoll());
-        if (variantId == null) {
-            LOGGER.at(Level.WARNING).log("Titan spawn rule '%s' has no usable variants", rule.getId());
-            sites.barren.add(key);
+        if (!isBuildableFor(chunkStore, blockX, surfaceY, blockZ, variantId)) {
+            // Deliberately not marked barren: players reshape terrain, and a hillside that is too steep
+            // today may be flattened tomorrow.
             return false;
         }
 

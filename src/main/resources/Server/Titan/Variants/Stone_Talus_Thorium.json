@@ -15,17 +15,41 @@
   "TurnSpeed": 0.9,
   "WakeRadius": 6,
   "LoseTargetRadius": 52,
+  "LeashRadius": 42,
 
   "AttackRange": 6.0,
   "AttackDamage": 26,
   "AttackRadius": 1.7,
-  "AttackKnockback": 8,
+  "AttackKnockback": 17,
   "AttackCooldown": 4.6,
   "StunSeconds": 3.9,
 
   "SlamChance": 0.35,
   "SlamRadius": 3.6,
   "SlamProneSeconds": 6.6,
+
+  "PoundChance": 0.3,
+  "PoundRadius": 5.4,
+  "PoundDamage": 12,
+  "PoundLaunch": 20,
+  "PoundStunSeconds": 5.1,
+
+  "HurlChance": 0.75,
+  "HurlMinRange": 9.6,
+  "HurlMaxRange": 40.0,
+  "HurlSpeed": 32.0,
+  "HurlDamage": 29,
+  "HurlRadius": 3.4,
+  "HurlKnockback": 20,
+
+  "PlowChance": 0.4,
+  "PlowCooldown": 18.0,
+  "PlowSpeed": 6.7,
+  "PlowSeconds": 2.2,
+  "PlowDamage": 21,
+  "PlowRadius": 4.3,
+  "PlowRiderKnockback": 26,
+  "PlowBeachedSeconds": 5.6,
 
   "DropList": "Drop_Talus_Thorium",
   "DropItem": "Ore_Thorium",
@@ -35,5 +59,17 @@
   "ImpactParticle": "Block_Land_Hard_Stone",
   "ImpactSound": "SFX_Golem_Earth_Slam_Impact",
   "WakeSound": "SFX_Golem_Earth_Wake",
-  "DeathSound": "SFX_Stone_Break"
+  "DeathSound": "SFX_Stone_Break",
+
+  "TelegraphRingParticle": "Titan_Telegraph_Ring",
+  "TelegraphFillParticle": "Titan_Telegraph_Fill",
+  "TelegraphLineParticle": "Titan_Telegraph_Line",
+  "TelegraphCrackParticle": "Titan_Telegraph_Crack",
+  "TelegraphSound": "SFX_Golem_Earth_Alerted",
+  "PoundSound": "SFX_Golem_Earth_Stomp_Impact",
+  "HurlRipSound": "SFX_Golem_Earth_Swing",
+  "HurlThrowSound": "SFX_Drop_Weapons_Stone_Large",
+  "PlowSound": "SFX_Golem_Earth_Spin",
+
+  "BattleMusic": "Track_Titan_Battle"
 }

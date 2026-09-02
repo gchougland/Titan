@@ -1,0 +1,18 @@
+{
+  "$Comment": [
+    "The zone 1 plains, split out of Talus_Zone1 so the Roaming Temple can have somewhere it turns up and nowhere else. A rule owns an environment outright and a second rule naming the same one is ignored, so this is the only way to say 'the plains, but also the temple'. Chance and the two talus weights are the ones Talus_Zone1 uses, so a talus is no rarer here than in the forest next door.",
+    "The temple is one roll in forty. That is deliberately far below anything else in the file: it is nineteen times the block count of a talus, three of them is the per-world ceiling, and one standing on the horizon is meant to be the thing a player remembers about the walk rather than scenery they learn to route around. On top of the weight it has to find fourteen blocks of level ground on every corner, which most of the plains is not, so what actually turns up is rarer again than the number here."
+  ],
+
+  "Environments": [
+    "Env_Zone1_Plains"
+  ],
+
+  "Chance": 0.35,
+
+  "Variants": [
+    { "Variant": "Stone_Talus_Copper", "Weight": 20 },
+    { "Variant": "Stone_Talus_Iron", "Weight": 10 },
+    { "Variant": "Roaming_Temple", "Weight": 5 }
+  ]
+}

@@ -60,6 +60,41 @@
       "Looping": false,
       "BlendingDuration": 0.2
     },
+    "Pound_Windup": {
+      "File": "Titan/Talus/Animations/Pound_Windup.blockyanim",
+      "Looping": false,
+      "BlendingDuration": 0.22
+    },
+    "Pound": {
+      "File": "Titan/Talus/Animations/Pound.blockyanim",
+      "Looping": false,
+      "BlendingDuration": 0.08
+    },
+    "Hurl_Windup": {
+      "File": "Titan/Talus/Animations/Hurl_Windup.blockyanim",
+      "Looping": false,
+      "BlendingDuration": 0.25
+    },
+    "Hurl": {
+      "File": "Titan/Talus/Animations/Hurl.blockyanim",
+      "Looping": false,
+      "BlendingDuration": 0.08
+    },
+    "Plow_Windup": {
+      "File": "Titan/Talus/Animations/Plow_Windup.blockyanim",
+      "Looping": false,
+      "BlendingDuration": 0.25
+    },
+    "Plow": {
+      "File": "Titan/Talus/Animations/Plow.blockyanim",
+      "Looping": true,
+      "BlendingDuration": 0.12
+    },
+    "Plow_Recover": {
+      "File": "Titan/Talus/Animations/Plow_Recover.blockyanim",
+      "Looping": true,
+      "BlendingDuration": 0.3
+    },
     "Death": {
       "File": "Titan/Talus/Animations/Death.blockyanim",
       "Looping": false,

@@ -147,7 +147,10 @@ public final class TitanIkChainDef {
         return gaitPhase;
     }
 
-    /** Where the effector rests relative to the body, in model units. */
+    /**
+     * Where the effector rests relative to the body, in model units, in the same titan-local space as a
+     * bone's {@code Offset}: {@code -Z} is forward. A foot normally copies the X and Z of the leg it ends.
+     */
     @Nonnull
     public Vector3d getRestOffset() {
         return restOffset;

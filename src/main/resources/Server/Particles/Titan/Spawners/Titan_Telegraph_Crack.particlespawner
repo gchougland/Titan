@@ -1,0 +1,120 @@
+{
+  "$Comment": [
+    "Split ground, laid face up where a titan is dragging a boulder out. Five of them at random turns so the break does not read as one repeated stamp, and they linger well past the pull because a hole torn in the ground should still be there a moment later."
+  ],
+  "RenderMode": "Erosion",
+  "ParticleRotationInfluence": "None",
+  "ParticleRotateWithSpawner": true,
+  "LinearFiltering": true,
+  "LightInfluence": 0,
+  "TrailSpawnerPositionMultiplier": 1,
+  "TrailSpawnerRotationMultiplier": 1,
+  "MaxConcurrentParticles": 5,
+  "ParticleLifeSpan": {
+    "Min": 1.4,
+    "Max": 2.0
+  },
+  "TotalParticles": {
+    "Min": 5,
+    "Max": 5
+  },
+  "SpawnBurst": true,
+  "SpawnRate": {
+    "Min": 5,
+    "Max": 5
+  },
+  "Shape": "Cube",
+  "EmitOffset": {
+    "X": {
+      "Min": -0.7,
+      "Max": 0.7
+    },
+    "Y": {
+      "Min": 0,
+      "Max": 0
+    },
+    "Z": {
+      "Min": -0.7,
+      "Max": 0.7
+    }
+  },
+  "Particle": {
+    "Texture": "Particles/Textures/Shapes/Crack.png",
+    "ScaleRatioConstraint": "OneToOne",
+    "UVOption": "RandomFlipUV",
+    "SoftParticles": "Disable",
+    "InitialAnimationFrame": {
+      "Opacity": 1,
+      "FrameIndex": {
+        "Min": 0,
+        "Max": 0
+      },
+      "Scale": {
+        "X": {
+          "Min": 1.6,
+          "Max": 2.6
+        },
+        "Y": {
+          "Min": 1.6,
+          "Max": 2.6
+        }
+      },
+      "Rotation": {
+        "X": {
+          "Min": 90.0,
+          "Max": 90.0
+        },
+        "Y": {
+          "Min": 0.0,
+          "Max": 0.0
+        },
+        "Z": {
+          "Min": -360.0,
+          "Max": 360.0
+        }
+      },
+      "Color": "#6b6259"
+    },
+    "Animation": {
+      "0": {
+        "FrameIndex": {
+          "Min": 0,
+          "Max": 0
+        },
+        "Opacity": 0.0,
+        "Color": "#6b6259",
+        "Scale": {
+          "X": {
+            "Min": 0.2,
+            "Max": 0.2
+          },
+          "Y": {
+            "Min": 0.2,
+            "Max": 0.2
+          }
+        }
+      },
+      "15": {
+        "Opacity": 0.9,
+        "Scale": {
+          "X": {
+            "Min": 1.0,
+            "Max": 1.0
+          },
+          "Y": {
+            "Min": 1.0,
+            "Max": 1.0
+          }
+        }
+      },
+      "70": {
+        "Opacity": 0.7,
+        "Color": "#4d453d"
+      },
+      "100": {
+        "Opacity": 0.0,
+        "Color": "#3a342e"
+      }
+    }
+  }
+}
