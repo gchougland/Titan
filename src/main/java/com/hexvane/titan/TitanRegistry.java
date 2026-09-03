@@ -2,6 +2,7 @@ package com.hexvane.titan;
 
 import com.hexvane.titan.entity.TitanBoulderComponent;
 import com.hexvane.titan.entity.TitanBoulderPartComponent;
+import com.hexvane.titan.entity.TitanBrainComponent;
 import com.hexvane.titan.entity.TitanComponent;
 import com.hexvane.titan.entity.TitanPartComponent;
 import com.hexvane.titan.entity.TitanWeakpointComponent;
@@ -22,6 +23,7 @@ public final class TitanRegistry {
     private static ComponentType<EntityStore, TitanWeakpointComponent> weakpointComponentType;
     private static ComponentType<EntityStore, TitanBoulderComponent> boulderComponentType;
     private static ComponentType<EntityStore, TitanBoulderPartComponent> boulderPartComponentType;
+    private static ComponentType<EntityStore, TitanBrainComponent> brainComponentType;
 
     private TitanRegistry() {
     }
@@ -38,6 +40,7 @@ public final class TitanRegistry {
         boulderComponentType = registry.registerComponent(TitanBoulderComponent.class, TitanBoulderComponent::new);
         boulderPartComponentType =
             registry.registerComponent(TitanBoulderPartComponent.class, TitanBoulderPartComponent::new);
+        brainComponentType = registry.registerComponent(TitanBrainComponent.class, TitanBrainComponent::new);
     }
 
     @Nonnull
@@ -63,6 +66,11 @@ public final class TitanRegistry {
     @Nonnull
     public static ComponentType<EntityStore, TitanBoulderPartComponent> getBoulderPartComponentType() {
         return require(boulderPartComponentType);
+    }
+
+    @Nonnull
+    public static ComponentType<EntityStore, TitanBrainComponent> getBrainComponentType() {
+        return require(brainComponentType);
     }
 
     @Nonnull

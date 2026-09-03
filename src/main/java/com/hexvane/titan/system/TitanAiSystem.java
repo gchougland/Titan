@@ -13,10 +13,12 @@ import com.hexvane.titan.asset.TitanVariantAsset;
 import com.hexvane.titan.combat.TitanLoot;
 import com.hexvane.titan.combat.TitanSound;
 import com.hexvane.titan.entity.TitanComponent;
+import com.hexvane.titan.entity.TitanIntent;
 import com.hexvane.titan.entity.TitanState;
 import com.hexvane.titan.ik.GroundSampler;
 import com.hexvane.titan.spawn.TitanEnvironment;
 import com.hexvane.titan.spawn.TitanSiteMemory;
+import com.hexvane.titan.spawn.TitanTrio;
 import com.hypixel.hytale.component.Archetype;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -141,12 +143,14 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
                 titan.setState(TitanState.DYING);
                 TitanSound.play(commandBuffer, variant.getDeathSound(), transform.getPosition());
                 recordKill(store, titan);
+                TitanTrio.detach(store, titan);
                 return;
             }
             case LOST -> {
                 // Part of the rig has gone out from under it, so this is an unload rather than a kill.
                 // Dying here would drop loot at a site no player has touched and mark it cleared for the
                 // next quarter of an hour.
+                TitanTrio.detach(store, titan);
                 commandBuffer.removeEntity(self, RemoveReason.REMOVE);
                 return;
             }
@@ -157,12 +161,16 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
         titan.tickProvoked(dt);
         retaliate(commandBuffer, titan, variant, transform);
 
+        if (titan.isBrainDriven()) {
+            applyBrainWake(commandBuffer, titan, variant, transform);
+        }
+
         final boolean hasTarget = resolveTarget(store, titan, variant, transform.getPosition());
 
         switch (titan.getState()) {
             case SLEEPING -> tickSleeping(commandBuffer, titan, variant, transform, hasTarget);
             case WAKING -> tickWaking(titan);
-            case IDLE -> tickIdle(store, titan, variant, transform, dt, hasTarget);
+            case IDLE -> tickIdle(store, commandBuffer, titan, variant, transform, dt, hasTarget);
             case CHASE -> tickChase(store, commandBuffer, titan, variant, skeleton, transform, dt, hasTarget);
             case WINDUP -> TitanMeleeAttack.tickWindup(scratch, store, commandBuffer, titan, variant, transform, dt);
             case SMASH -> TitanMeleeAttack.tickSmash(store, commandBuffer, self, titan, variant);
@@ -193,6 +201,18 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
         updateHandGoals(titan, skeleton, dt);
         settleBodyHeight(store, titan, transform, dt);
         transform.getRotation().setYaw(titan.getYaw());
+    }
+
+    /** Consumes a Role WAKE intent while still sleeping. */
+    private static void applyBrainWake(@Nonnull final CommandBuffer<EntityStore> commandBuffer,
+                                       @Nonnull final TitanComponent titan,
+                                       @Nonnull final TitanVariantAsset variant,
+                                       @Nonnull final TransformComponent transform) {
+        if (titan.getState() != TitanState.SLEEPING) return;
+        if (titan.getIntent() != TitanIntent.WAKE) return;
+        titan.consumeIntent();
+        titan.setState(TitanState.WAKING);
+        TitanSound.play(commandBuffer, variant.getWakeSound(), transform.getPosition());
     }
 
     /**
@@ -361,6 +381,8 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
                               @Nonnull final TitanVariantAsset variant,
                               @Nonnull final TransformComponent transform,
                               final boolean hasTarget) {
+        // Brain Roles own proximity engage via Encounter ChangeTargetRole + TitanWake.
+        if (titan.isBrainDriven()) return;
         if (!hasTarget) return;
         if (scratch.targetPosition.distance(transform.getPosition()) > variant.getWakeRadius()) return;
 
@@ -383,6 +405,7 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
      * {@link #tickWander}.
      */
     private void tickIdle(@Nonnull final Store<EntityStore> store,
+                          @Nonnull final CommandBuffer<EntityStore> commandBuffer,
                           @Nonnull final TitanComponent titan,
                           @Nonnull final TitanVariantAsset variant,
                           @Nonnull final TransformComponent transform,
@@ -390,6 +413,13 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
                           final boolean hasTarget) {
         if (hasTarget) {
             titan.getVelocity().set(0);
+            if (titan.isBrainDriven()) {
+                final TitanSkeletonAsset skeleton = titan.getSkeleton();
+                if (skeleton != null
+                    && tryExecuteIntent(store, commandBuffer, titan, variant, skeleton, transform, dt)) {
+                    return;
+                }
+            }
             titan.setState(TitanState.CHASE);
             return;
         }
@@ -510,7 +540,11 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
 
         final var position = transform.getPosition();
 
-        if (titan.getAttackCooldown() <= 0f) {
+        if (titan.isBrainDriven()) {
+            if (tryExecuteIntent(store, commandBuffer, titan, variant, skeleton, transform, dt)) {
+                return;
+            }
+        } else if (titan.getAttackCooldown() <= 0f) {
             if (TitanPlowAttack.tryBegin(scratch, store, commandBuffer, titan, variant, skeleton, transform)) return;
 
             final double distance = TitanAiSupport.horizontalDistance(position, scratch.targetPosition);
@@ -543,6 +577,55 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
         }
 
         TitanAiSupport.walkTowards(scratch, titan, variant, position, scratch.targetPosition, variant.getAttackRange(), dt);
+    }
+
+    /**
+     * Starts an attack queued by the brain Role. Returns {@code true} when an attack began this tick.
+     */
+    private boolean tryExecuteIntent(@Nonnull final Store<EntityStore> store,
+                                     @Nonnull final CommandBuffer<EntityStore> commandBuffer,
+                                     @Nonnull final TitanComponent titan,
+                                     @Nonnull final TitanVariantAsset variant,
+                                     @Nonnull final TitanSkeletonAsset skeleton,
+                                     @Nonnull final TransformComponent transform,
+                                     final float dt) {
+        final TitanIntent intent = titan.getIntent();
+        if (intent == TitanIntent.NONE || intent == TitanIntent.WAKE || intent == TitanIntent.CHASE) {
+            if (intent == TitanIntent.CHASE) titan.consumeIntent();
+            return false;
+        }
+        if (titan.getAttackCooldown() > 0f) return false;
+
+        final var position = transform.getPosition();
+        TitanAiSupport.turnTowards(titan, position, scratch.targetPosition, variant.getTurnSpeed(), dt);
+        titan.consumeIntent();
+
+        switch (intent) {
+            case MELEE -> beginMelee(commandBuffer, titan, variant, position);
+            case SLAM -> {
+                titan.setState(TitanState.SLAM_WINDUP);
+                TitanSound.play(commandBuffer, variant.getTelegraphSound(), position);
+            }
+            case POUND -> {
+                titan.setState(TitanState.POUND_WINDUP);
+                TitanSound.play(commandBuffer, variant.getTelegraphSound(), position);
+            }
+            case HURL -> {
+                titan.setAttackSide(chooseAttackSide(titan, position));
+                titan.setState(TitanState.HURL_WINDUP);
+                TitanSound.play(commandBuffer, variant.getTelegraphSound(), position);
+            }
+            case PLOW -> TitanPlowAttack.tryBegin(scratch, store, commandBuffer, titan, variant, skeleton, transform);
+            case STOMP -> {
+                TitanStompAttack.begin(scratch, titan);
+                TitanSound.play(commandBuffer, variant.getTelegraphSound(), position);
+            }
+            default -> {
+                return false;
+            }
+        }
+        titan.getVelocity().set(0);
+        return true;
     }
 
     /**

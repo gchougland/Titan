@@ -12,5 +12,9 @@
   "ServerVersion": "${server_version}",
   "DisabledByDefault": false,
   "IncludesAssetPack": true,
-  "Main": "${plugin_main_entrypoint}"
+  "Main": "${plugin_main_entrypoint}",
+  "Dependencies": {
+    "Hytale:NPC": "*",
+    "Hytale:EncounterManager": "*"
+  }
 }

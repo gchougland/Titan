@@ -1,0 +1,38 @@
+{
+  "Type": "Generic",
+  "Appearance": "Titan_Brain",
+  "KnockbackScale": 0,
+  "MotionControllerList": [
+    {
+      "Type": "Walk",
+      "MaxWalkSpeed": 0.01,
+      "Gravity": 0,
+      "MaxFallSpeed": 0,
+      "Acceleration": 0
+    }
+  ],
+  "MaxHealth": {
+    "Compute": "MaxHealth"
+  },
+  "Parameters": {
+    "MaxHealth": {
+      "Value": 1,
+      "Description": "Brain NPCs are invulnerable; health is unused"
+    }
+  },
+  "Instructions": [
+    {
+      "Instructions": [
+        {
+          "Sensor": {
+            "Type": "Any"
+          },
+          "BodyMotion": {
+            "Type": "Nothing"
+          }
+        }
+      ]
+    }
+  ],
+  "NameTranslationKey": "server.npcRoles.Titan_Talus_Sleeping.name"
+}

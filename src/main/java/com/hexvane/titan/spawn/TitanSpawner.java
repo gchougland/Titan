@@ -161,6 +161,12 @@ public final class TitanSpawner {
 
         LOGGER.at(Level.INFO).log("Spawned titan '%s' with %d parts (%d climbable, mode %s) and %d weakpoints (%d to kill) at %s",
             variantId, counts.parts, counts.colliders, colliderMode, weakpoints, titan.getWeakpointsToKill(), position);
+
+        if (!TitanTrio.attach(store, root)) {
+            LOGGER.at(Level.WARNING).log(
+                "Titan '%s' spawned without Encounter/brain trio; fighting with legacy AI only", variantId);
+        }
+
         return new Result(root, counts.parts, weakpoints, null);
     }
 

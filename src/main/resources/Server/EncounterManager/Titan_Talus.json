@@ -1,0 +1,161 @@
+{
+  "Class": "EncounterManager",
+  "Type": "Generic",
+  "Debug": "DisplayState",
+  "StartState": "Idle",
+  "CleanupOnRemove": false,
+  "Instructions": [
+    {
+      "Sensor": {
+        "Type": "Player",
+        "Range": 72,
+        "Collector": {
+          "Type": "EncounterMembers"
+        }
+      },
+      "Instructions": [
+        {
+          "Sensor": {
+            "Type": "State",
+            "State": "Idle"
+          },
+          "Instructions": [
+            {
+              "Continue": true,
+              "Sensor": {
+                "Type": "And",
+                "Sensors": [
+                  {
+                    "Type": "Target",
+                    "Range": 100,
+                    "TargetSlot": "Boss"
+                  },
+                  {
+                    "Type": "Player",
+                    "Range": 72
+                  }
+                ]
+              },
+              "Actions": [
+                {
+                  "Type": "SetEncounterBossBar"
+                },
+                {
+                  "Type": "StartEncounterMusic",
+                  "MusicContainer": "Track_Titan_Battle"
+                }
+              ]
+            },
+            {
+              "Sensor": {
+                "Type": "And",
+                "Sensors": [
+                  {
+                    "Type": "Target",
+                    "Range": 100,
+                    "TargetSlot": "Brain"
+                  },
+                  {
+                    "Type": "Player",
+                    "Range": 48
+                  }
+                ]
+              },
+              "Actions": [
+                {
+                  "Type": "ChangeTargetRole",
+                  "Role": "Titan_Talus_Combat",
+                  "ChangeAppearance": false,
+                  "DetachFromSpawning": true
+                },
+                {
+                  "Type": "State",
+                  "State": "Combat"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Sensor": {
+            "Type": "State",
+            "State": "Combat"
+          },
+          "Instructions": [
+            {
+              "Continue": true,
+              "Sensor": {
+                "Type": "And",
+                "Sensors": [
+                  {
+                    "Type": "Target",
+                    "Range": 100,
+                    "TargetSlot": "Boss"
+                  },
+                  {
+                    "Type": "Player",
+                    "Range": 72
+                  }
+                ]
+              },
+              "Actions": [
+                {
+                  "Type": "SetEncounterBossBar"
+                },
+                {
+                  "Type": "StartEncounterMusic",
+                  "MusicContainer": "Track_Titan_Battle"
+                }
+              ]
+            },
+            {
+              "Sensor": {
+                "Type": "Not",
+                "Sensor": {
+                  "Type": "Target",
+                  "Range": 100,
+                  "TargetSlot": "Boss"
+                }
+              },
+              "Actions": [
+                {
+                  "Type": "ClearEncounterBossBar"
+                },
+                {
+                  "Type": "StopEncounterMusic"
+                },
+                {
+                  "Type": "ReleaseTarget",
+                  "TargetSlot": "Boss"
+                },
+                {
+                  "Type": "ReleaseTarget",
+                  "TargetSlot": "Brain"
+                },
+                {
+                  "Type": "State",
+                  "State": "Complete"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Sensor": {
+            "Type": "State",
+            "State": "Complete"
+          },
+          "Instructions": [
+            {
+              "Actions": [
+                {
+                  "Type": "Nothing"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

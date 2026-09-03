@@ -113,7 +113,10 @@ public final class TitanComponent implements Component<EntityStore> {
     private int weakpointsToKill;
     private int weakpointsBroken;
     private float nodeHealth;
-    /** Players currently shown this titan's boss bar, so it can be taken off them again. */
+    /**
+     * Players previously shown a custom boss bar. Unused after Encounter Manager took over presentation;
+     * retained empty so older save/debug paths that touch the list stay safe.
+     */
     @Nonnull
     private final List<Ref<EntityStore>> barViewers = new ArrayList<>();
     /**
@@ -126,6 +129,18 @@ public final class TitanComponent implements Component<EntityStore> {
 
     private float deathTimer;
     private boolean lootDropped;
+
+    /**
+     * When set, an Encounter Manager + brain NPC Role own engagement UX and attack selection; this
+     * component only executes {@link #intent}.
+     */
+    private boolean brainDriven;
+    @Nullable
+    private Ref<EntityStore> brainRef;
+    @Nullable
+    private Ref<EntityStore> encounterRef;
+    @Nonnull
+    private TitanIntent intent = TitanIntent.NONE;
 
     public TitanComponent() {
     }
@@ -670,6 +685,50 @@ public final class TitanComponent implements Component<EntityStore> {
 
     public void setLootDropped(final boolean lootDropped) {
         this.lootDropped = lootDropped;
+    }
+
+    /** Whether an Encounter + brain NPC own engagement and attack selection for this titan. */
+    public boolean isBrainDriven() {
+        return brainDriven;
+    }
+
+    public void setBrainDriven(final boolean brainDriven) {
+        this.brainDriven = brainDriven;
+    }
+
+    @Nullable
+    public Ref<EntityStore> getBrainRef() {
+        return brainRef;
+    }
+
+    public void setBrainRef(@Nullable final Ref<EntityStore> brainRef) {
+        this.brainRef = brainRef;
+    }
+
+    @Nullable
+    public Ref<EntityStore> getEncounterRef() {
+        return encounterRef;
+    }
+
+    public void setEncounterRef(@Nullable final Ref<EntityStore> encounterRef) {
+        this.encounterRef = encounterRef;
+    }
+
+    @Nonnull
+    public TitanIntent getIntent() {
+        return intent;
+    }
+
+    public void setIntent(@Nonnull final TitanIntent intent) {
+        this.intent = intent;
+    }
+
+    /** Reads and clears the pending Role intent. */
+    @Nonnull
+    public TitanIntent consumeIntent() {
+        final TitanIntent current = intent;
+        intent = TitanIntent.NONE;
+        return current;
     }
 
     /**

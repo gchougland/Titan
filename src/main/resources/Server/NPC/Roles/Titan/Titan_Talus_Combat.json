@@ -1,0 +1,92 @@
+{
+  "Type": "Generic",
+  "Appearance": "Titan_Brain",
+  "KnockbackScale": 0,
+  "MotionControllerList": [
+    {
+      "Type": "Walk",
+      "MaxWalkSpeed": 0.01,
+      "Gravity": 0,
+      "MaxFallSpeed": 0,
+      "Acceleration": 0
+    }
+  ],
+  "MaxHealth": {
+    "Compute": "MaxHealth"
+  },
+  "Parameters": {
+    "MaxHealth": {
+      "Value": 1,
+      "Description": "Brain NPCs are invulnerable; health is unused"
+    }
+  },
+  "Instructions": [
+    {
+      "Instructions": [
+        {
+          "Sensor": {
+            "Type": "Any"
+          },
+          "BodyMotion": {
+            "Type": "Nothing"
+          },
+          "Actions": [
+            {
+              "Type": "TitanWake",
+              "Once": true
+            }
+          ]
+        },
+        {
+          "Continue": true,
+          "Sensor": {
+            "Type": "Player",
+            "Range": 60
+          },
+          "Actions": [
+            {
+              "Type": "TitanSetTarget"
+            }
+          ]
+        },
+        {
+          "Continue": true,
+          "Sensor": {
+            "Type": "Player",
+            "MinRange": 12,
+            "Range": 48
+          },
+          "Actions": [
+            {
+              "Type": "TitanHurl"
+            }
+          ]
+        },
+        {
+          "Continue": true,
+          "Sensor": {
+            "Type": "Player",
+            "Range": 24
+          },
+          "Actions": [
+            {
+              "Type": "TitanStomp"
+            }
+          ]
+        },
+        {
+          "Sensor": {
+            "Type": "Player",
+            "Range": 7.5
+          },
+          "Actions": [
+            {
+              "Type": "TitanMelee"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "NameTranslationKey": "server.npcRoles.Titan_Talus_Combat.name"
+}

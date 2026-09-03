@@ -8,17 +8,21 @@ import com.hexvane.titan.asset.TitanSpawnRuleAsset;
 import com.hexvane.titan.asset.TitanVariantAsset;
 import com.hexvane.titan.command.TitanCommand;
 import com.hexvane.titan.config.TitanConfig;
+import com.hexvane.titan.npc.TitanNpcRegistration;
 import com.hexvane.titan.spawn.PrefabVoxelReader;
 import com.hexvane.titan.spawn.TitanEnvironment;
 import com.hexvane.titan.spawn.TitanSiteMemory;
 import com.hexvane.titan.system.TitanAiSystem;
 import com.hexvane.titan.system.TitanAnimationSystem;
 import com.hexvane.titan.system.TitanBossBarSystem;
+import com.hexvane.titan.system.TitanBrainSyncSystem;
 import com.hexvane.titan.system.TitanBoulderSystem;
+import com.hexvane.titan.system.TitanHealthSyncSystem;
 import com.hexvane.titan.system.TitanPartSyncSystem;
 import com.hexvane.titan.system.TitanRagdollSystem;
 import com.hexvane.titan.system.TitanRootDamageSystem;
 import com.hexvane.titan.system.TitanSyncStats;
+import com.hexvane.titan.system.TitanTrioCleanupSystem;
 import com.hexvane.titan.system.TitanWeakpointDamageBonusSystem;
 import com.hexvane.titan.system.TitanWeakpointDamageSystem;
 import com.hexvane.titan.system.TitanWeakpointDeathSystem;
@@ -31,6 +35,7 @@ import com.hypixel.hytale.server.core.asset.HytaleAssetStore;
 import com.hypixel.hytale.server.core.modules.entity.tracker.EntityTrackerSystems;
 import com.hypixel.hytale.server.core.plugin.PluginBase;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.npc.NPCPlugin;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -63,6 +68,7 @@ public final class TitanBootstrap {
     }
 
     public static void install(@Nonnull final PluginBase plugin) {
+        TitanNpcRegistration.register(NPCPlugin.get());
         registerAssets(plugin);
         registerComponentsAndSystems(plugin);
         applyEngineGlobals();
@@ -160,8 +166,11 @@ public final class TitanBootstrap {
         registry.registerSystem(new TitanWeakpointSystem());
         registry.registerSystem(new TitanWeakpointDeathSystem());
         registry.registerSystem(new TitanRootDamageSystem());
+        registry.registerSystem(new TitanHealthSyncSystem());
         registry.registerSystem(new TitanBossBarSystem());
         registry.registerSystem(new TitanBossBarSystem.Removal());
+        registry.registerSystem(new TitanBrainSyncSystem());
+        registry.registerSystem(new TitanTrioCleanupSystem());
         registry.registerSystem(new TitanWeakpointDamageBonusSystem());
         registry.registerSystem(new TitanWeakpointDamageSystem());
         registry.registerSystem(new TitanRagdollSystem());
