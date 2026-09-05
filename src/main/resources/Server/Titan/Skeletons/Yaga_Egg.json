@@ -1,0 +1,30 @@
+{
+  "$Comment": [
+    "The unhatched Baba Yaga. One bone and no legs: an egg sits still, and everything the rig machinery does beyond holding blocks in place is switched off by having nothing to drive.",
+    "Shell is flagged so its blocks are themselves the weakpoints. That is what makes the egg something a player breaks open rather than something with ore stuck to it, and it means the existing damage, break and death path runs the hatch without knowing it is looking at geometry.",
+    "The pivot is the middle of the nest's footprint at the nest's floor, not the middle of the shell. The shell and the nest were split out of one authored prefab and still share its coordinates, so anchoring the egg to the nest's centre is what keeps the two lined up when the nest is painted into the world as real blocks and the egg is built as a titan above it.",
+    "No PrefabYaw. Everything else here is turned so the creature faces the way the engine calls forward, but an egg has no front, and leaving it unturned keeps the shell in the same coordinates as the nest prefab it has to line up with."
+  ],
+  "BodyBone": "Shell",
+  "UnitScale": 1.0,
+  "HipHeight": 0.0,
+  "ColliderConfig": "Titan_Platform",
+
+  "Bones": [
+    {
+      "$Comment": "Hollow, so only the visible skin of the egg spawns and becomes breakable. Nothing is buried inside a shell worth keeping, and every block that does spawn is an entity with health on it.",
+      "Name": "Shell",
+      "Offset": { "X": 0, "Y": 0, "Z": 0 },
+      "Prefab": "Titan/Yaga/Yaga_Egg_Shell",
+      "Pivot": { "X": 4.5, "Y": 0.0, "Z": 4.5 },
+      "Scale": 1.0,
+      "Hollow": true,
+      "Shell": true,
+      "Collider": false,
+      "Detachable": true
+    }
+  ],
+
+  "IkChains": [],
+  "WeakpointSockets": []
+}

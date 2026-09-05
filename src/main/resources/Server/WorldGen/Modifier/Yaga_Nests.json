@@ -1,0 +1,72 @@
+{
+  "$Comment": [
+    "Injects Baba Yaga egg nests into Zone3 forests via world-gen v1 (WorldGenModifier BiomePrefab).",
+    "Adventure worlds use WorldGen.Type Hytale — not HytaleGenerator v2. Prefab path is dot notation resolved under Server/Prefabs."
+  ],
+  "Priority": "Normal",
+  "Target": {
+    "Root": "Default",
+    "Rules": [
+      "Zones.Zone3_Tier1.Tile.Forest_Redwood",
+      "Zones.Zone3_Tier1.Tile.Forest_Fir",
+      "Zones.Zone3_Tier2.Tile.Forest_Cedar",
+      "Zones.Zone3_Tier2.Tile.Forest_Cedar_Mixed",
+      "Zones.Zone3_Tier1.Custom.Valley_Forest_Redwood",
+      "Zones.Zone3_Tier1.Custom.Valley_Forest_Fir",
+      "Zones.Zone3_Tier1.Custom.Lake_Forest_Redwood",
+      "Zones.Zone3_Tier1.Custom.Lake_Forest_Fir",
+      "Zones.Zone3_Tier1.Custom.Lake_Forest_Hedera",
+      "Zones.Zone3_Tier1.Custom.Forest_Redwood_Kweebec",
+      "Zones.Zone3_Tier2.Custom.Valley_Forest_Cedar",
+      "Zones.Zone3_Tier2.Custom.Valley_Forest_Cedar_Mixed",
+      "Zones.Zone3_Tier2.Custom.Lake_Forest_Cedar",
+      "Zones.Zone3_Tier2.Custom.Lake_Forest_Cedar_Mixed"
+    ]
+  },
+  "Operations": [
+    {
+      "Type": "Add",
+      "Content": {
+        "Type": "BiomePrefab",
+        "Prefabs": [
+          {
+            "Path": "Titan.Yaga.Yaga_Egg_Nest_Site",
+            "Weight": 1.0
+          }
+        ],
+        "PointGrid": {
+          "Seed": "YagaNest",
+          "Scale": 96.0,
+          "Jitter": 0.75,
+          "Density": {
+            "Min": 0.0,
+            "Max": 0.35
+          }
+        },
+        "FitHeightmap": true,
+        "ParentMask": {
+          "Include": {
+            "Any": false,
+            "Empty": false,
+            "Blocks": [
+              "Soil_Needles",
+              "Soil_Grass",
+              "Soil_Grass_Cold",
+              "Soil_Leaves",
+              "Soil_Dirt",
+              "Soil_Pathway",
+              "Soil_Gravel"
+            ],
+            "Fluids": []
+          },
+          "Exclude": {
+            "Any": false,
+            "Empty": true,
+            "Blocks": [],
+            "Fluids": []
+          }
+        }
+      }
+    }
+  ]
+}

@@ -46,7 +46,7 @@ public final class PrefabVoxelReader {
      */
     @Nonnull
     public static PrefabVoxels read(@Nullable final String prefabKey) {
-        return read(prefabKey, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        return read(prefabKey, Integer.MIN_VALUE, Integer.MAX_VALUE, PrefabRotation.ROTATION_0);
     }
 
     /**
@@ -57,11 +57,21 @@ public final class PrefabVoxelReader {
      * slice, so the faces exposed by the cut are treated as surface and are kept by a hollow bone. Layers
      * outside the window are not read at all, so cutting a prefab three ways costs no more than reading it
      * whole.
+     *
+     * <p>{@code rotation} turns the prefab about Y as it is decoded, which is the only place a turn can be
+     * made without consequences elsewhere: the engine carries each block's own orientation and its
+     * multi-block links round with it, and the bone that ends up holding the geometry stays axis-aligned,
+     * so nothing downstream — pivots, IK planes, the gait planner — has to know a turn happened. Slicing
+     * still cuts along Y, which the turn leaves alone.
      */
     @Nonnull
-    public static PrefabVoxels read(@Nullable final String prefabKey, final int minY, final int maxY) {
+    public static PrefabVoxels read(@Nullable final String prefabKey,
+                                    final int minY,
+                                    final int maxY,
+                                    @Nonnull final PrefabRotation rotation) {
+
         if (prefabKey == null || prefabKey.isEmpty() || minY > maxY) return EMPTY;
-        return CACHE.computeIfAbsent(cacheKey(prefabKey, minY, maxY), key -> load(prefabKey, minY, maxY));
+        return CACHE.computeIfAbsent(cacheKey(prefabKey, minY, maxY, rotation), key -> load(prefabKey, minY, maxY, rotation));
     }
 
     /**
@@ -73,32 +83,38 @@ public final class PrefabVoxelReader {
      */
     @Nonnull
     public static PrefabVoxels read(@Nullable final String prefabKey, @Nullable final String suffix) {
-        return read(prefabKey, suffix, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        return read(prefabKey, suffix, Integer.MIN_VALUE, Integer.MAX_VALUE, PrefabRotation.ROTATION_0);
     }
 
-    /** Reads a slice of the rock-type variant of a prefab. See {@link #read(String, int, int)}. */
+    /** Reads a slice of the rock-type variant of a prefab. See {@link #read(String, int, int, PrefabRotation)}. */
     @Nonnull
     public static PrefabVoxels read(@Nullable final String prefabKey,
                                     @Nullable final String suffix,
                                     final int minY,
-                                    final int maxY) {
+                                    final int maxY,
+                                    @Nonnull final PrefabRotation rotation) {
 
         if (prefabKey == null || prefabKey.isEmpty() || suffix == null || suffix.isEmpty()) {
-            return read(prefabKey, minY, maxY);
+            return read(prefabKey, minY, maxY, rotation);
         }
 
         final String suffixed = prefabKey + '_' + suffix;
-        if (!CACHE.containsKey(cacheKey(suffixed, minY, maxY))
+        if (!CACHE.containsKey(cacheKey(suffixed, minY, maxY, rotation))
             && PrefabStore.get().findBrowsablePrefabPath(suffixed) == null) {
-            return read(prefabKey, minY, maxY);
+            return read(prefabKey, minY, maxY, rotation);
         }
-        return read(suffixed, minY, maxY);
+        return read(suffixed, minY, maxY, rotation);
     }
 
     @Nonnull
-    private static String cacheKey(@Nonnull final String prefabKey, final int minY, final int maxY) {
-        if (minY == Integer.MIN_VALUE && maxY == Integer.MAX_VALUE) return prefabKey;
-        return prefabKey + '#' + minY + ':' + maxY;
+    private static String cacheKey(@Nonnull final String prefabKey,
+                                   final int minY,
+                                   final int maxY,
+                                   @Nonnull final PrefabRotation rotation) {
+
+        final String turned = rotation == PrefabRotation.ROTATION_0 ? prefabKey : prefabKey + '@' + rotation;
+        if (minY == Integer.MIN_VALUE && maxY == Integer.MAX_VALUE) return turned;
+        return turned + '#' + minY + ':' + maxY;
     }
 
     /** Drops the cache so edited prefabs are picked up on the next spawn. */
@@ -107,7 +123,10 @@ public final class PrefabVoxelReader {
     }
 
     @Nonnull
-    private static PrefabVoxels load(@Nonnull final String prefabKey, final int sliceMinY, final int sliceMaxY) {
+    private static PrefabVoxels load(@Nonnull final String prefabKey,
+                                     final int sliceMinY,
+                                     final int sliceMaxY,
+                                     @Nonnull final PrefabRotation rotation) {
         final var path = PrefabStore.get().findBrowsablePrefabPath(prefabKey);
         if (path == null) {
             LOGGER.at(Level.WARNING).log("Titan prefab '%s' was not found in any asset pack", prefabKey);
@@ -131,7 +150,7 @@ public final class PrefabVoxelReader {
 
         buffer.forEach(
             IPrefabBuffer.iterateAllColumns(),
-            (x, y, z, blockId, holder, supportValue, rotation, filler, call, fluidId, fluidLevel) -> {
+            (x, y, z, blockId, holder, supportValue, blockRotation, filler, call, fluidId, fluidLevel) -> {
                 if (y < sliceMinY || y > sliceMaxY) return;
                 if (blockId == BlockType.EMPTY_ID) return;
                 final BlockType type = BlockType.getAssetMap().getAsset(blockId);
@@ -147,16 +166,16 @@ public final class PrefabVoxelReader {
                 // one overlapping copy of the model for each.
                 if (filler != 0) return;
 
-                collected.add(new int[]{x, y, z, rotation});
+                collected.add(new int[]{x, y, z, blockRotation});
                 keys.add(type.getId());
             },
             null,
             null,
-            new PrefabBufferCall(new Random(0), PrefabRotation.ROTATION_0)
+            new PrefabBufferCall(new Random(0), rotation)
         );
 
         if (collected.isEmpty()) {
-            LOGGER.at(Level.WARNING).log("Titan prefab '%s' contains no blocks", cacheKey(prefabKey, sliceMinY, sliceMaxY));
+            LOGGER.at(Level.WARNING).log("Titan prefab '%s' contains no blocks", cacheKey(prefabKey, sliceMinY, sliceMaxY, rotation));
             return EMPTY;
         }
 
@@ -183,7 +202,7 @@ public final class PrefabVoxelReader {
         }
 
         LOGGER.at(Level.INFO).log("Loaded Titan prefab '%s': %d blocks (%d shell)",
-            cacheKey(prefabKey, sliceMinY, sliceMaxY), voxels.size(), surfaceCount);
+            cacheKey(prefabKey, sliceMinY, sliceMaxY, rotation), voxels.size(), surfaceCount);
         return new PrefabVoxels(voxels, minX, minY, minZ, maxX, maxY, maxZ);
     }
 

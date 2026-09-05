@@ -1,0 +1,94 @@
+{
+  "$Comment": [
+    "The grown house. Everything the hatchling does, plus a home in it: two large chests, a bed that skips the night, a furnace and a workbench. Where it goes is the wand's business rather than any block's; see Titan_Yaga_Wand.",
+    "Pet, for the same reasons as Yaga_Baby. It spawns no weakpoints and cannot be killed.",
+    "The spawn effect is bigger than the hatchling's because the house is: twenty-six blocks out on a house seventeen tall, and a longer stagger, since seven hundred blocks arriving in the same second reads as a pop rather than an assembly.",
+    "FollowDistance is twelve on a house thirteen wide, so it comes to a stop with its legs clear of the player rather than standing over them.",
+    "Slower and heavier than the hatchling. CrouchDepth of six takes the hips from eleven down to five, which is about as far as an eleven-block leg folds.",
+    "RestSink of seven is the rest of the way down, and the reason resting a house is worth doing. Folded legs alone leave its floor eight blocks up, which is a wall rather than a step: past the fold the whole creature settles instead, legs and all, until the mound it stands on is bedded in the earth and the floor is a block off the ground. The two happen one after the other rather than together — legs first, then the settle — so the feet are tucked under the body by the time they go below the surface instead of being dragged through it at full stretch.",
+    "AboardRadius of seven is half the width of the house and a little over, so an owner anywhere on the floor counts as being carried and it stops trying to walk to them.",
+    "WandSpeed of four is twice the amble it follows at. Being directed somewhere is the one time a player is watching it cross ground rather than waiting for it to catch up with them, and at two it looks like it is thinking about it.",
+    "WandTurnSpeed of a little over two radians a second is most of a half turn in a second: quick enough that swinging the wand across the horizon feels answered, slow enough that a seventeen-block house is not pirouetting.",
+    "LeapHeight of six clears a stump, a fence or a low ledge with the legs to spare without the house hanging in the air; LeapSpeed of nine carries it about ten blocks while it is up there, which is far enough to be worth pressing for and short enough to aim.",
+    "BattleMusic is explicitly empty for the reason set out in Yaga_Egg.json: the field defaults to a real fight theme.",
+    "Both large chests share one block key, so they share one entry. The spawner numbers the copies from InventoryIndex in a stable order, which is how two chests declared at index zero end up as containers zero and one with their own contents."
+  ],
+  "Skeleton": "Yaga_Baba",
+  "DisplayName": "Baba Yaga",
+  "BodyScale": 1.0,
+
+  "Pet": true,
+  "StartAwake": true,
+  "Passive": true,
+  "Chase": false,
+  "WanderRadius": 0,
+
+  "SpawnFxRadius": 26.0,
+  "SpawnFxDuration": 1.1,
+  "SpawnFxStagger": 1.6,
+
+  "FollowDistance": 12.0,
+  "CrouchDepth": 6.0,
+  "RestSink": 7.0,
+  "AboardRadius": 7.0,
+
+  "WandSpeed": 4.0,
+  "WandTurnSpeed": 2.2,
+  "LeapHeight": 6.0,
+  "LeapSpeed": 9.0,
+
+  "SpawnFootprintRadius": 7,
+  "SpawnFootprintRelief": 5,
+  "SpawnHeadroom": 30,
+  "SpawnLevelToLowest": true,
+
+  "MoveSpeed": 2.0,
+  "TurnSpeed": 1.1,
+  "WakeRadius": 0,
+  "LoseTargetRadius": 0,
+  "LeashRadius": 0,
+
+  "SmashChance": 0,
+  "SlamChance": 0,
+  "PoundChance": 0,
+  "HurlChance": 0,
+  "PlowChance": 0,
+  "StompChance": 0,
+
+  "Fixtures": [
+    {
+      "$Comment": "Seven rows each, and there are two of them. Rows are not a server-side concept — the client lays a container out nine slots wide — so seven rows is sixty-three.",
+      "Block": "Furniture_Human_Ruins_Chest_Large",
+      "Kind": "Chest",
+      "Capacity": 63,
+      "InventoryIndex": 0,
+      "Hint": "titan_yaga.yaga.hint.chest"
+    },
+    {
+      "Block": "Furniture_Human_Ruins_Bed",
+      "Kind": "Bed",
+      "Hint": "titan_yaga.yaga.hint.bed"
+    },
+    {
+      "$Comment": "Capacity zero because the furnace claims none of the house's chests: YagaFurnace runs the engine's own furnace, whose slots are laid out from this block's own bench config and saved with it.",
+      "Block": "Bench_Furnace",
+      "Kind": "Furnace",
+      "Capacity": 0,
+      "Hint": "titan_yaga.yaga.hint.furnace"
+    },
+    {
+      "Block": "Bench_WorkBench",
+      "Kind": "Workbench",
+      "Hint": "titan_yaga.yaga.hint.workbench"
+    }
+  ],
+
+  "ImpactParticle": "Block_Land_Hard_Stone",
+  "ImpactSound": "SFX_Golem_Earth_Laydown",
+  "DeathSound": "SFX_Stone_Break",
+  "StepSound": "SFX_Wood_Walk",
+  "CrouchSound": "SFX_Golem_Earth_Laydown",
+  "SpawnSound": "SFX_Golem_Earth_Wake",
+  "LeapSound": "SFX_Golem_Earth_Wake",
+  "BattleMusic": ""
+}

@@ -1,0 +1,9 @@
+{
+  "$Comment": [
+    "What a titan's usable blocks point their Use interaction at. Every fixture on every titan shares this one entry, because what a fixture does depends on which fixture it is, and that is decided by the component on the voxel rather than by the asset: one root interaction here, one system reading TitanFixtureComponent there.",
+    "The chain itself does nothing — see Titan_Fixture_Noop for why it has to exist at all."
+  ],
+  "Interactions": [
+    "Titan_Fixture_Noop"
+  ]
+}

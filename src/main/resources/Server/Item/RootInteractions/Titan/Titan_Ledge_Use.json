@@ -1,0 +1,6 @@
+{
+  "$Comment": "Use root for grab ledges. Shared by every nub; the interact system decides what grabbing means.",
+  "Interactions": [
+    "Titan_Ledge_Noop"
+  ]
+}

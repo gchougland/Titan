@@ -1,0 +1,48 @@
+{
+  "$Comment": [
+    "A Baba Yaga egg in its nest, found in the redwood forests of zone 3. The player breaks the shell open and whatever comes out is theirs.",
+    "Pet, so none of the combat pipeline touches it: no boss bar, no battle music, no Encounter and no brain NPC. It is not a fight, and an egg with a health bar over it would read as one.",
+    "The shell is declared on the skeleton rather than here — there is no WeakpointModel because there is no ore to hang on it. ShellHealth is the whole cost of breaking in, not the cost of one block: every hit on any of the sixty-six blocks comes off the same pool and none of them can be knocked off on its own, because an egg with a hole in one side would show what is curled up inside it. It cracks open all at once when the pool runs out.",
+    "The pool is about twenty swings' worth. This is a thing you hit until it opens, not a boss: a minute of work with no danger in it.",
+    "StartAwake and Passive: it does nothing and it never wakes up. Passive stops it answering being hit, which for a titan whose whole purpose is to be hit matters.",
+    "BattleMusic is explicitly empty because the field defaults to a real fight theme. Nothing plays it for a pet, but a friendly variant left naming one is a trap for whoever reads this next.",
+    "The nest is stamped into the world as ordinary blocks. World nests come from the Yaga_Egg_Nest_Site structure prefab (Zone3 redwoods); /titan spawn still paints GroundPrefab so a command-spawned egg has somewhere to sit. The shell and the nest were split out of one authored prefab and still share its coordinates, which is what makes centring the nest on the egg's root line the two back up.",
+    "The footprint is the nest, nine blocks across, and it wants flat ground because a nest half-buried in a hillside is the one way this can look wrong. Headroom is the egg plus room for the hatchling that replaces it."
+  ],
+  "Skeleton": "Yaga_Egg",
+  "DisplayName": "Baba Yaga Egg",
+  "BodyScale": 1.0,
+
+  "GroundPrefab": "Titan/Yaga/Yaga_Egg_Nest",
+
+  "Pet": true,
+  "StartAwake": true,
+  "Passive": true,
+  "Chase": false,
+  "WanderRadius": 0,
+
+  "ShellHealth": 300,
+
+  "SpawnFootprintRadius": 5,
+  "SpawnFootprintRelief": 2,
+  "SpawnHeadroom": 12,
+  "SpawnLevelToLowest": false,
+
+  "MoveSpeed": 0,
+  "TurnSpeed": 0,
+  "WakeRadius": 0,
+  "LoseTargetRadius": 0,
+  "LeashRadius": 0,
+
+  "SmashChance": 0,
+  "SlamChance": 0,
+  "PoundChance": 0,
+  "HurlChance": 0,
+  "PlowChance": 0,
+  "StompChance": 0,
+
+  "ImpactParticle": "Block_Land_Hard_Stone",
+  "ImpactSound": "SFX_Egg_Hit",
+  "DeathSound": "SFX_Stone_Break",
+  "BattleMusic": ""
+}

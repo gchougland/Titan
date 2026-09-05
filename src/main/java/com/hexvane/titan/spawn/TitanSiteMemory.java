@@ -26,6 +26,15 @@ public final class TitanSiteMemory implements Resource<EntityStore> {
     @Nonnull
     public static final String ID = "TitanSiteMemory";
 
+    /**
+     * Duration for {@link #markCleared} that never counts down.
+     *
+     * <p>For sites whose titan is not coming back at all rather than not for a while: a Baba Yaga egg
+     * hatches into something the player keeps, so a nest that produced another one after a cooldown would
+     * turn a one-off find into a farm.
+     */
+    public static final float FOREVER = -1f;
+
     @Nonnull
     public static final BuilderCodec<TitanSiteMemory> CODEC = BuilderCodec.builder(TitanSiteMemory.class, TitanSiteMemory::new)
         .append(
@@ -50,7 +59,8 @@ public final class TitanSiteMemory implements Resource<EntityStore> {
     }
 
     /**
-     * Records that a site's titan has been killed and must stay gone for {@code seconds}.
+     * Records that a site's titan has been killed and must stay gone for {@code seconds}, or for good if
+     * that is {@link #FOREVER}.
      *
      * <p>Synchronised because the kill is reported by the AI, which ticks titans in parallel, while the
      * countdown and the save run on the world thread. Kills are rare enough for the lock to cost nothing.
@@ -71,6 +81,8 @@ public final class TitanSiteMemory implements Resource<EntityStore> {
         final var iterator = cleared.long2FloatEntrySet().iterator();
         while (iterator.hasNext()) {
             final Long2FloatMap.Entry entry = iterator.next();
+            if (entry.getFloatValue() == FOREVER) continue;
+
             final float remaining = entry.getFloatValue() - dt;
             if (remaining <= 0f) {
                 iterator.remove();
@@ -110,7 +122,9 @@ public final class TitanSiteMemory implements Resource<EntityStore> {
     private synchronized void setCleared(@Nonnull final TitanClearedSite[] records) {
         cleared.clear();
         for (final TitanClearedSite record : records) {
-            if (record.getSeconds() > 0f) cleared.put(record.getCell(), record.getSeconds());
+            if (record.getSeconds() > 0f || record.getSeconds() == FOREVER) {
+                cleared.put(record.getCell(), record.getSeconds());
+            }
         }
     }
 

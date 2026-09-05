@@ -86,6 +86,11 @@ public final class TitanConfig {
             (c, v) -> c.parallelPartSync = v,
             c -> c.parallelPartSync
         ).add()
+        .append(
+            new KeyedCodec<>("WandLog", Codec.BOOLEAN),
+            (c, v) -> c.wandLog = v,
+            c -> c.wandLog
+        ).add()
         .build();
 
     /** Used before the plugin has handed over the loaded file, and if loading fails. */
@@ -103,11 +108,11 @@ public final class TitanConfig {
         active = config;
     }
 
-    private double weakpointHealthMultiplier = 1;
-    private double attackDamageMultiplier = 1;
-    private double attackKnockbackMultiplier = 1;
+    private double weakpointHealthMultiplier = 1.5;
+    private double attackDamageMultiplier = 1.5;
+    private double attackKnockbackMultiplier = 0.8;
     private double pickaxeDamageMultiplier = 18;
-    private double maceDamageMultiplier = 1.6;
+    private double maceDamageMultiplier = 1.4;
     private boolean battleMusic = true;
     private boolean telegraphs = true;
     @Nonnull
@@ -117,6 +122,7 @@ public final class TitanConfig {
     private double partSyncInterval;
     private double entityLodRatio;
     private boolean parallelPartSync;
+    private boolean wandLog = true;
 
     /** Scales how much punishment each ore node takes before it breaks. */
     public float getWeakpointHealthMultiplier() {
@@ -268,6 +274,17 @@ public final class TitanConfig {
      */
     public boolean isParallelPartSync() {
         return parallelPartSync;
+    }
+
+    /**
+     * Whether each press and release of the wand is logged.
+     *
+     * <p>On by default, because a wand that is not working and a wand that is not being pointed at anything
+     * look the same from here: the house stands still either way. A line says the wand was heard and the
+     * house had its own reasons for staying put; no line says the press never reached the server at all.
+     */
+    public boolean isWandLogEnabled() {
+        return wandLog;
     }
 
     /**

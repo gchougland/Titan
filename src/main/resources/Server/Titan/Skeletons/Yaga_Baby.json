@@ -1,0 +1,174 @@
+{
+  "$Comment": [
+    "The hatchling: a one-room hut on a mound of earth, standing on two chicken legs. Offsets are model units (one prefab block) in titan-local space: +X right, +Y up, -Z forward. The root sits on the ground, so Pelvis's offset is the hip height.",
+    "Every prefab is turned a quarter turn about Y as it is read. They were authored facing +X — the hut's door is on its +X wall — and the engine treats -Z as forward, which is the direction the gait planner steps along and the direction the body's yaw points. Turning at read time rather than with a bind rotation on the root leaves the rig axis-aligned, so the IK bending planes and the leg offsets below are stated in plain titan-local axes. Every Pivot here is therefore in the *turned* prefab space, where a pivot of 0.5 is the middle of the block at index 0.",
+    "There is no ClipSet. Nothing on the creature is authored as an animation: the legs are driven by the foot planner off the body's own velocity, and the tail by the procedural wobble at the bottom of this file. A missing clip set resolves to the bind pose rather than an error.",
+    "The legs are the point of the rig, and they are tiny — the thigh and calf prefabs are two blocks each. A bird's leg bends the opposite way to a person's, and at this size the prefabs barely slope enough to say so: the thigh drops 2 and leans half a block back, the calf drops 2 and leans half a block forward. What actually makes the knee bend backwards is PoleDirection, not the geometry, so the crouch reads correctly even though the bind pose is nearly straight.",
+    "Legs and tail carry no collision at all. The legs sweep through the space a player stands in, and a collider swinging through someone shoves them, which reads as the hut kicking anyone who walks up to it. Collision is on the hut and its mound, which is what the player climbs on and stands on."
+  ],
+  "BodyBone": "Pelvis",
+  "UnitScale": 1.0,
+  "HipHeight": 4.5,
+  "ColliderConfig": "Titan_Platform",
+
+  "Bones": [
+    {
+      "$Comment": "The hub the hut and both legs hang off. Carries no geometry, so the point the legs are measured from is the underside of the mound rather than somewhere inside it. 4.5 rather than the 5 the bind pose measures, so the chain has something left to bend: see the IK comment.",
+      "Name": "Pelvis",
+      "Offset": { "X": 0, "Y": 4.5, "Z": 0 },
+      "Detachable": false
+    },
+    {
+        "$Comment": "Mound and hut together, 7x8x7. No Pivot, so it defaults to the bottom centre of its own bounds, which puts the underside of the mound exactly at the hips and leaves the tops of the thighs immediately below it, hiding both joints without overlapping a single voxel. Climbable on every exposed face rather than only the top, because the top is a hut with walls, a door and a roof that a player would otherwise walk through. Usable, so clicking any part of the hut tells it to sit or stand — a player walks up to the thing and clicks it, and which block they hit is beside the point. The legs are Usable too, for the same reason and because a standing hut holds its floor above head height; only the tail is left out. The hint is one line for both directions because it is spawned onto every voxel and restating several hundred of them each time the mode changed would not be worth what it bought.",
+      "Name": "Body",
+      "Parent": "Pelvis",
+      "Offset": { "X": 0, "Y": 0, "Z": 0 },
+      "Prefab": "Titan/Yaga/Yaga_Baby_Body",
+      "PrefabYaw": 90,
+      "Scale": 1.0,
+      "Hollow": true,
+      "ColliderStride": 1,
+      "ColliderAllFaces": true,
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "Detachable": false
+    },
+    {
+      "$Comment": "A stub of thatch off the back. The prefab's low forward corner is the end that meets the hut, so that is the pivot and the wobble swings the tail about its base. The offset buries that base a block inside the rear wall, so the tail grows out of the wall rather than floating off it.",
+      "Name": "Tail",
+      "Parent": "Pelvis",
+      "Offset": { "X": 0, "Y": 1.5, "Z": 3 },
+      "Prefab": "Titan/Yaga/Yaga_Baby_Tail",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 0.5, "Z": -0.5 },
+      "Scale": 1.0,
+      "Collider": false
+    },
+
+    {
+      "$Comment": "Left leg. The stance is 1.5 out on a hut 7 wide, which is as far as the legs go while still meeting solid ground under the mound. Pivot Y is 2, the top face of the prefab rather than the middle of its top layer, so the thigh hangs entirely below the hip.",
+      "Name": "L-Thigh",
+      "Parent": "Pelvis",
+      "Offset": { "X": -1.5, "Y": 0, "Z": 0 },
+      "Prefab": "Titan/Yaga/Yaga_Baby_Thigh",
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 2.0, "Z": 0.5 },
+      "Scale": 1.0,
+      "Collider": false
+    },
+    {
+      "$Comment": "Down 2 and back half a block, which is where the thigh prefab's bottom layer sits relative to its top.",
+      "Name": "L-Calf",
+      "Parent": "L-Thigh",
+      "Offset": { "X": 0, "Y": -2.0, "Z": 1 },
+      "Prefab": "Titan/Yaga/Yaga_Baby_Calf",
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 2.0, "Z": 0.5 },
+      "Scale": 1.0,
+      "Collider": false
+    },
+    {
+      "$Comment": "Down 3 rather than the calf's own 2, and forward half a block. The extra block is the foot's own height, so with a Pivot Y of 0 the bone's origin lands on the sole rather than at the ankle. That is the point the IK plants and the point the sole is levelled about, so the foot rests on the ground instead of hanging its own height below the spot the solver picked.",
+      "Name": "L-Foot",
+      "Parent": "L-Calf",
+      "Offset": { "X": 0, "Y": -3.0, "Z": -1.5 },
+      "Prefab": "Titan/Yaga/Yaga_Baby_Foot",
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 0.0, "Z": 0.5 },
+      "Scale": 1.0,
+      "Collider": false
+    },
+
+    {
+      "$Comment": "Right leg, the same prefabs at the mirrored stance. The leg is one block wide and symmetric about its own axis, so there is nothing for MirrorX to do.",
+      "Name": "R-Thigh",
+      "Parent": "Pelvis",
+      "Offset": { "X": 1.5, "Y": 0, "Z": 0 },
+      "Prefab": "Titan/Yaga/Yaga_Baby_Thigh",
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 2.0, "Z": 0.5 },
+      "Scale": 1.0,
+      "Collider": false
+    },
+    {
+      "Name": "R-Calf",
+      "Parent": "R-Thigh",
+      "Offset": { "X": 0, "Y": -2.0, "Z": 1 },
+      "Prefab": "Titan/Yaga/Yaga_Baby_Calf",
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 2.0, "Z": 0.5 },
+      "Scale": 1.0,
+      "Collider": false
+    },
+    {
+      "Name": "R-Foot",
+      "Parent": "R-Calf",
+      "Offset": { "X": 0, "Y": -3.0, "Z": -1.5 },
+      "Prefab": "Titan/Yaga/Yaga_Baby_Foot",
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 0.0, "Z": 0.5 },
+      "Scale": 1.0,
+      "Collider": false
+    }
+  ],
+
+  "IkChains": [
+    {
+      "$Comment": [
+        "PoleDirection is the direction the middle joint bends towards, in titan-local space, and +Z is behind the creature. That one value is the whole chicken leg: the same chain with the default -Z bends the knee forwards like a person's. It is stated rather than derived because a chain this straight in its bind pose gives the solver no hint which of the two solutions the artist meant.",
+        "The two segments are 2.06 and 3.04 long, so the chain reaches 5.10 while the hip sits 4.5 up. A chain whose reach equalled the hip height would stand dead straight on flat ground with nothing left to bend and would fail to reach the moment a foot had to step down; the half block of slack is the knee's working room, and it is what gives the bind stance its slight bend.",
+        "RestOffset is measured from Pelvis in the same axes as a bone offset, so X repeats the leg's own stance and the foot rests under the hip it belongs to. Z is 0 because the thigh's half-block lean back and the calf's half-block lean forward cancel, leaving the ankle directly under the hip. Y only seeds the search — the planner snaps the result to the terrain.",
+        "GaitPhase must be 0 and 0.5, not 0 and 1: the planner rounds it into one of two alternating groups and only lets one group leave the ground at a time. With both legs in the same group a two-legged creature would take both feet off the floor together.",
+        "Stride and step are short even for a four-block leg. A hut this heavy taking long strides reads as gliding, and a tall step would leave the chain unable to reach."
+      ],
+      "Name": "Leg_L",
+      "Kind": "TwoBone",
+      "Role": "Foot",
+      "Bones": [ "L-Thigh", "L-Calf", "L-Foot" ],
+      "PoleDirection": { "X": 0, "Y": 0, "Z": 1 },
+      "Side": -1,
+      "StrideLength": 2.0,
+      "StepHeight": 1.0,
+      "GaitPhase": 0.0,
+      "RestOffset": { "X": -1.5, "Y": -4.5, "Z": 0.0 }
+    },
+    {
+      "Name": "Leg_R",
+      "Kind": "TwoBone",
+      "Role": "Foot",
+      "Bones": [ "R-Thigh", "R-Calf", "R-Foot" ],
+      "PoleDirection": { "X": 0, "Y": 0, "Z": 1 },
+      "Side": 1,
+      "StrideLength": 2.0,
+      "StepHeight": 1.0,
+      "GaitPhase": 0.5,
+      "RestOffset": { "X": 1.5, "Y": -4.5, "Z": 0.0 }
+    }
+  ],
+
+  "ProceduralWobble": [
+    {
+      "$Comment": "Bobs the tail about the creature's right axis, which tilts it up and down. The idle floor is what stops a stationary hut reading as a statue; the full swing arrives at a couple of blocks a second, which is about its top speed.",
+      "Bone": "Tail",
+      "Axis": { "X": 1, "Y": 0, "Z": 0 },
+      "AmplitudeDeg": 14.0,
+      "IdleAmplitudeDeg": 4.0,
+      "Hz": 1.4,
+      "SpeedScale": 2.0
+    }
+  ],
+
+  "WeakpointSockets": []
+}

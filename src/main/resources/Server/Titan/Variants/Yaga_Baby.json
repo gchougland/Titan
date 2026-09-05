@@ -1,0 +1,74 @@
+{
+  "$Comment": [
+    "The hatchling. Belongs to whoever cracked the egg, follows them about, and can be told to sit down so they can climb on. One room with a chest in it and an open doorway.",
+    "Pet, so it is outside the combat pipeline entirely: no bar, no music, no Encounter, and the combat state machine skips it in favour of YagaPetSystem. It also spawns no weakpoints, which is what makes it unkillable — there is nothing on it to break.",
+    "The spawn effect is what the player sees when the egg opens: the hut assembles itself out of blocks that fly in from a shell fourteen blocks out, the ones nearest the middle arriving first. Fourteen is a little wider than the hut is tall, so the blocks appear outside its silhouette but still inside a player's view of it.",
+    "FollowDistance is six on a hut seven wide, so it stops about a block short of the player rather than walking into them. It weighs far more than a player does, so walking into one would shove them instead of stopping.",
+    "CrouchDepth of three takes the hips from four and a half down to one and a half, which folds the four-block legs about as far as they go. RestSink of two and a half is the rest of the way: past the fold the whole creature settles, legs and all, until the mound beds into the earth and the floor inside the hut is a block off the ground rather than three and a half. Three and a half is a wall — a player cannot jump it — and a hut nobody can climb onto is a hut that may as well not sit down. The two happen one after the other rather than together — legs first, then the settle — so the feet are tucked under the body by the time they go below the surface instead of being dragged through it at full stretch. See Yaga_Baba.json, which does the same thing at house scale.",
+    "AboardRadius of four is half the width of the hut and a little over, so an owner who has climbed on stops being somebody it tries to walk to.",
+    "MoveSpeed is a little above a walk. Anything slower and following the player is useless; anything faster and a hut on tiny legs reads as sliding.",
+    "The wand works on the hatchling as well as on the grown house, and it is nimbler at both: quicker to come round, quicker across the ground, and a lower, shorter leap in keeping with four-block legs.",
+    "BattleMusic is explicitly empty for the reason set out in Yaga_Egg.json: the field defaults to a real fight theme.",
+    "Fixtures are matched by block key. The prefab holds one anchor block per piece of furniture and the spawner only ever builds the anchor, so each entry resolves to exactly one usable block. There is no door: swinging one on a moving hut never landed right, so the doorway is left open."
+  ],
+  "Skeleton": "Yaga_Baby",
+  "DisplayName": "Baby Yaga",
+  "BodyScale": 1.0,
+
+  "Pet": true,
+  "StartAwake": true,
+  "Passive": true,
+  "Chase": false,
+  "WanderRadius": 0,
+
+  "SpawnFxRadius": 14.0,
+  "SpawnFxDuration": 0.9,
+  "SpawnFxStagger": 1.1,
+
+  "FollowDistance": 6.0,
+  "CrouchDepth": 3.0,
+  "RestSink": 2.5,
+  "AboardRadius": 4.0,
+
+  "WandSpeed": 4.5,
+  "WandTurnSpeed": 2.6,
+  "LeapHeight": 4.0,
+  "LeapSpeed": 8.0,
+
+  "SpawnFootprintRadius": 4,
+  "SpawnFootprintRelief": 3,
+  "SpawnHeadroom": 14,
+  "SpawnLevelToLowest": false,
+
+  "MoveSpeed": 2.4,
+  "TurnSpeed": 1.6,
+  "WakeRadius": 0,
+  "LoseTargetRadius": 0,
+  "LeashRadius": 0,
+
+  "SmashChance": 0,
+  "SlamChance": 0,
+  "PoundChance": 0,
+  "HurlChance": 0,
+  "PlowChance": 0,
+  "StompChance": 0,
+
+  "Fixtures": [
+    {
+      "$Comment": "Four rows. Rows are not a server-side concept — the client lays a container out nine slots wide — so four rows is thirty-six.",
+      "Block": "Furniture_Human_Ruins_Chest_Small",
+      "Kind": "Chest",
+      "Capacity": 36,
+      "InventoryIndex": 0,
+      "Hint": "titan_yaga.yaga.hint.chest"
+    }
+  ],
+
+  "ImpactParticle": "Block_Land_Hard_Stone",
+  "DeathSound": "SFX_Stone_Break",
+  "StepSound": "SFX_Wood_Walk",
+  "CrouchSound": "SFX_Golem_Earth_Laydown",
+  "SpawnSound": "SFX_Golem_Earth_Wake",
+  "LeapSound": "SFX_Golem_Earth_Wake",
+  "BattleMusic": ""
+}

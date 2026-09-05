@@ -3,6 +3,7 @@ package com.hexvane.titan.command;
 import com.hexvane.titan.asset.TitanVariantAsset;
 import com.hexvane.titan.config.TitanConfig;
 import com.hexvane.titan.entity.TitanComponent;
+import com.hexvane.titan.yaga.YagaComponent;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
@@ -86,6 +87,36 @@ final class TitanCommandUtil {
         for (final Ref<EntityStore> candidate : snapshotNearby(store, origin, radius)) {
             if (!candidate.isValid()) continue;
             if (store.getComponent(candidate, TitanComponent.getComponentType()) == null) continue;
+
+            final var transform = store.getComponent(candidate, TransformComponent.getComponentType());
+            if (transform == null) continue;
+
+            final double distance = transform.getPosition().distanceSquared(origin);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = candidate;
+            }
+        }
+        return best;
+    }
+
+    /**
+     * The Baba Yaga house nearest to {@code origin} within {@code radius}, or {@code null}.
+     *
+     * <p>Separate from {@link #findNearest} because the yaga commands are all about one house and a player
+     * standing next to theirs may well be standing nearer to something else — an egg they have not cracked,
+     * or a combat titan that happens to be closer.
+     */
+    @Nullable
+    static Ref<EntityStore> findNearestYaga(@Nonnull final Store<EntityStore> store,
+                                            @Nonnull final Vector3d origin,
+                                            final double radius) {
+        Ref<EntityStore> best = null;
+        double bestDistance = Double.MAX_VALUE;
+
+        for (final Ref<EntityStore> candidate : snapshotNearby(store, origin, radius)) {
+            if (!candidate.isValid()) continue;
+            if (store.getComponent(candidate, YagaComponent.getComponentType()) == null) continue;
 
             final var transform = store.getComponent(candidate, TransformComponent.getComponentType());
             if (transform == null) continue;

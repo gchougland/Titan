@@ -1,0 +1,113 @@
+{
+  "$Comment": [
+    "The wand a Baba Yaga house is directed with. Hold either mouse button and the house walks the way the wand is pointing; press the use key and it leaps that way. Both are interaction types this mod registers with the engine at startup, and neither does anything to whatever the wand happens to be aimed at — the house is found from who is holding it.",
+    "Primary and Secondary run the same thing, so a player pointing at where they want the house to go does not have to remember which button points. YagaPoint is a held interaction, the same kind of thing as raising a shield: it runs for as long as the button is down and ends when it is let go, which is the whole of what the house needs to know.",
+    "CastLeftCharging is the wand's own looping cast from the base game, which is what the arm does for the length of a hold. CastLeft, the one-shot, goes on the leap. ClearAnimationOnFinish so the arm comes down when the button does.",
+    "The look is the base game's wooden earth wand: model, texture, particles and hand animations all point at assets the client already has. A mod shipping its own model would have to get it onto every client first, and the point of this item is what it does rather than what it is carved from.",
+    "RunTime zero on the leap so the chain is over in the tick it started in. The house does the leaping, and a player left mid-interaction for half a second afterwards could not point it anywhere while it was in the air."
+  ],
+  "TranslationProperties": {
+    "Name": "server.items.Titan_Yaga_Wand.name"
+  },
+  "Categories": [
+    "Items.Weapons"
+  ],
+  "Icon": "Icons/ItemsGenerated/Weapon_Wand_Wood.png",
+  "Quality": "Rare",
+  "ItemLevel": 1,
+  "Model": "Items/Weapons/Wand/Wood.blockymodel",
+  "Texture": "Items/Weapons/Wand/Wood_Texture.png",
+  "PlayerAnimationsId": "Wand",
+  "Particles": [
+    {
+      "SystemId": "Wood_Wand",
+      "TargetNodeName": "Handle"
+    }
+  ],
+  "Interactions": {
+    "Primary": {
+      "Interactions": [
+        {
+          "Type": "YagaPoint",
+          "Effects": {
+            "ItemAnimationId": "CastLeftCharging",
+            "ClearAnimationOnFinish": true
+          },
+          "CancelOnOtherClick": false
+        }
+      ]
+    },
+    "Secondary": {
+      "Interactions": [
+        {
+          "Type": "YagaPoint",
+          "Effects": {
+            "ItemAnimationId": "CastLeftCharging",
+            "ClearAnimationOnFinish": true
+          },
+          "CancelOnOtherClick": false
+        }
+      ]
+    },
+    "Use": {
+      "Interactions": [
+        {
+          "Type": "YagaLeap",
+          "Effects": {
+            "ItemAnimationId": "CastLeft"
+          },
+          "RunTime": 0
+        }
+      ]
+    }
+  },
+  "IconProperties": {
+    "Scale": 0.6,
+    "Translation": [
+      -13,
+      -16
+    ],
+    "Rotation": [
+      45,
+      90,
+      0
+    ]
+  },
+  "DroppedItemAnimation": "Items/Animations/Dropped/Dropped_Diagonal_Left.blockyanim",
+  "Tags": {
+    "Type": [
+      "Weapon"
+    ],
+    "Family": [
+      "Wand"
+    ]
+  },
+  "ItemSoundSetId": "ISS_Weapons_Wand",
+  "Recipe": {
+    "TimeSeconds": 1,
+    "KnowledgeRequired": false,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Life_Essence_Concentrated",
+        "Quantity": 1
+      },
+      {
+        "ItemId": "Ingredient_Stick",
+        "Quantity": 10
+      },
+      {
+        "ItemId": "Ingredient_Void_Essence",
+        "Quantity": 10
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Arcanebench",
+        "Type": "Crafting",
+        "Categories": [
+          "Arcane_Misc"
+        ]
+      }
+    ]
+  }
+}

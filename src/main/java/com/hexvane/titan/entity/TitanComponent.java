@@ -18,6 +18,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * The brain and skeleton state of one titan, living on an otherwise invisible root entity. Every voxel and
@@ -39,6 +40,9 @@ public final class TitanComponent implements Component<EntityStore> {
      * changes while the clock runs.
      */
     private static final float LOST_GRACE_SECONDS = 2f;
+
+    /** Seconds the wobble phase clock wraps at. A whole number of cycles for any integer frequency. */
+    private static final float WOBBLE_PERIOD = 60f;
 
     public static ComponentType<EntityStore, TitanComponent> getComponentType() {
         return TitanRegistry.getTitanComponentType();
@@ -65,6 +69,8 @@ public final class TitanComponent implements Component<EntityStore> {
 
     private double scale = 1.0;
     private float yaw;
+    /** Phase clock for {@link #addWobbleTime}; see there for why it is not a wall clock. */
+    private float wobbleTime = ThreadLocalRandom.current().nextFloat() * WOBBLE_PERIOD;
     @Nonnull
     private final Vector3d velocity = new Vector3d();
     /** Where the titan was built, and the centre of the ground it will defend. */
@@ -91,6 +97,8 @@ public final class TitanComponent implements Component<EntityStore> {
     private int stompFoot = -1;
     @Nonnull
     private final Vector3d stompGoal = new Vector3d();
+    /** How far under their planted spots the feet are held; see {@link #getFootSink}. */
+    private double footSink;
 
     @Nonnull
     private final Vector3d wanderGoal = new Vector3d();
@@ -301,6 +309,20 @@ public final class TitanComponent implements Component<EntityStore> {
         return elapsed;
     }
 
+    /**
+     * Advances the clock the procedural wobbles run off and returns it.
+     *
+     * <p>Kept per titan rather than read off a wall clock so two of the same variant standing together are
+     * not in lockstep, and so a titan being posed at a reduced rate advances by what it was actually given.
+     * Wrapped at a whole number of seconds, which is a whole number of cycles for any integer frequency, so
+     * the sway does not jump when the counter rolls over and the value never grows large enough to lose
+     * precision.
+     */
+    public float addWobbleTime(final float advance) {
+        wobbleTime = (wobbleTime + advance) % WOBBLE_PERIOD;
+        return wobbleTime;
+    }
+
     public float getYaw() {
         return yaw;
     }
@@ -472,6 +494,23 @@ public final class TitanComponent implements Component<EntityStore> {
     @Nonnull
     public Vector3d getStompGoal() {
         return stompGoal;
+    }
+
+    /**
+     * How far below the ground the feet are held, in world blocks.
+     *
+     * <p>Zero for anything walking about: the planner puts each foot on the surface and the legs reach
+     * down to it. A titan that sits lower than its legs can fold sets this instead, and then the whole
+     * rig — hips and feet together — goes down into the ground keeping its shape, rather than the legs
+     * folding further than they are able and the inverse kinematics turning them back up through the body
+     * to reach feet still standing on the surface.
+     */
+    public double getFootSink() {
+        return footSink;
+    }
+
+    public void setFootSink(final double footSink) {
+        this.footSink = footSink;
     }
 
     /**

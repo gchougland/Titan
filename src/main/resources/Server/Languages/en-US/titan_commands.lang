@@ -64,3 +64,10 @@ commands.titan.preview.yaw.desc=Facing in degrees; defaults to your own facing. 
 commands.titan.preview.layers.desc=Show only this many layers from the bottom up
 commands.titan.preview.unknownPrefab=No prefab found for "{prefab}".
 commands.titan.preview.spawned=Preview of {prefab} at {yaw, number} degrees, {distance, number} blocks ahead. Does the mesh face where you asked, and is it solid or a ghost? Remove it with /prefabpreview remove --radius=64.
+
+commands.titan.ledge.desc=Grab-ledge cling prototype
+commands.titan.ledge.failed=Could not spawn ledge (missing model or interaction assets).
+commands.titan.ledge.spawn.desc=Spawn one grab ledge ahead of you
+commands.titan.ledge.spawn.success=Spawned a grab ledge at ({x, number}, {y, number}, {z, number}). Use it to hang.
+commands.titan.ledge.playground.desc=Spawn a ledge cling test course (row, gap, pull-up shelf)
+commands.titan.ledge.playground.success=Spawned ledge playground with {count, number} nubs at ({x, number}, {y, number}, {z, number}). Use a nub to hang; A/D slide; W pull up; crouch drop; jump launch.

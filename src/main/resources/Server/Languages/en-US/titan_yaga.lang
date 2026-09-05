@@ -1,0 +1,48 @@
+yaga.name.egg=Baba Yaga Egg
+yaga.name.baby=Baby Yaga
+yaga.name.baba=Baba Yaga
+
+yaga.hint.toggleRest=Press [{key}] to tell it to sit or stand
+yaga.hint.chest=Press [{key}] to open the chest
+yaga.hint.door.open=Press [{key}] to open the door
+yaga.hint.door.close=Press [{key}] to close the door
+yaga.hint.bed=Press [{key}] to sleep
+yaga.hint.furnace=Press [{key}] to use the furnace
+yaga.hint.workbench=Press [{key}] to use the workbench
+
+yaga.notYours=That belongs to someone else.
+yaga.bed.notNight=It is too early to turn in.
+yaga.egg.hatched=The shell splits and something climbs out. It is yours now, and so is the wand: hold either mouse button to send it that way, or press use to make it leap.
+yaga.egg.hatchFailed=The egg cracked open but nothing could be built where it stood.
+
+yaga.mode.resting=It folds its legs and settles.
+yaga.mode.follow=It stands back up.
+yaga.mode.midLeap=It is in mid-air. Wait for it to land.
+
+commands.titan.yaga.desc=Baba Yaga house commands
+commands.titan.yaga.noneNearby=No Baba Yaga found nearby.
+commands.titan.yaga.radius.desc=Search radius in blocks
+
+commands.titan.yaga.spawn.desc=Spawn a Baba Yaga at a given stage, owned by you
+commands.titan.yaga.spawn.stage.desc=egg, baby or baba
+commands.titan.yaga.spawn.badStage=Unknown stage '{value}'. Expected one of: {known}
+commands.titan.yaga.spawn.success=Spawned the {stage} stage at ({x, number}, {y, number}, {z, number}).
+commands.titan.yaga.spawn.failed=Could not spawn it: {error}
+
+commands.titan.yaga.upgrade.desc=Grow the nearest Baby Yaga into a Baba Yaga
+commands.titan.yaga.upgrade.notBaby=That one is already grown.
+commands.titan.yaga.upgrade.success=It grows. {moved, number} of its {total, number} stacks moved into the new chests.
+commands.titan.yaga.upgrade.spilled=It grows, but {dropped, number} stacks had nowhere to go and were lost.
+commands.titan.yaga.upgrade.failed=Could not grow it: {error}
+
+yaga.brew.notBaby=Only a Baby Yaga can drink Witches Brew.
+yaga.brew.success=The brew sinks in and the house grows. {moved, number} of its {total, number} stacks moved into the new chests.
+yaga.brew.spilled=The brew sinks in and the house grows, but {dropped, number} stacks had nowhere to go and were lost.
+yaga.brew.failed=The brew did nothing: {error}
+
+commands.titan.yaga.forget.desc=Delete the nearest Baba Yaga and its saved record
+commands.titan.yaga.forget.success=Forgotten. Its chests went with it.
+
+commands.titan.yaga.wand.desc=Give yourself a wand for directing your house
+commands.titan.yaga.wand.success=A wand. Hold either mouse button to send your house that way, or press use to make it leap.
+commands.titan.yaga.wand.full=Your pack is full.

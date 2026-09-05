@@ -4,11 +4,7 @@
   "KnockbackScale": 0,
   "MotionControllerList": [
     {
-      "Type": "Walk",
-      "MaxWalkSpeed": 0.01,
-      "Gravity": 0,
-      "MaxFallSpeed": 0,
-      "Acceleration": 0
+      "Type": "Walk"
     }
   ],
   "MaxHealth": {

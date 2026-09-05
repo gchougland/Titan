@@ -4,6 +4,8 @@ import com.hexvane.titan.anim.TitanClipLibrary;
 import com.hexvane.titan.anim.TitanPose;
 import com.hexvane.titan.asset.TitanIkChainDef;
 import com.hexvane.titan.asset.TitanSkeletonAsset;
+import com.hexvane.titan.asset.TitanVariantAsset;
+import com.hexvane.titan.combat.TitanSound;
 import com.hexvane.titan.entity.TitanComponent;
 import com.hexvane.titan.entity.TitanState;
 import com.hexvane.titan.ik.FabrikSolver;
@@ -71,7 +73,11 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
     @Nonnull
     private final Vector3d poleWorld = new Vector3d();
     @Nonnull
+    private final Vector3d wobbleAxis = new Vector3d();
+    @Nonnull
     private final Vector3d twistWorld = new Vector3d();
+    @Nonnull
+    private final Vector3d footGoal = new Vector3d();
     @Nonnull
     private final Vector3d chainRoot = new Vector3d();
     @Nonnull
@@ -148,10 +154,54 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         titan.setPoseDirty(true);
         animator.advance(advance);
         animator.sampleInto(skeleton, pose);
-        poseBones(dt, titan, skeleton, pose, transform, store);
+        applyWobble(titan, skeleton, pose, advance);
+        poseBones(dt, titan, skeleton, pose, transform, store, commandBuffer);
 
         // Must run on the finished pose, and poseBones has more than one exit.
         pose.captureMotion();
+    }
+
+    /**
+     * Sways the bones a skeleton declares a wobble for, on top of whatever the clip left them at.
+     *
+     * <p>Between clip sampling and the IK pass on purpose. Composed onto the local rotation rather than
+     * replacing it, so a bone that a clip does animate gets both; and applied before the IK, so a wobble
+     * mistakenly authored on a bone inside a chain is quietly overwritten instead of tearing the limb.
+     *
+     * <p>The phase runs off the animator's own clock rather than a wall clock, so a titan being posed at a
+     * reduced rate while asleep sways at the right speed instead of jumping between samples.
+     */
+    private void applyWobble(@Nonnull final TitanComponent titan,
+                             @Nonnull final TitanSkeletonAsset skeleton,
+                             @Nonnull final TitanPose pose,
+                             final float advance) {
+
+        final var wobbles = skeleton.getProceduralWobble();
+        if (wobbles.length == 0) return;
+
+        final float time = titan.addWobbleTime(advance);
+        final double speed = titan.getVelocity().length();
+
+        for (final var wobble : wobbles) {
+            final int bone = wobble.getBoneIndex();
+            if (bone < 0 || bone >= pose.getBoneCount()) continue;
+
+            final double reach = wobble.getSpeedScale() <= 0f
+                ? 1.0
+                : Math.min(1.0, speed / wobble.getSpeedScale());
+            final double amplitude = Math.toRadians(
+                wobble.getIdleAmplitudeDegrees()
+                    + (wobble.getAmplitudeDegrees() - wobble.getIdleAmplitudeDegrees()) * reach);
+            if (amplitude == 0.0) continue;
+
+            final double phase = Math.toRadians(wobble.getPhaseDegrees()) + time * wobble.getHz() * 2.0 * Math.PI;
+            final double angle = Math.sin(phase) * amplitude;
+
+            final var axis = wobble.getAxis();
+            if (axis.lengthSquared() < 1.0e-9) continue;
+            wobbleAxis.set(axis).normalize();
+            pose.getLocalRotation(bone).rotateAxis(angle, wobbleAxis.x, wobbleAxis.y, wobbleAxis.z);
+        }
     }
 
     /** Turns the sampled clip into world matrices, with the IK correction pass on top where it applies. */
@@ -160,7 +210,8 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
                            @Nonnull final TitanSkeletonAsset skeleton,
                            @Nonnull final TitanPose pose,
                            @Nonnull final TransformComponent transform,
-                           @Nonnull final Store<EntityStore> store) {
+                           @Nonnull final Store<EntityStore> store,
+                           @Nonnull final CommandBuffer<EntityStore> commandBuffer) {
 
         final double scale = titan.getScale();
         TitanPose.rootMatrix(transform.getPosition(), titan.getYaw(), scale, rootMatrix);
@@ -176,7 +227,7 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         right.set(Math.cos(titan.getYaw()), 0, -Math.sin(titan.getYaw()));
         pose.getWorldPosition(skeleton.getBodyBoneIndex(), bodyPosition);
 
-        updateFeet(dt, titan, skeleton, store, scale);
+        updateFeet(dt, titan, skeleton, store, commandBuffer, scale);
         applyFootIk(titan, skeleton, pose);
         applyHandIk(titan, skeleton, pose);
 
@@ -194,11 +245,19 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
     /**
      * Steps the gait. Only one diagonal group may be airborne at a time, so the titan always has half its
      * feet on the ground.
+     *
+     * <p>Which group is airborne is counted twice: once from the feet already stepping when the tick began,
+     * and again as each foot is given its turn. Only the first count was there to begin with, and it left a
+     * hole exactly one tick wide — the tick where every foot is planted and the body has dragged them all
+     * past their stride. Nothing was stepping, so nothing was blocked, so both groups set off together and
+     * the walk came out as a two-footed hop. Marking the group as each foot commits closes it: the first
+     * group to be asked goes, the other waits for it to land, and the legs alternate from then on.
      */
     private void updateFeet(final float dt,
                             @Nonnull final TitanComponent titan,
                             @Nonnull final TitanSkeletonAsset skeleton,
                             @Nonnull final Store<EntityStore> store,
+                            @Nonnull final CommandBuffer<EntityStore> commandBuffer,
                             final double scale) {
 
         final FootState[] feet = titan.getFeet();
@@ -228,8 +287,21 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
 
             final var chain = ikChains[chains[i]];
             final boolean blocked = feet[i].gaitGroup == 0 ? groupOneStepping : groupZeroStepping;
-            TitanFootPlanner.update(feet[i], chain, bodyPosition, forward, right,
+            final boolean stepping = TitanFootPlanner.update(feet[i], chain, bodyPosition, forward, right,
                 titan.getVelocity(), scale, chunkStore, dt, !blocked, gaitScratch);
+
+            if (stepping) {
+                if (feet[i].gaitGroup == 0) groupZeroStepping = true;
+                else groupOneStepping = true;
+            }
+
+            if (feet[i].justLanded) {
+                feet[i].justLanded = false;
+                final TitanVariantAsset variant = titan.getVariant();
+                if (variant != null) {
+                    TitanSound.play(commandBuffer, variant.getStepSound(), feet[i].planted);
+                }
+            }
         }
     }
 
@@ -238,9 +310,14 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
                              @Nonnull final TitanPose pose) {
         final FootState[] feet = titan.getFeet();
         final int[] chains = titan.getFootChains();
+        // Taken off the goal rather than off the planted spot, so the gait carries on planning against the
+        // surface it is standing on and a titan that stands back up finds its feet already where they were.
+        final double sink = titan.getFootSink();
         for (int i = 0; i < feet.length; i++) {
             if (!feet[i].initialised) continue;
-            solveChain(skeleton, pose, skeleton.getIkChains()[chains[i]], feet[i].current, 1f);
+            final Vector3d goal = footGoal.set(feet[i].current);
+            goal.y -= sink;
+            solveChain(skeleton, pose, skeleton.getIkChains()[chains[i]], goal, 1f);
         }
     }
 

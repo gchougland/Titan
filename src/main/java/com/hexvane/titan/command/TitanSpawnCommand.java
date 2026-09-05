@@ -3,6 +3,7 @@ package com.hexvane.titan.command;
 import com.hexvane.titan.asset.TitanVariantAsset;
 import com.hexvane.titan.spawn.ColliderMode;
 import com.hexvane.titan.spawn.TitanSpawner;
+import com.hexvane.titan.yaga.YagaSpawn;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
@@ -108,6 +109,13 @@ public final class TitanSpawnCommand extends AbstractPlayerCommand {
                 .param("error", String.valueOf(result.error())));
             return;
         }
+
+        final Ref<EntityStore> root = result.root();
+        assert root != null;
+
+        // A Baba Yaga is more than its body, and spawning one this way would otherwise leave a house that
+        // nothing steers and whose chests open onto nothing. Given to the caller, since they asked for it.
+        YagaSpawn.adopt(store, root, result.inventoryCapacities(), playerRef.getUuid());
 
         context.sendMessage(Message.translation("titan_commands.commands.titan.spawn.success")
             .param("variant", variantId)

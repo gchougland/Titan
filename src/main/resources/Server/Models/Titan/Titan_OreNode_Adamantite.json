@@ -1,11 +1,11 @@
 {
-  "$Comment": "Weakpoint node. Renders the ore item's own model and texture but is a real damageable entity, which a dropped item entity cannot be because those are intangible. The model and textures are bundled copies under Items/ because ModelAsset only accepts Characters/, NPC/, Items/ and VFX/ as roots while the vanilla ore art lives under Resources/. HitBox is the mesh's own bounds at unit scale, measured by tools/measure_ore_model.py on the 32 units/block grid block art uses. The variant's WeakpointScale grows it, and the spawner reads its centre back so a node sits on its socket instead of hovering above it.",
+  "$Comment": "Weakpoint node. Renders the ore item's own model and texture but is a real damageable entity, which a dropped item entity cannot be because those are intangible. The model and textures are bundled copies under Items/ because ModelAsset only accepts Characters/, NPC/, Items/ and VFX/ as roots while the vanilla ore art lives under Resources/. HitBox is the mesh's own bounds as the client draws it, measured by tools/measure_ore_model.py at 64 units/block. That is the grid an entity model renders on; this is block art, authored at 32, so it draws at half the size it was modelled at and measuring it at 32 gives a box twice too big. The variant's WeakpointScale grows it, and the spawner reads its centre back so a node sits on its socket instead of hovering above it.",
   "Model": "Items/Titan/OreNode/Ore_Large.blockymodel",
   "Texture": "Items/Titan/OreNode/Textures/Adamantite.png",
-  "EyeHeight": 0.55,
+  "EyeHeight": 0.28,
   "HitBox": {
-    "Min": { "X": -0.71, "Y": -0.15, "Z": -0.64 },
-    "Max": { "X": 0.73, "Y": 1.25, "Z": 0.84 }
+    "Min": { "X": -0.36, "Y": -0.08, "Z": -0.32 },
+    "Max": { "X": 0.37, "Y": 0.63, "Z": 0.42 }
   },
   "MinScale": 1,
   "MaxScale": 8

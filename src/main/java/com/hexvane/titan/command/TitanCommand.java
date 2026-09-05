@@ -19,5 +19,7 @@ public final class TitanCommand extends AbstractCommandCollection {
         addSubCommand(new TitanDebugCommand());
         addSubCommand(new TitanPerfCommand());
         addSubCommand(new TitanPreviewCommand());
+        addSubCommand(new TitanYagaCommand());
+        addSubCommand(new TitanLedgeCommand());
     }
 }

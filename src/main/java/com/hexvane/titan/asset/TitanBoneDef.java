@@ -4,6 +4,7 @@ import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.math.vector.Vector3dUtil;
+import com.hypixel.hytale.server.core.prefab.PrefabRotation;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
@@ -47,6 +48,11 @@ public final class TitanBoneDef {
             o -> o.prefab
         ).add()
         .append(
+            new KeyedCodec<>("PrefabYaw", Codec.INTEGER),
+            (o, v) -> o.prefabYaw = v,
+            o -> o.prefabYaw
+        ).add()
+        .append(
             new KeyedCodec<>("Pivot", Vector3dUtil.CODEC),
             (o, v) -> o.pivot = new Vector3d(v),
             o -> o.pivot
@@ -60,6 +66,26 @@ public final class TitanBoneDef {
             new KeyedCodec<>("MirrorX", Codec.BOOLEAN),
             (o, v) -> o.mirrorX = v,
             o -> o.mirrorX
+        ).add()
+        .append(
+            new KeyedCodec<>("Shell", Codec.BOOLEAN),
+            (o, v) -> o.shell = v,
+            o -> o.shell
+        ).add()
+        .append(
+            new KeyedCodec<>("Collider", Codec.BOOLEAN),
+            (o, v) -> o.collider = v,
+            o -> o.collider
+        ).add()
+        .append(
+            new KeyedCodec<>("Usable", Codec.BOOLEAN),
+            (o, v) -> o.usable = v,
+            o -> o.usable
+        ).add()
+        .append(
+            new KeyedCodec<>("UseHint", Codec.STRING),
+            (o, v) -> o.useHint = v,
+            o -> o.useHint
         ).add()
         .append(
             new KeyedCodec<>("ColliderStride", Codec.INTEGER),
@@ -107,10 +133,16 @@ public final class TitanBoneDef {
     private final Vector3d bindRotationDegrees = new Vector3d();
     @Nullable
     private String prefab;
+    private int prefabYaw;
     @Nullable
     private Vector3d pivot;
     private float scale = 1f;
     private boolean mirrorX;
+    private boolean shell;
+    private boolean collider = true;
+    private boolean usable;
+    @Nullable
+    private String useHint;
     private int colliderStride;
     private boolean colliderAllFaces;
     private int maxParts;
@@ -154,8 +186,30 @@ public final class TitanBoneDef {
     }
 
     /**
-     * Point inside the prefab (in prefab block coordinates) that the bone rotates around. When absent the
-     * builder uses the bottom centre of the prefab's bounds.
+     * Quarter turns about Y, in degrees, applied to the prefab as it is read.
+     *
+     * <p>A rig faces {@code -Z}, because that is the direction the engine treats as forward and the one the
+     * gait planner steps along. A prefab authored facing some other way would otherwise walk sideways, and
+     * turning it with a bind rotation on the root would take the IK's bending planes with it. Rotating at
+     * read time instead leaves the rig axis-aligned and is the only place that knows how to carry a
+     * stair's or a door's own orientation round with it.
+     *
+     * <p>{@code 90} maps the prefab's {@code +X} onto the rig's forward.
+     */
+    @Nonnull
+    public PrefabRotation getPrefabRotation() {
+        return switch (((prefabYaw % 360) + 360) % 360) {
+            case 90 -> PrefabRotation.ROTATION_90;
+            case 180 -> PrefabRotation.ROTATION_180;
+            case 270 -> PrefabRotation.ROTATION_270;
+            default -> PrefabRotation.ROTATION_0;
+        };
+    }
+
+    /**
+     * Point inside the prefab that the bone rotates around, in the prefab's block coordinates <em>after</em>
+     * {@link #getPrefabRotation()} has been applied. When absent the builder uses the bottom centre of the
+     * prefab's bounds.
      */
     @Nullable
     public Vector3d getPivot() {
@@ -175,6 +229,51 @@ public final class TitanBoneDef {
      */
     public boolean isMirrorX() {
         return mirrorX;
+    }
+
+    /**
+     * Whether this bone's own blocks are what a player has to break to bring the titan down.
+     *
+     * <p>Most titans carry ore nodes bolted onto a body that cannot be hurt. An egg has nothing to bolt
+     * them to: the shell <em>is</em> the target, and cracking it apart is the whole interaction. Setting
+     * this gives every voxel of the bone health and enters it as a weakpoint, so the existing damage and
+     * audit path counts the shell breaking without knowing it is looking at geometry rather than ore.
+     */
+    public boolean isShell() {
+        return shell;
+    }
+
+    /**
+     * Whether this bone's voxels may carry hard collision at all.
+     *
+     * <p>Off is for the parts of a creature that sweep through the space a player stands in. A leg that
+     * swings a collider through someone shoves them, and on a rig whose legs pass under its own body that
+     * reads as the titan kicking anyone who walks near it. The stride only thins colliders out; this
+     * removes them.
+     */
+    public boolean isCollider() {
+        return collider;
+    }
+
+    /**
+     * Whether using one of this bone's blocks means something to the creature as a whole.
+     *
+     * <p>Separate from the variant's fixtures, which are single named blocks that each do their own thing.
+     * This is for a bone the player addresses by touching any part of it: the Baba Yaga's house is told to
+     * sit down by clicking the house, and which block they happened to click is beside the point. What the
+     * use does is not decided here — the fixture system asks whatever is on the titan's root.
+     *
+     * <p>Costs an interaction component per voxel of the bone, replicated once to each client that comes
+     * into range, so it belongs on the bone the player walks up to rather than on the whole rig.
+     */
+    public boolean isUsable() {
+        return usable;
+    }
+
+    /** Translation key shown while pointing at one of this bone's blocks, for a {@link #isUsable()} bone. */
+    @Nullable
+    public String getUseHint() {
+        return useHint;
     }
 
     /** Every n-th eligible voxel becomes a hard-collision climbable block. {@code 0} disables collision. */

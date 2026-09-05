@@ -3,10 +3,18 @@
 The ore weakpoint's declared HitBox has to cover the geometry it renders, otherwise the node draws in one
 place and is struck in another, and the spawner reads the box back to seat a node on its socket.
 
-The grid resolution is not recorded in the file and differs by model kind: block and item art is authored
-at 32 units per block, character and creature art at 64. Both were confirmed against models whose declared
-HitBox is a close fit: NPC_Spawner_Block is a 2-block post that only measures 2 blocks at 32, and the
-grizzly bear's 1.8-block hitbox only matches its mesh at 64.
+The grid resolution is not recorded in the file, and it is not a property of the file either: it is the
+convention of whatever draws the mesh.
+
+  - Block art is authored at 32 units per block. 290 of the 1030 meshes under Blocks/ measure exactly 32
+    units across, and NPC_Spawner_Block is a 2-block post that measures exactly 1x2x1 at 32.
+  - An entity model, which is what a ModelAsset is, renders at 64. Characters/Player.blockymodel is 102
+    units tall, a 1.6-block player at 64 and an absurd 3.2-block one at 32.
+
+So pass 64 when measuring for a ModelAsset HitBox, whatever grid the art was authored on. Block art
+reused as an entity model, as the ore and crystal weakpoints are, draws at half the size it was modelled
+at; measuring it at 32 yields a box twice too big, and TitanSpawner reads that box to seat the node, so
+an oversized one buries the node in the body it is bolted to.
 
 Usage:  python tools/measure_ore_model.py [path.blockymodel] [units-per-block]
 """
@@ -16,7 +24,7 @@ import sys
 from pathlib import Path
 
 BLOCK_UNITS = 32.0
-CHARACTER_UNITS = 64.0
+ENTITY_UNITS = 64.0
 
 DEFAULT_MODEL = (
     Path(__file__).resolve().parent.parent
@@ -64,7 +72,7 @@ def walk(node, parent_pos, lo, hi):
 
 def main():
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_MODEL
-    units = float(sys.argv[2]) if len(sys.argv) > 2 else BLOCK_UNITS
+    units = float(sys.argv[2]) if len(sys.argv) > 2 else ENTITY_UNITS
     model = json.loads(path.read_text(encoding="utf-8"))
 
     lo = [float("inf")] * 3

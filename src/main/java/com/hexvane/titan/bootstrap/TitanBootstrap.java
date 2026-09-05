@@ -21,6 +21,8 @@ import com.hexvane.titan.system.TitanHealthSyncSystem;
 import com.hexvane.titan.system.TitanPartSyncSystem;
 import com.hexvane.titan.system.TitanRagdollSystem;
 import com.hexvane.titan.system.TitanRootDamageSystem;
+import com.hexvane.titan.system.TitanShellDamageSystem;
+import com.hexvane.titan.system.TitanSpawnFxSystem;
 import com.hexvane.titan.system.TitanSyncStats;
 import com.hexvane.titan.system.TitanTrioCleanupSystem;
 import com.hexvane.titan.system.TitanWeakpointDamageBonusSystem;
@@ -28,11 +30,23 @@ import com.hexvane.titan.system.TitanWeakpointDamageSystem;
 import com.hexvane.titan.system.TitanWeakpointDeathSystem;
 import com.hexvane.titan.system.TitanWeakpointSystem;
 import com.hexvane.titan.system.TitanWorldSpawnSystem;
+import com.hexvane.titan.yaga.YagaEggSiteSystem;
+import com.hexvane.titan.yaga.YagaEggSystem;
+import com.hexvane.titan.yaga.YagaFurnaceSystem;
+import com.hexvane.titan.yaga.YagaInteractSystem;
+import com.hexvane.titan.yaga.YagaLeapInteraction;
+import com.hexvane.titan.yaga.YagaMemory;
+import com.hexvane.titan.yaga.YagaPetSystem;
+import com.hexvane.titan.yaga.YagaPointInteraction;
+import com.hexvane.titan.yaga.YagaRespawnSystem;
+import com.hexvane.titan.ledge.TitanLedgeHangSystem;
+import com.hexvane.titan.ledge.TitanLedgeInteractSystem;
 import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
 import com.hypixel.hytale.component.ResourceType;
 import com.hypixel.hytale.server.core.asset.HytaleAssetStore;
 import com.hypixel.hytale.server.core.modules.entity.tracker.EntityTrackerSystems;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.plugin.PluginBase;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.NPCPlugin;
@@ -64,15 +78,36 @@ public final class TitanBootstrap {
         return siteMemoryType;
     }
 
+    /** Exposed so the {@code /titan yaga} commands can read and edit what the houses remember. */
+    @Nullable
+    private static ResourceType<EntityStore, YagaMemory> yagaMemoryType;
+
+    @Nullable
+    public static ResourceType<EntityStore, YagaMemory> getYagaMemoryType() {
+        return yagaMemoryType;
+    }
+
     private TitanBootstrap() {
     }
 
     public static void install(@Nonnull final PluginBase plugin) {
         TitanNpcRegistration.register(NPCPlugin.get());
+        registerInteractions();
         registerAssets(plugin);
         registerComponentsAndSystems(plugin);
         applyEngineGlobals();
         plugin.getCommandRegistry().registerCommand(new TitanCommand());
+    }
+
+    /**
+     * Teaches the interaction parser the types this mod's items use.
+     *
+     * <p>Before the assets, and not optional: an item naming a type nothing has registered does not fall
+     * back to doing nothing, it fails to parse, and the item goes missing along with its interaction.
+     */
+    private static void registerInteractions() {
+        Interaction.CODEC.register(YagaLeapInteraction.TYPE, YagaLeapInteraction.class, YagaLeapInteraction.CODEC);
+        Interaction.CODEC.register(YagaPointInteraction.TYPE, YagaPointInteraction.class, YagaPointInteraction.CODEC);
     }
 
     /**
@@ -159,9 +194,18 @@ public final class TitanBootstrap {
         siteMemoryType = registry.registerResource(
             TitanSiteMemory.class, TitanSiteMemory.ID, TitanSiteMemory.CODEC);
 
+        // A Baba Yaga house, by contrast, is entirely the result of what a player did, so all of it is
+        // kept: where it is, how grown it is, and what is in its chests.
+        yagaMemoryType = registry.registerResource(
+            YagaMemory.class, YagaMemory.ID, YagaMemory.CODEC);
+
         registry.registerSystem(new TitanAiSystem(siteMemoryType));
         registry.registerSystem(new TitanAnimationSystem());
         registry.registerSystem(new TitanPartSyncSystem());
+        // After part sync, despite running before it: a system's declared dependencies are validated as it
+        // is registered, so anything it names has to be registered already. This one sits between the
+        // animation and the sync, and names both.
+        registry.registerSystem(new TitanSpawnFxSystem());
         registry.registerSystem(new TitanSyncStats.Roll());
         registry.registerSystem(new TitanWeakpointSystem());
         registry.registerSystem(new TitanWeakpointDeathSystem());
@@ -172,10 +216,24 @@ public final class TitanBootstrap {
         registry.registerSystem(new TitanBrainSyncSystem());
         registry.registerSystem(new TitanTrioCleanupSystem());
         registry.registerSystem(new TitanWeakpointDamageBonusSystem());
+        registry.registerSystem(new TitanShellDamageSystem());
         registry.registerSystem(new TitanWeakpointDamageSystem());
         registry.registerSystem(new TitanRagdollSystem());
         registry.registerSystem(new TitanBoulderSystem());
         registry.registerSystem(new TitanBoulderSystem.Parts());
+
+        // The pets. TitanAiSystem hands them over rather than sharing them, so between them these carry the
+        // whole of what a Baba Yaga does: the egg's hatch, and the house's steering and crouch.
+        registry.registerSystem(new YagaEggSiteSystem.EnsureComponents());
+        registry.registerSystem(new YagaEggSiteSystem.SpawnOnAdd());
+        registry.registerSystem(new YagaEggSystem(siteMemoryType));
+        registry.registerSystem(new YagaPetSystem());
+        registry.registerSystem(new YagaFurnaceSystem());
+        registry.registerSystem(new YagaInteractSystem());
+        registry.registerSystem(new YagaRespawnSystem(yagaMemoryType));
+
+        registry.registerSystem(new TitanLedgeInteractSystem());
+        registry.registerSystem(new TitanLedgeHangSystem());
 
         worldSpawnSystem = new TitanWorldSpawnSystem(siteMemoryType);
         registry.registerSystem(worldSpawnSystem);

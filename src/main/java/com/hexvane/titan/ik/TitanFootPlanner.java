@@ -20,8 +20,20 @@ public final class TitanFootPlanner {
 
     /** How far ahead of the body the next contact point is placed, as a fraction of the stride. */
     private static final double LEAD_FRACTION = 0.55;
-    /** Seconds a single step takes; slow to suit the scale of the creature. */
+    /** Seconds a single step takes at a walk; slow to suit the scale of the creature. */
     private static final float STEP_DURATION = 0.55f;
+    /**
+     * Shortest a step may be cut to when the body is moving quickly, in seconds.
+     *
+     * <p>A foot has to be back on the ground before the body has dragged it a full stride, or it never
+     * catches up and the leg trails behind for as long as the creature keeps going. With groups alternating
+     * strictly, one foot's swing has to fit inside half of that, which at a house's ten blocks a second is a
+     * fifth of a second — so the step shortens with speed rather than being a fixed slow stomp. The floor
+     * stops it becoming a twitch on something that has been pushed faster than it was ever meant to walk.
+     */
+    private static final float STEP_MINIMUM = 0.18f;
+    /** How much of the time it takes to cover a stride a single swing is allowed to use. */
+    private static final double SWING_SHARE = 0.5;
     /** Blocks above the candidate contact point that the ground search starts from. */
     private static final int GROUND_SEARCH_ABOVE = 4;
     /** Blocks below the candidate contact point that the ground search gives up at. */
@@ -76,8 +88,10 @@ public final class TitanFootPlanner {
             return false;
         }
 
+        final double stride = chain.getStrideLength() * scale;
+
         if (state.stepping) {
-            state.stepProgress += dt / STEP_DURATION;
+            state.stepProgress += dt / swingDuration(stride, velocity);
             if (state.stepProgress >= 1f) {
                 state.finishStep();
                 return false;
@@ -92,7 +106,6 @@ public final class TitanFootPlanner {
 
         if (!groupCanStep) return false;
 
-        final double stride = chain.getStrideLength() * scale;
         final Vector3d lead = scratch.lead.set(rest).fma(LEAD_FRACTION * stride, safeDirection(velocity, scratch.direction));
         snapToGround(lead, chunkStore);
 
@@ -143,6 +156,21 @@ public final class TitanFootPlanner {
             if (Double.isNaN(highest) || foot.planted.y > highest) highest = foot.planted.y;
         }
         return highest;
+    }
+
+    /**
+     * How long this foot's swing should take at the speed the body is going.
+     *
+     * <p>Standing still it is the full slow stomp, since there is nothing to keep up with and a heavy
+     * creature putting a foot down deliberately is the whole look. Moving, it is however long the body
+     * takes to cover a stride, shared out between the two groups that have to take turns.
+     */
+    private static float swingDuration(final double stride, @Nonnull final Vector3dc velocity) {
+        final double speed = Math.sqrt(velocity.x() * velocity.x() + velocity.z() * velocity.z());
+        if (speed < IkMath.EPSILON) return STEP_DURATION;
+
+        final double duration = SWING_SHARE * stride / speed;
+        return (float) Math.clamp(duration, STEP_MINIMUM, STEP_DURATION);
     }
 
     private static void snapToGround(@Nonnull final Vector3d point, @Nullable final ChunkStore chunkStore) {

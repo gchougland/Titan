@@ -1,6 +1,7 @@
 package com.hexvane.titan.system;
 
 import com.hexvane.titan.entity.TitanComponent;
+import com.hexvane.titan.entity.TitanPartComponent;
 import com.hexvane.titan.entity.TitanState;
 import com.hexvane.titan.entity.TitanWeakpointComponent;
 import com.hypixel.hytale.component.Archetype;
@@ -62,6 +63,13 @@ public final class TitanWeakpointSystem extends EntityTickingSystem<EntityStore>
         final var transform = archetypeChunk.getComponent(index, TransformComponent.getComponentType());
         if (weakpoint == null || transform == null) return;
 
+        // A shell voxel is both a weakpoint and a part of the body, and the part sync system already moves
+        // it — with the block's own orientation folded in and the drift and phase gates that keep a titan
+        // off the wire, none of which this system knows about. Writing the transform from here too would
+        // fight it and lose the block rotation. The rest of this system still applies: a shell voxel is
+        // cleaned up on the same terms as an ore node.
+        final boolean drivenByPartSync = archetypeChunk.getComponent(index, TitanPartComponent.getComponentType()) != null;
+
         final Ref<EntityStore> self = archetypeChunk.getReferenceTo(index);
         final Ref<EntityStore> owner = weakpoint.getOwner();
         final TitanComponent titan = owner != null && owner.isValid()
@@ -78,7 +86,7 @@ public final class TitanWeakpointSystem extends EntityTickingSystem<EntityStore>
             return;
         }
 
-        if (!titan.isPoseDirty()) return;
+        if (drivenByPartSync || !titan.isPoseDirty()) return;
 
         final var pose = titan.getPose();
         if (pose == null || weakpoint.getBoneIndex() < 0 || weakpoint.getBoneIndex() >= pose.getBoneCount()) return;

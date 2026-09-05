@@ -1,6 +1,7 @@
 package com.hexvane.titan.spawn;
 
 import com.hypixel.hytale.math.vector.Rotation3f;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.Rotation;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import org.joml.Quaterniond;
 import org.joml.Vector3d;

@@ -1,0 +1,173 @@
+{
+  "$Comment": [
+    "The grown Baba Yaga: a full house — beds, benches, chests, a brazier — on two chicken legs. Same rig as the hatchling grown up, and the same conventions. Offsets are model units (one prefab block) in titan-local space: +X right, +Y up, -Z forward. The root sits on the ground, so Pelvis's offset is the hip height.",
+    "Every prefab is turned a quarter turn about Y as it is read, for the reasons set out in Yaga_Baby.json. Every Pivot here is therefore in the *turned* prefab space, where the creature's forward is -Z and a pivot of 0.5 is the middle of the block at index 0.",
+    "The legs have real length here, so the chicken-leg shape reads properly rather than being implied: the thigh drops 5 and leans 3 back to the knee, the calf drops 5 and leans 3 forward again, and the foot hangs a block below that. Those numbers are the prefabs' own diagonals measured layer by layer, so the bind pose is the shape the artist drew.",
+    "Legs and tail carry no collision. The way up is the house, not the legs — see Yaga_Baby.json for why a swinging collider is worse than none.",
+    "The legs are Usable all the same, which is not the same thing as solid. Telling the house to sit is done by clicking it, and when it is standing the whole house is nine blocks up and out of reach: the only part of it a player on the ground can point at is a leg. So a click on any of the six leg bones asks the same question the house does, and a player walks up to the nearest shin to park it.",
+    "Fixtures — the chests, bed and benches — are not named here. They are matched by block key on the variant, because which of a titan's blocks are usable is a property of the house rather than of the rig."
+  ],
+  "BodyBone": "Pelvis",
+  "UnitScale": 1.0,
+  "HipHeight": 11.0,
+  "ColliderConfig": "Titan_Platform",
+
+  "Bones": [
+    {
+      "$Comment": "The hub the house and both legs hang off. No geometry of its own, so the legs are measured from the underside of the house. 11 rather than the 11.6 the chain can reach, which is the knee's working room: see the IK comment.",
+      "Name": "Pelvis",
+      "Offset": { "X": 0, "Y": 11.0, "Z": 0 },
+      "Detachable": false
+    },
+    {
+        "$Comment": "The house, 13x17x13. No Pivot, so it defaults to the bottom centre of its own bounds, putting the underside at the hips with the tops of the thighs immediately below it. Every exposed face is climbable: the living floor is at the sixth layer up with stairs, windows and furniture on it, all of which a player would walk through otherwise. Usable, so clicking the house tells it to sit or stand — see Yaga_Baby.json. The furniture inside it is matched separately by block key on the variant, and a fixture wins over this wherever the two land on the same block.",
+      "Name": "Body",
+      "Parent": "Pelvis",
+      "Offset": { "X": 0, "Y": -2, "Z": 0 },
+      "Prefab": "Titan/Yaga/Yaga_Baba_Body",
+      "PrefabYaw": 90,
+      "Scale": 1.0,
+      "Hollow": true,
+      "ColliderStride": 1,
+      "ColliderAllFaces": true,
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "Detachable": false
+    },
+    {
+      "$Comment": "A long thatched tail that sweeps up and back off the house. The prefab's low forward end is the end that meets the rear wall, so that is the pivot and the wobble swings the tail about its base. The offset buries that base a block and a half inside the wall.",
+      "Name": "Tail",
+      "Parent": "Pelvis",
+      "Offset": { "X": 0, "Y": 2.0, "Z": 5.0 },
+      "Prefab": "Titan/Yaga/Yaga_Baba_Tail",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 1.0, "Z": -4.5 },
+      "Scale": 1.0,
+      "Collider": false
+    },
+
+    {
+      "$Comment": "Left leg. The stance is 3.5 out on a house 13 wide: wide enough to look like it can carry the thing, close enough that both legs still meet solid floor. Pivot Y is 5, the top face of the prefab rather than the middle of its top layer, so the thigh hangs entirely below the hip; Pivot Z is the middle of that top layer, which is where the prefab's diagonal starts.",
+      "Name": "L-Thigh",
+      "Parent": "Pelvis",
+      "Offset": { "X": -4, "Y": 0, "Z": 0.5 },
+      "Prefab": "Titan/Yaga/Yaga_Baba_ThighL",
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 5.0, "Z": -1.0 },
+      "Scale": 1.0,
+      "Collider": false
+    },
+    {
+      "$Comment": "Down 5 and back 3, which is where the thigh prefab's bottom layer sits relative to its top. The knee is now behind the hip, and the calf leans forward again from here — that reversal is the whole shape.",
+      "Name": "L-Calf",
+      "Parent": "L-Thigh",
+      "Offset": { "X": 0, "Y": -5.0, "Z": 3.0 },
+      "Prefab": "Titan/Yaga/Yaga_Baba_CalfL",
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 5.0, "Z": 2.0 },
+      "Scale": 1.0,
+      "Collider": false
+    },
+    {
+      "$Comment": "Down 6 rather than the calf's own 5, and forward 3. The extra block is the foot's own height, so with a Pivot Y of 0 the bone's origin lands on the sole rather than at the ankle: the point the IK plants and the point the sole is levelled about. Pivot Z is the one block the claw's three toes have in common, which is where the ankle sits.",
+      "Name": "L-Foot",
+      "Parent": "L-Calf",
+      "Offset": { "X": 0, "Y": -6.0, "Z": -3.0 },
+      "Prefab": "Titan/Yaga/Yaga_Baba_FootL",
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 0.0, "Z": 0.5 },
+      "Scale": 1.0,
+      "Collider": false
+    },
+
+    {
+      "$Comment": "Right leg. Its own prefabs rather than MirrorX on the left ones, because the artist authored the pair.",
+      "Name": "R-Thigh",
+      "Parent": "Pelvis",
+      "Offset": { "X": 4, "Y": 0, "Z": 0.5 },
+      "Prefab": "Titan/Yaga/Yaga_Baba_ThighR",
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 5.0, "Z": -1.0 },
+      "Scale": 1.0,
+      "Collider": false
+    },
+    {
+      "Name": "R-Calf",
+      "Parent": "R-Thigh",
+      "Offset": { "X": 0, "Y": -5.0, "Z": 3.0 },
+      "Prefab": "Titan/Yaga/Yaga_Baba_CalfR",
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 5.0, "Z": 2.0 },
+      "Scale": 1.0,
+      "Collider": false
+    },
+    {
+      "Name": "R-Foot",
+      "Parent": "R-Calf",
+      "Offset": { "X": 0, "Y": -6.0, "Z": -3.0 },
+      "Prefab": "Titan/Yaga/Yaga_Baba_FootR",
+      "Usable": true,
+      "UseHint": "titan_yaga.yaga.hint.toggleRest",
+      "PrefabYaw": 90,
+      "Pivot": { "X": 0.5, "Y": 0.0, "Z": 0.5 },
+      "Scale": 1.0,
+      "Collider": false
+    }
+  ],
+
+  "IkChains": [
+    {
+      "$Comment": [
+        "PoleDirection +Z bends the knee backwards, which is what makes it a bird's leg rather than a person's. See Yaga_Baby.json for the full reasoning behind the pole, the phases and the rest offset; the numbers differ only because the leg is longer.",
+        "The two segments are 5.83 and 6.71, so the chain reaches 12.54 while the hip sits 11 up. That block and a half of slack is the knee's working room, and it is also what lets a foot step down onto lower ground without the chain running out of reach.",
+        "RestOffset Z is 0 because the thigh's 3 back and the calf's 3 forward cancel, leaving the ankle directly under the hip it belongs to."
+      ],
+      "Name": "Leg_L",
+      "Kind": "TwoBone",
+      "Role": "Foot",
+      "Bones": [ "L-Thigh", "L-Calf", "L-Foot" ],
+      "PoleDirection": { "X": 0, "Y": 0, "Z": 1 },
+      "Side": -1,
+      "StrideLength": 4.0,
+      "StepHeight": 2.0,
+      "GaitPhase": 0.0,
+      "RestOffset": { "X": -3.5, "Y": -11.0, "Z": 0.0 }
+    },
+    {
+      "Name": "Leg_R",
+      "Kind": "TwoBone",
+      "Role": "Foot",
+      "Bones": [ "R-Thigh", "R-Calf", "R-Foot" ],
+      "PoleDirection": { "X": 0, "Y": 0, "Z": 1 },
+      "Side": 1,
+      "StrideLength": 4.0,
+      "StepHeight": 2.0,
+      "GaitPhase": 0.5,
+      "RestOffset": { "X": 3.5, "Y": -11.0, "Z": 0.0 }
+    }
+  ],
+
+  "ProceduralWobble": [
+    {
+      "$Comment": "Slower and shallower than the hatchling's for the same reason a large animal moves less than a small one: the tail is nine blocks long, so the same angle is a far bigger sweep at the tip.",
+      "Bone": "Tail",
+      "Axis": { "X": 1, "Y": 0, "Z": 0 },
+      "AmplitudeDeg": 8.0,
+      "IdleAmplitudeDeg": 2.5,
+      "Hz": 0.9,
+      "SpeedScale": 3.0
+    }
+  ],
+
+  "WeakpointSockets": []
+}

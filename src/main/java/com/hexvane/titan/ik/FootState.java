@@ -30,6 +30,8 @@ public final class FootState {
     public int gaitGroup;
     /** Cleared until the first tick has snapped the foot onto the terrain. */
     public boolean initialised;
+    /** Set when a step finishes; the animation system plays a footfall and clears it. */
+    public boolean justLanded;
 
     /** Lifts the foot off its current position and starts a step towards {@link #stepTarget}. */
     public void beginStep() {
@@ -44,5 +46,6 @@ public final class FootState {
         current.set(stepTarget);
         stepping = false;
         stepProgress = 0f;
+        justLanded = true;
     }
 }

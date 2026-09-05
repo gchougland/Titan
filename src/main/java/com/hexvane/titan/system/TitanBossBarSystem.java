@@ -85,6 +85,11 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
         final var transform = archetypeChunk.getComponent(index, TransformComponent.getComponentType());
         if (titan == null || transform == null) return;
 
+        // A pet is not a fight, so it gets no bar and no music. Its shell voxels are still weakpoints
+        // while it is an egg, which is what would otherwise put a boss bar over a nest.
+        final var variant = titan.getVariant();
+        if (variant != null && variant.isPet()) return;
+
         titan.copyWeakpoints(nodes);
         syncPooledHealth(store, archetypeChunk, index, titan, nodes);
 

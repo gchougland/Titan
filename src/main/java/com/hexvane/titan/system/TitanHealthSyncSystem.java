@@ -54,6 +54,11 @@ public final class TitanHealthSyncSystem extends EntityTickingSystem<EntityStore
         final var stats = archetypeChunk.getComponent(index, EntityStatMap.getComponentType());
         if (titan == null || stats == null || titan.getWeakpointsTotal() <= 0) return;
 
+        // Nothing reads a pet's pooled health: it has no Encounter and no bar. An egg's shell counts as
+        // weakpoints, so without this its root would be publishing a boss's health value.
+        final var variant = titan.getVariant();
+        if (variant != null && variant.isPet()) return;
+
         titan.copyWeakpoints(nodes);
         syncPooledHealth(store, titan, stats, nodes);
     }

@@ -3,6 +3,7 @@ package com.hexvane.titan.system;
 import com.hexvane.titan.config.TitanConfig;
 import com.hexvane.titan.entity.TitanComponent;
 import com.hexvane.titan.entity.TitanPartComponent;
+import com.hexvane.titan.entity.TitanSpawnFxComponent;
 import com.hexvane.titan.entity.TitanState;
 import com.hexvane.titan.physics.DebrisBurst;
 import com.hexvane.titan.spawn.BlockRotations;
@@ -19,6 +20,7 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.vector.Rotation3f;
+import com.hypixel.hytale.server.core.modules.entity.component.BoundingBox;
 import com.hypixel.hytale.server.core.modules.entity.component.EntityScaleComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -66,6 +68,18 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
      * hundred redundant size packets per tick, so it is set well above what any recovery needs.
      */
     public static final float SCALE_REFRESH_SECONDS = 30f;
+
+    /**
+     * Seconds after spawn before the earliest voxel re-dirties its scale. Gives the spawn flood time to
+     * settle and viewers a chance to be tracking before the one-shot pass.
+     */
+    public static final float SPAWN_SCALE_PASS_DELAY = 0.5f;
+
+    /**
+     * Seconds of spread after {@link #SPAWN_SCALE_PASS_DELAY} across the body, so a temple does not dump
+     * thousands of size packets on one tick.
+     */
+    public static final float SPAWN_SCALE_PASS_STAGGER = 1.0f;
 
     /**
      * Shortest and longest a piece of rubble lies around before it is cleaned up, in seconds. Short enough
@@ -134,6 +148,17 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
 
         // Detached debris belongs to the ragdoll system and must survive the owner being removed.
         if (part.isDetached()) return;
+
+        // Scale is independent of flight: re-dirty before the SpawnFx early-out so assembling bodies get
+        // the right size while blocks are still flying in.
+        if (part.consumeSpawnScalePass(dt, SPAWN_SCALE_PASS_DELAY, SPAWN_SCALE_PASS_STAGGER)) {
+            final var scaleComponent = archetypeChunk.getComponent(index, EntityScaleComponent.getComponentType());
+            if (scaleComponent != null) scaleComponent.setScale(part.getScale());
+        }
+
+        // Still flying in. TitanSpawnFxSystem owns the transform until it arrives; writing the posed
+        // position here as well would snap the block to its destination and cancel the flight.
+        if (archetypeChunk.getComponent(index, TitanSpawnFxComponent.getComponentType()) != null) return;
 
         // Through the command buffer rather than the store: the store's getter asserts it is being called
         // on the world thread, and this system can be running on a pool thread instead.
@@ -209,6 +234,18 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
 
         transform.getPosition().set(scratch.worldPosition);
         transform.getRotation().set(scratch.rotation);
+
+        // Only the fixtures have anything to turn: a box is stored to rotate for the furniture whose
+        // footprint reaches past its own cell, and for everything else — which is nearly every voxel of
+        // every titan — this returns on its first line. The engine does this once when an entity is added
+        // and never again, because a block entity's box does not normally turn; the furniture on a house
+        // that turns to follow its owner is clicked along the line the house was facing when it spawned
+        // without it.
+        final var bounds = archetypeChunk.getComponent(index, BoundingBox.getComponentType());
+        if (bounds != null) {
+            bounds.applyRotation(scratch.rotation.pitch(), scratch.rotation.yaw(), scratch.rotation.roll());
+        }
+
         TitanSyncStats.countWritten();
     }
 

@@ -1,0 +1,9 @@
+{
+  "$Comment": [
+    "Does nothing, on purpose. A titan's chests, doors, bed and benches are all handled by TitanFixtureSystem off the UseEntityEvent that fires before this runs, so by the time the interaction chain gets here the work is already done.",
+    "It exists because the chain will not start without it. UseEntityInteraction fails outright when the target carries no interaction id for the type, and RootInteraction rejects an empty Interactions list, so a fixture needs something on the far end of the click even when the answer is 'nothing'. A no-op is also what keeps the client's prompt honest: the block still lights up and still shows its hint.",
+    "RunTime 0 so the chain finishes in the same tick and the player is not left mid-interaction while a chest window opens over the top of it."
+  ],
+  "Type": "Simple",
+  "RunTime": 0
+}

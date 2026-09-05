@@ -6,6 +6,7 @@ import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
 import com.hypixel.hytale.assetstore.map.JsonAssetWithMap;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
+import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -85,6 +86,11 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
             a -> a.weakpointHealth
         ).add()
         .append(
+            new KeyedCodec<>("ShellHealth", Codec.FLOAT),
+            (a, v) -> a.shellHealth = v,
+            a -> a.shellHealth
+        ).add()
+        .append(
             new KeyedCodec<>("SpawnFootprintRadius", Codec.INTEGER),
             (a, v) -> a.spawnFootprintRadius = v,
             a -> a.spawnFootprintRadius
@@ -103,6 +109,11 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
             new KeyedCodec<>("SpawnLevelToLowest", Codec.BOOLEAN),
             (a, v) -> a.spawnLevelToLowest = v,
             a -> a.spawnLevelToLowest
+        ).add()
+        .append(
+            new KeyedCodec<>("GroundPrefab", Codec.STRING),
+            (a, v) -> a.groundPrefab = v,
+            a -> a.groundPrefab
         ).add()
         .append(
             new KeyedCodec<>("MoveSpeed", Codec.FLOAT),
@@ -138,6 +149,71 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
             new KeyedCodec<>("Passive", Codec.BOOLEAN),
             (a, v) -> a.passive = v,
             a -> a.passive
+        ).add()
+        .append(
+            new KeyedCodec<>("Pet", Codec.BOOLEAN),
+            (a, v) -> a.pet = v,
+            a -> a.pet
+        ).add()
+        .append(
+            new KeyedCodec<>("SpawnFxRadius", Codec.FLOAT),
+            (a, v) -> a.spawnFxRadius = v,
+            a -> a.spawnFxRadius
+        ).add()
+        .append(
+            new KeyedCodec<>("SpawnFxDuration", Codec.FLOAT),
+            (a, v) -> a.spawnFxDuration = v,
+            a -> a.spawnFxDuration
+        ).add()
+        .append(
+            new KeyedCodec<>("SpawnFxStagger", Codec.FLOAT),
+            (a, v) -> a.spawnFxStagger = v,
+            a -> a.spawnFxStagger
+        ).add()
+        .append(
+            new KeyedCodec<>("Fixtures", new ArrayCodec<>(TitanFixtureDef.CODEC, TitanFixtureDef[]::new)),
+            (a, v) -> a.fixtures = v,
+            a -> a.fixtures
+        ).add()
+        .append(
+            new KeyedCodec<>("FollowDistance", Codec.DOUBLE),
+            (a, v) -> a.followDistance = v,
+            a -> a.followDistance
+        ).add()
+        .append(
+            new KeyedCodec<>("CrouchDepth", Codec.DOUBLE),
+            (a, v) -> a.crouchDepth = v,
+            a -> a.crouchDepth
+        ).add()
+        .append(
+            new KeyedCodec<>("RestSink", Codec.DOUBLE),
+            (a, v) -> a.restSink = v,
+            a -> a.restSink
+        ).add()
+        .append(
+            new KeyedCodec<>("AboardRadius", Codec.DOUBLE),
+            (a, v) -> a.aboardRadius = v,
+            a -> a.aboardRadius
+        ).add()
+        .append(
+            new KeyedCodec<>("WandSpeed", Codec.DOUBLE),
+            (a, v) -> a.wandSpeed = v,
+            a -> a.wandSpeed
+        ).add()
+        .append(
+            new KeyedCodec<>("WandTurnSpeed", Codec.FLOAT),
+            (a, v) -> a.wandTurnSpeed = v,
+            a -> a.wandTurnSpeed
+        ).add()
+        .append(
+            new KeyedCodec<>("LeapHeight", Codec.DOUBLE),
+            (a, v) -> a.leapHeight = v,
+            a -> a.leapHeight
+        ).add()
+        .append(
+            new KeyedCodec<>("LeapSpeed", Codec.DOUBLE),
+            (a, v) -> a.leapSpeed = v,
+            a -> a.leapSpeed
         ).add()
         .append(
             new KeyedCodec<>("Chase", Codec.BOOLEAN),
@@ -405,6 +481,26 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
             a -> a.deathSound
         ).add()
         .append(
+            new KeyedCodec<>("StepSound", Codec.STRING),
+            (a, v) -> a.stepSound = v,
+            a -> a.stepSound
+        ).add()
+        .append(
+            new KeyedCodec<>("CrouchSound", Codec.STRING),
+            (a, v) -> a.crouchSound = v,
+            a -> a.crouchSound
+        ).add()
+        .append(
+            new KeyedCodec<>("SpawnSound", Codec.STRING),
+            (a, v) -> a.spawnSound = v,
+            a -> a.spawnSound
+        ).add()
+        .append(
+            new KeyedCodec<>("LeapSound", Codec.STRING),
+            (a, v) -> a.leapSound = v,
+            a -> a.leapSound
+        ).add()
+        .append(
             new KeyedCodec<>("TelegraphRingParticle", Codec.STRING),
             (a, v) -> a.telegraphRingParticle = v,
             a -> a.telegraphRingParticle
@@ -473,10 +569,13 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     private int weakpointsToKill;
     private float weakpointEmbed = 0.25f;
     private float weakpointHealth = 100f;
+    private float shellHealth;
     private int spawnFootprintRadius;
     private int spawnFootprintRelief;
     private int spawnHeadroom;
     private boolean spawnLevelToLowest;
+    @Nullable
+    private String groundPrefab;
     private float moveSpeed = 1.6f;
     private float turnSpeed = 0.9f;
     private float wakeRadius = 14f;
@@ -484,6 +583,20 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     private float leashRadius = 40f;
     private boolean startAwake;
     private boolean passive;
+    private boolean pet;
+    private float spawnFxRadius;
+    private float spawnFxDuration = 1.2f;
+    private float spawnFxStagger = 0.5f;
+    @Nonnull
+    private TitanFixtureDef[] fixtures = new TitanFixtureDef[0];
+    private double followDistance = 8.0;
+    private double crouchDepth = 2.0;
+    private double restSink;
+    private double aboardRadius;
+    private double wandSpeed = 3.0;
+    private float wandTurnSpeed = 2.0f;
+    private double leapHeight;
+    private double leapSpeed = 6.0;
     private boolean chase = true;
     private float wanderRadius;
     private float wanderPauseMin = 6f;
@@ -546,6 +659,14 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     private String wakeSound;
     @Nullable
     private String deathSound;
+    @Nullable
+    private String stepSound;
+    @Nullable
+    private String crouchSound;
+    @Nullable
+    private String spawnSound;
+    @Nullable
+    private String leapSound;
     @Nullable
     private String telegraphRingParticle = "Titan_Telegraph_Ring";
     @Nullable
@@ -649,6 +770,18 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     }
 
     /**
+     * Damage the whole of a shell absorbs before it breaks open, before the server config multiplier.
+     *
+     * <p>Only means anything to a skeleton with shell bones, where the creature's own blocks are what gets
+     * hit. Unlike ore nodes this is one figure for the lot of them: the shell drains as a single target and
+     * no voxel of it comes off on its own, so this is the whole cost of breaking in rather than the cost of
+     * one block.
+     */
+    public float getShellHealth() {
+        return shellHealth;
+    }
+
+    /**
      * How much ground a natural spawn needs, in blocks either side of the site, or {@code 0} to take the
      * spawner's default.
      *
@@ -678,6 +811,25 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
      */
     public boolean isSpawnLevelToLowest() {
         return spawnLevelToLowest;
+    }
+
+    /**
+     * Prefab stamped into the world as ordinary blocks under this titan when it is built, or {@code null}
+     * for a titan that arrives on bare ground.
+     *
+     * <p>For the scenery a titan comes with rather than any part of the titan itself: the nest an egg sits
+     * in belongs to the clearing, not to the egg, and has to still be there after the egg is gone. Painted
+     * as real blocks precisely so it outlives the entity, which means it is also a permanent change to the
+     * world that nothing takes back.
+     *
+     * <p>Laid down centred on the root's block column with its lowest layer at the root's feet, so the
+     * prefab is authored around the titan rather than offset to one side of it. A titan rebuilt at the same
+     * spot after an unload paints the same blocks into the same cells, so this is idempotent rather than
+     * cumulative — at the cost of undoing anything a player changed about it in the meantime.
+     */
+    @Nullable
+    public String getGroundPrefab() {
+        return groundPrefab;
     }
 
     /** Blocks per second while chasing. */
@@ -728,6 +880,168 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
      */
     public boolean isPassive() {
         return passive;
+    }
+
+    /**
+     * Whether this titan belongs to a player rather than fighting them.
+     *
+     * <p>A pet takes no part in the combat pipeline: it gets no boss bar, no battle music, no Encounter and
+     * no brain NPC, and the combat state machine skips it entirely in favour of whatever system owns its
+     * behaviour. Everything below the neck is shared — the same pose, IK, gait and voxel sync.
+     */
+    public boolean isPet() {
+        return pet;
+    }
+
+    /**
+     * How far out the voxels of a spawn effect start from, in blocks, or {@code 0} for no effect.
+     *
+     * <p>The titan assembles itself out of blocks that fly in from a shell of this radius. Sized to the
+     * creature: too small and the blocks are already inside the silhouette when they appear, too large and
+     * they arrive from outside the player's view.
+     */
+    public float getSpawnFxRadius() {
+        return spawnFxRadius;
+    }
+
+    /** Seconds one voxel takes to travel in from its starting point. */
+    public float getSpawnFxDuration() {
+        return spawnFxDuration;
+    }
+
+    /**
+     * Extra seconds spread across the body, so the voxels nearest the middle arrive first and the build
+     * reads outwards from the core instead of every block landing at once.
+     */
+    public float getSpawnFxStagger() {
+        return spawnFxStagger;
+    }
+
+    /** Blocks of this titan's geometry that a player can use. Empty for a titan with none. */
+    @Nonnull
+    public TitanFixtureDef[] getFixtures() {
+        return fixtures;
+    }
+
+    /**
+     * How close a pet follows its owner, in blocks.
+     *
+     * <p>Wants to be wider than the titan itself. Anything less and it walks into the player, and because
+     * it is far heavier than one it would push them around rather than stop.
+     */
+    public double getFollowDistance() {
+        return followDistance;
+    }
+
+    /**
+     * How far the hips drop when a pet is told to rest, in blocks.
+     *
+     * <p>Applied to the root, which sits at the feet plane. The IK holds the feet where they were planted,
+     * so pulling the root down folds the legs under the body instead of sinking it through the ground, and
+     * the depth is really a statement about how far the legs can fold before the body meets them.
+     */
+    public double getCrouchDepth() {
+        return crouchDepth;
+    }
+
+    /**
+     * How much further a resting pet settles into the ground, in blocks, once its legs are folded as far
+     * as they go.
+     *
+     * <p>Legs stop being the answer well before the floor of a house on legs is somewhere a player can
+     * step onto: fold an eleven-block leg completely and the floor above it is still four blocks up, which
+     * is a wall rather than a step. Past that point the whole creature goes down instead, feet and all, so
+     * the mound it stands on beds into the earth and the floor comes level with it. Nothing is buried that
+     * a player wants to see — the legs and the underside of the mound — and the shape stays right because
+     * hips and feet descend together.
+     *
+     * <p>Zero for a pet whose legs fold far enough on their own, and for every titan that never rests.
+     */
+    public double getRestSink() {
+        return restSink;
+    }
+
+    /**
+     * How far out from the root a player counts as standing on this titan, in blocks.
+     *
+     * <p>A pet carrying its owner must not also chase them. Following is a heading and a speed worked out
+     * from where the owner is, and an owner who is standing on the thing doing the working out moves with
+     * every correction it makes: the house turns towards them, which carries them round with it, which
+     * leaves them still off to the same side. It spins on the spot for as long as they stand there.
+     *
+     * <p>Wants to be about half the width of the titan. Zero means it is never carrying anybody, which is
+     * true of everything but a house.
+     */
+    public double getAboardRadius() {
+        return aboardRadius;
+    }
+
+    /**
+     * How fast a titan walks while it is being pointed somewhere with the wand, in blocks per second.
+     *
+     * <p>Kept apart from {@code MoveSpeed}, which is the amble of a pet catching up with an owner who is
+     * probably standing still by now. A house that has been told to go somewhere is going somewhere, and
+     * the player is usually watching it cross ground they are not crossing with it, so it can afford to be
+     * quicker than it is when it is trailing them about.
+     */
+    public double getWandSpeed() {
+        return wandSpeed;
+    }
+
+    /**
+     * How fast a titan turns onto the heading the wand is pointing, in radians per second.
+     *
+     * <p>Faster than {@code TurnSpeed} for the same reason as above: a pet noticing where its owner has got
+     * to can take its time, but every fraction of a second between swinging the wand and the house coming
+     * round is felt as the wand being unresponsive.
+     */
+    public float getWandTurnSpeed() {
+        return wandTurnSpeed;
+    }
+
+    /**
+     * How high a titan leaps when the wand tells it to, in blocks, before scale.
+     *
+     * <p>The apex of the arc rather than a launch speed, so what is written here is what a player sees.
+     * Zero for anything that does not leap, which is every titan that is not a Baba Yaga house.
+     */
+    public double getLeapHeight() {
+        return leapHeight;
+    }
+
+    /**
+     * How fast a titan travels forward through a leap, in blocks per second.
+     *
+     * <p>Held for the whole arc, so the distance covered is this multiplied by the time in the air, which
+     * is set by {@link #getLeapHeight()}. Wants to be quicker than the walk — a leap that covers no more
+     * ground than walking would have is a hop on the spot — without outrunning the gait, whose legs are
+     * still stepping while the house is airborne.
+     */
+    public double getLeapSpeed() {
+        return leapSpeed;
+    }
+
+    /** @return the fixture declared for {@code blockKey}, or {@code null} if that block is ordinary geometry. */
+    @Nullable
+    public TitanFixtureDef findFixture(@Nonnull final String blockKey) {
+        for (final TitanFixtureDef fixture : fixtures) {
+            if (blockKey.equals(fixture.getBlock())) return fixture;
+        }
+        return null;
+    }
+
+    /**
+     * The first fixture of {@code kind}, or {@code null} if this titan has none.
+     *
+     * <p>For the systems that drive a particular fixture rather than answer a click on one: a smelter has
+     * to find its own container every tick without being told which block it came from.
+     */
+    @Nullable
+    public TitanFixtureDef findFixture(@Nonnull final TitanFixtureDef.Kind kind) {
+        for (final TitanFixtureDef fixture : fixtures) {
+            if (fixture.getKind() == kind) return fixture;
+        }
+        return null;
     }
 
     /** Whether the titan closes the distance to its target; with this off it only answers what comes to it. */
@@ -1016,6 +1330,30 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     @Nullable
     public String getDeathSound() {
         return deathSound;
+    }
+
+    /** Sound played when a foot plants after a step. Unused by combat titans. */
+    @Nullable
+    public String getStepSound() {
+        return stepSound;
+    }
+
+    /** Sound played when a pet kneels or stands back up. */
+    @Nullable
+    public String getCrouchSound() {
+        return crouchSound;
+    }
+
+    /** Sound played once as the spawn fly-in starts. */
+    @Nullable
+    public String getSpawnSound() {
+        return spawnSound;
+    }
+
+    /** Sound played as a titan leaves the ground on a leap. The landing uses {@code ImpactSound}. */
+    @Nullable
+    public String getLeapSound() {
+        return leapSound;
     }
 
     /**

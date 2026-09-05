@@ -1,0 +1,5 @@
+{
+  "$Comment": "No-op Use chain for ledge nubs. TitanLedgeInteractSystem handles the grab on UseEntityEvent.Pre; this only exists so the interaction chain can start.",
+  "Type": "Simple",
+  "RunTime": 0
+}

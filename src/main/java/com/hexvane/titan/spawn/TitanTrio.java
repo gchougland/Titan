@@ -62,10 +62,16 @@ public final class TitanTrio {
         final var transform = store.getComponent(titanRoot, TransformComponent.getComponentType());
         if (titan == null || transform == null) return false;
 
+        final var variant = titan.getVariant();
+
+        // A pet has nobody to fight, so there is no encounter to run and no Role for a brain to hold. Its
+        // behaviour is driven directly instead, and spawning the companions anyway would put a boss
+        // engagement around a house that follows the player about.
+        if (variant != null && variant.isPet()) return true;
+
         // Boss-bar tracking and rebind need a stable UUID on the presentation target.
         store.ensureComponent(titanRoot, UUIDComponent.getComponentType());
 
-        final var variant = titan.getVariant();
         final String displayName = variant != null ? variant.getDisplayName() : "Titan";
         store.putComponent(titanRoot, DisplayNameComponent.getComponentType(),
             new DisplayNameComponent(Message.raw(displayName)));
@@ -112,7 +118,12 @@ public final class TitanTrio {
         return true;
     }
 
-    /** Removes brain and encounter companions; safe to call when some refs are already gone. */
+    /**
+     * Clears trio links immediately and removes brain/encounter after the current store pass.
+     *
+     * <p>Must not call {@link Store#removeEntity} inline: this is invoked from ticking systems and from
+     * {@code onEntityRemoved}, both of which run while the store is already processing.
+     */
     public static void detach(@Nonnull final Store<EntityStore> store, @Nonnull final TitanComponent titan) {
         final Ref<EntityStore> brain = titan.getBrainRef();
         final Ref<EntityStore> encounter = titan.getEncounterRef();
@@ -121,12 +132,18 @@ public final class TitanTrio {
         titan.setBrainDriven(false);
         titan.setIntent(com.hexvane.titan.entity.TitanIntent.NONE);
 
-        if (brain != null && brain.isValid()) {
-            store.removeEntity(brain, RemoveReason.REMOVE);
-        }
-        if (encounter != null && encounter.isValid()) {
-            store.removeEntity(encounter, RemoveReason.REMOVE);
-        }
+        final boolean removeBrain = brain != null && brain.isValid();
+        final boolean removeEncounter = encounter != null && encounter.isValid();
+        if (!removeBrain && !removeEncounter) return;
+
+        store.getExternalData().getWorld().execute(() -> {
+            if (removeBrain && brain.isValid()) {
+                store.removeEntity(brain, RemoveReason.REMOVE);
+            }
+            if (removeEncounter && encounter.isValid()) {
+                store.removeEntity(encounter, RemoveReason.REMOVE);
+            }
+        });
     }
 
     @Nullable

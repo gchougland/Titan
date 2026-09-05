@@ -2,6 +2,7 @@ package com.hexvane.titan.system;
 
 import com.hexvane.titan.ai.TitanAiScratch;
 import com.hexvane.titan.ai.TitanAiSupport;
+import com.hexvane.titan.ai.TitanBodyDriver;
 import com.hexvane.titan.ai.TitanHurlAttack;
 import com.hexvane.titan.ai.TitanMeleeAttack;
 import com.hexvane.titan.ai.TitanPlowAttack;
@@ -49,8 +50,6 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
 
     /** Seconds an idle arm takes to hand control back to the clip pose. */
     private static final float HAND_IK_FADE = 0.4f;
-    /** How fast the body settles onto new terrain height, in blocks per second. */
-    private static final double BODY_HEIGHT_FOLLOW = 4.0;
     /** Seconds the invisible root outlives its body. */
     private static final float DEATH_LINGER_SECONDS = 2f;
     /** How long a titan stays angry after being hit, holding its target out to the full leash range. */
@@ -76,10 +75,6 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
      */
     private static final int WANDER_GROUND_ABOVE = 8;
     private static final int WANDER_GROUND_BELOW = 32;
-
-    /** Vertical search window for the ground under the body itself, in blocks. */
-    private static final int BODY_GROUND_ABOVE = 6;
-    private static final int BODY_GROUND_BELOW = 16;
 
     /** How far off the body's forward axis a target must be before the attacking side is reconsidered. */
     private static final double SIDE_PREFERENCE_DEADZONE = 0.5;
@@ -124,6 +119,11 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
         final TitanVariantAsset variant = titan.getVariant();
         final TitanSkeletonAsset skeleton = titan.getSkeleton();
         if (variant == null || skeleton == null) return;
+
+        // A pet has no part in any of this. Its behaviour, its ground follow and its own upkeep are all
+        // owned by YagaPetSystem, and letting the combat machine tick it too would have two systems
+        // choosing a state and a velocity for the same body on the same tick.
+        if (variant.isPet()) return;
 
         final Ref<EntityStore> self = archetypeChunk.getReferenceTo(index);
         titan.addStateTime(dt);
@@ -199,7 +199,7 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
         }
 
         updateHandGoals(titan, skeleton, dt);
-        settleBodyHeight(store, titan, transform, dt);
+        TitanBodyDriver.settleBodyHeight(store, transform, dt, 0);
         transform.getRotation().setYaw(titan.getYaw());
     }
 
@@ -712,22 +712,4 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
         store.getResource(siteMemoryType).markCleared(titan.getSiteCell(), KILL_COOLDOWN);
     }
 
-    /**
-     * Eases the root towards the terrain under it. The root sits at the feet plane, so the body bone's own
-     * bind offset provides the hip height.
-     */
-    private static void settleBodyHeight(@Nonnull final Store<EntityStore> store,
-                                         @Nonnull final TitanComponent titan,
-                                         @Nonnull final TransformComponent transform,
-                                         final float dt) {
-        final var chunkStore = store.getExternalData().getWorld().getChunkStore();
-        final var position = transform.getPosition();
-        final double ground = GroundSampler.sample(
-            chunkStore, position.x, position.y, position.z, BODY_GROUND_ABOVE, BODY_GROUND_BELOW);
-        if (!GroundSampler.isValid(ground)) return;
-
-        final double delta = ground - position.y;
-        final double maxStep = BODY_HEIGHT_FOLLOW * dt;
-        position.y += Math.abs(delta) <= maxStep ? delta : Math.copySign(maxStep, delta);
-    }
 }

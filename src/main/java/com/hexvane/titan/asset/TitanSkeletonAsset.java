@@ -53,6 +53,11 @@ public final class TitanSkeletonAsset implements JsonAssetWithMap<String, Defaul
             a -> a.weakpointSockets
         ).add()
         .append(
+            new KeyedCodec<>("ProceduralWobble", new ArrayCodec<>(TitanWobbleDef.CODEC, TitanWobbleDef[]::new)),
+            (a, v) -> a.proceduralWobble = v,
+            a -> a.proceduralWobble
+        ).add()
+        .append(
             new KeyedCodec<>("ClipSet", Codec.STRING),
             (a, v) -> a.clipSet = v,
             a -> a.clipSet
@@ -91,6 +96,7 @@ public final class TitanSkeletonAsset implements JsonAssetWithMap<String, Defaul
     private TitanBoneDef[] bones = new TitanBoneDef[0];
     private TitanIkChainDef[] ikChains = new TitanIkChainDef[0];
     private TitanSocketDef[] weakpointSockets = new TitanSocketDef[0];
+    private TitanWobbleDef[] proceduralWobble = new TitanWobbleDef[0];
     @Nullable
     private String clipSet;
     @Nullable
@@ -153,6 +159,14 @@ public final class TitanSkeletonAsset implements JsonAssetWithMap<String, Defaul
                 LOGGER.at(Level.WARNING).log("Titan skeleton '%s' weakpoint socket references unknown bone '%s'", id, socket.getBone());
             }
             socket.resolve(resolved == null ? -1 : resolved);
+        }
+
+        for (final var wobble : proceduralWobble) {
+            final Integer resolved = byName.get(wobble.getBone());
+            if (resolved == null) {
+                LOGGER.at(Level.WARNING).log("Titan skeleton '%s' procedural wobble references unknown bone '%s'", id, wobble.getBone());
+            }
+            wobble.resolve(resolved == null ? -1 : resolved);
         }
 
         bodyBoneIndex = bodyBone == null ? 0 : byName.getOrDefault(bodyBone, 0);
@@ -218,6 +232,12 @@ public final class TitanSkeletonAsset implements JsonAssetWithMap<String, Defaul
     @Nonnull
     public TitanSocketDef[] getWeakpointSockets() {
         return weakpointSockets;
+    }
+
+    /** Bones that sway on a sine wave over the clip pose. Empty for rigs that do not need it. */
+    @Nonnull
+    public TitanWobbleDef[] getProceduralWobble() {
+        return proceduralWobble;
     }
 
     /** {@code TitanClipSetAsset} id supplying this rig's animations, or {@code null} for none. */

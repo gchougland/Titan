@@ -40,7 +40,20 @@ public final class TitanPartComponent implements Component<EntityStore> {
 
     /** The size this voxel is meant to render at, kept so a drifted or undelivered value can be restored. */
     private float scale = 1f;
+    /**
+     * Counts down to the slow safety-net restatement. Starts at a full refresh interval so it does not
+     * fire in the first few seconds and steal the job of {@link #consumeSpawnScalePass}.
+     */
     private float scaleRefreshTimer;
+
+    /**
+     * One delayed re-dirty of {@code EntityScaleComponent} after spawn. The engine can burn the initial
+     * out-of-date mark under the spawn flood, leaving clients at default size until something calls
+     * {@code setScale} again; this is that call, once, staggered across the body.
+     */
+    private boolean spawnScalePassPending = true;
+    /** Negative until delay and stagger are known at tick time. */
+    private float spawnScalePassTimer = -1f;
 
     /**
      * The transform the clients were last given, and whether they have been given one at all.
@@ -82,13 +95,13 @@ public final class TitanPartComponent implements Component<EntityStore> {
                               @Nonnull final Vector3d localOffset,
                               final int blockRotation,
                               final float scale,
-                              final float scaleRefreshPhase) {
+                              final float scaleRefreshInterval) {
         this.owner = owner;
         this.boneIndex = boneIndex;
         this.localOffset.set(localOffset);
         this.blockRotation = blockRotation;
         this.scale = scale;
-        this.scaleRefreshTimer = scaleRefreshPhase;
+        this.scaleRefreshTimer = scaleRefreshInterval;
     }
 
     @Nullable
@@ -115,6 +128,25 @@ public final class TitanPartComponent implements Component<EntityStore> {
     }
 
     /**
+     * Counts down to the one post-spawn scale restatement, then never again.
+     *
+     * <p>Staggered with {@link #syncPhase} so a temple does not requeue every block's size on the same tick.
+     *
+     * @param delay   seconds before the earliest part fires
+     * @param stagger seconds of spread after {@code delay} across the body
+     * @return {@code true} once when this part's turn arrives
+     */
+    public boolean consumeSpawnScalePass(final float dt, final float delay, final float stagger) {
+        if (!spawnScalePassPending) return false;
+        if (spawnScalePassTimer < 0f) spawnScalePassTimer = delay + syncPhase * stagger;
+
+        spawnScalePassTimer -= dt;
+        if (spawnScalePassTimer > 0f) return false;
+        spawnScalePassPending = false;
+        return true;
+    }
+
+    /**
      * Counts down to the next time this voxel should restate its size to the clients watching it.
      *
      * <p>The engine sends a block entity's scale once, when the value is marked out of date, and clears
@@ -126,6 +158,7 @@ public final class TitanPartComponent implements Component<EntityStore> {
      * <p>The rotation is deliberately slow now. The engine restates the scale to any viewer that has newly
      * become able to see the entity, which covers a client arriving after the mark was consumed, so this is
      * insurance against an unidentified cause rather than the mechanism that keeps a titan the right size.
+     * The post-spawn pass in {@link #consumeSpawnScalePass} is what fixes size right after spawn.
      *
      * @return {@code true} when this part is due
      */
@@ -251,6 +284,8 @@ public final class TitanPartComponent implements Component<EntityStore> {
         copy.blockRotation = blockRotation;
         copy.scale = scale;
         copy.scaleRefreshTimer = scaleRefreshTimer;
+        copy.spawnScalePassPending = spawnScalePassPending;
+        copy.spawnScalePassTimer = spawnScalePassTimer;
         copy.sentPosition.set(sentPosition);
         copy.sentRotation.set(sentRotation);
         copy.everSent = everSent;
