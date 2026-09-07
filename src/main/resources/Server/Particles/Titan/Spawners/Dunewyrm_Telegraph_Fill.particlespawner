@@ -1,0 +1,54 @@
+{
+  "$Comment": [
+    "Soft filled danger disc that grows into the glow ring. Slightly denser than the outline,",
+    "still translucent. Packet scale drives grow-in (radius * fill progress)."
+  ],
+  "RenderMode": "BlendAdd",
+  "ParticleRotationInfluence": "None",
+  "ParticleRotateWithSpawner": true,
+  "LinearFiltering": true,
+  "LightInfluence": 0,
+  "MaxConcurrentParticles": 1,
+  "ParticleLifeSpan": { "Min": 0.7, "Max": 0.7 },
+  "TotalParticles": { "Min": 1, "Max": 1 },
+  "SpawnBurst": true,
+  "SpawnRate": { "Min": 1, "Max": 1 },
+  "Particle": {
+    "Texture": "Particles/Textures/Circles/Circle_Wisp.png",
+    "ScaleRatioConstraint": "OneToOne",
+    "UVOption": "None",
+    "SoftParticles": "Disable",
+    "InitialAnimationFrame": {
+      "Opacity": 1,
+      "Color": "#ff2222",
+      "FrameIndex": { "Min": 0, "Max": 0 },
+      "Scale": {
+        "X": { "Min": 1.0, "Max": 1.0 },
+        "Y": { "Min": 1.0, "Max": 1.0 }
+      },
+      "Rotation": {
+        "X": { "Min": 90.0, "Max": 90.0 },
+        "Y": { "Min": 0.0, "Max": 0.0 },
+        "Z": { "Min": 0.0, "Max": 0.0 }
+      }
+    },
+    "Animation": {
+      "0": {
+        "Opacity": 0.0,
+        "Color": "#ff2e2e"
+      },
+      "20": {
+        "Opacity": 0.5,
+        "Color": "#ff3c3c"
+      },
+      "75": {
+        "Opacity": 0.35,
+        "Color": "#d81818"
+      },
+      "100": {
+        "Opacity": 0.0,
+        "Color": "#7a0c0c"
+      }
+    }
+  }
+}

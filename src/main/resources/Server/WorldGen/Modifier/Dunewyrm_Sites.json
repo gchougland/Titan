@@ -1,0 +1,64 @@
+{
+  "$Comment": [
+    "Injects Dunewyrm ruin sites into Zone 2 deserts via world-gen v1 (WorldGenModifier BiomePrefab).",
+    "Prefab pastes the structure plus an invisible DunewyrmSite marker; Java builds the snake on load."
+  ],
+  "Priority": "Normal",
+  "Target": {
+    "Root": "Default",
+    "Rules": [
+      "Zones.Zone2_Tier3.Tile.Desert_Barren",
+      "Zones.Zone2_Tier3.Tile.Desert_Mushroom",
+      "Zones.Zone2_Tier2.Tile.Desert_Red",
+      "Zones.Zone2_Tier2.Tile.Desert_Rock",
+      "Zones.Zone2_Tier2.Tile.Desert_Springs",
+      "Zones.Zone2_Tier2.Tile.Desert_Oasis"
+    ]
+  },
+  "Operations": [
+    {
+      "Type": "Add",
+      "Content": {
+        "Type": "BiomePrefab",
+        "Prefabs": [
+          {
+            "Path": "Titan.Dunewyrm.Dunewyrm_Structure_Site",
+            "Weight": 1.0
+          }
+        ],
+        "PointGrid": {
+          "Seed": "DunewyrmSite",
+          "Scale": 128.0,
+          "Jitter": 0.7,
+          "Density": {
+            "Min": 0.0,
+            "Max": 0.28
+          }
+        },
+        "FitHeightmap": true,
+        "ParentMask": {
+          "Include": {
+            "Any": false,
+            "Empty": false,
+            "Blocks": [
+              "Soil_Sand",
+              "Soil_Sand_Red",
+              "Soil_Sand_White",
+              "Soil_Dirt",
+              "Soil_Dirt_Dry",
+              "Rock_Sandstone",
+              "Rock_Sandstone_Red"
+            ],
+            "Fluids": []
+          },
+          "Exclude": {
+            "Any": false,
+            "Empty": true,
+            "Blocks": [],
+            "Fluids": []
+          }
+        }
+      }
+    }
+  ]
+}

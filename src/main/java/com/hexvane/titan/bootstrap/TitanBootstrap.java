@@ -39,6 +39,13 @@ import com.hexvane.titan.yaga.YagaMemory;
 import com.hexvane.titan.yaga.YagaPetSystem;
 import com.hexvane.titan.yaga.YagaPointInteraction;
 import com.hexvane.titan.yaga.YagaRespawnSystem;
+import com.hexvane.titan.dunewyrm.DunewyrmAiSystem;
+import com.hexvane.titan.dunewyrm.DunewyrmContactDamageSystem;
+import com.hexvane.titan.dunewyrm.DunewyrmHealthSyncSystem;
+import com.hexvane.titan.dunewyrm.DunewyrmPartSyncSystem;
+import com.hexvane.titan.dunewyrm.DunewyrmRootDamageSystem;
+import com.hexvane.titan.dunewyrm.DunewyrmSegmentDamageSystem;
+import com.hexvane.titan.dunewyrm.DunewyrmSiteSystem;
 import com.hexvane.titan.ledge.TitanLedgeHangSystem;
 import com.hexvane.titan.ledge.TitanLedgeInteractSystem;
 import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
@@ -234,6 +241,16 @@ public final class TitanBootstrap {
 
         registry.registerSystem(new TitanLedgeInteractSystem());
         registry.registerSystem(new TitanLedgeHangSystem());
+
+        registry.registerSystem(new DunewyrmSiteSystem.EnsureComponents());
+        registry.registerSystem(new DunewyrmSiteSystem.SpawnOnAdd());
+        registry.registerSystem(new DunewyrmAiSystem());
+        registry.registerSystem(new DunewyrmPartSyncSystem());
+        registry.registerSystem(new DunewyrmContactDamageSystem());
+        registry.registerSystem(new DunewyrmHealthSyncSystem());
+        registry.registerSystem(new DunewyrmHealthSyncSystem.Removal());
+        registry.registerSystem(new DunewyrmRootDamageSystem());
+        registry.registerSystem(new DunewyrmSegmentDamageSystem());
 
         worldSpawnSystem = new TitanWorldSpawnSystem(siteMemoryType);
         registry.registerSystem(worldSpawnSystem);

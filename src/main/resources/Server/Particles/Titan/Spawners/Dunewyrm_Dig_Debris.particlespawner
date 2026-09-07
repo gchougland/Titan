@@ -1,0 +1,67 @@
+{
+  "$Comment": "Wide sandy burst for a buried Dunewyrm head — sized for a giant snake, not a zombie.",
+  "RenderMode": "BlendLinear",
+  "EmitOffset": {
+    "X": { "Min": -2.8, "Max": 2.8 },
+    "Y": { "Min": -0.2, "Max": 0.4 },
+    "Z": { "Min": -2.8, "Max": 2.8 }
+  },
+  "ParticleRotationInfluence": "Billboard",
+  "LinearFiltering": true,
+  "LightInfluence": 0.55,
+  "ParticleRotateWithSpawner": false,
+  "MaxConcurrentParticles": 48,
+  "TotalParticles": { "Min": 28, "Max": 40 },
+  "ParticleLifeSpan": { "Min": 0.45, "Max": 0.9 },
+  "SpawnRate": { "Min": 80, "Max": 120 },
+  "SpawnBurst": true,
+  "InitialVelocity": {
+    "Speed": { "Min": 2.5, "Max": 6.5 },
+    "Yaw": { "Min": 0, "Max": 360 },
+    "Pitch": { "Min": 35, "Max": 88 }
+  },
+  "Attractors": [
+    {
+      "Position": { "X": 0, "Y": 0, "Z": 0 },
+      "RadialAxis": { "X": 0, "Y": 1, "Z": 0 },
+      "Radius": 0,
+      "RadialAcceleration": 0,
+      "RadialTangentAcceleration": 0,
+      "DampingMultiplier": { "X": 0.88, "Y": 0.82, "Z": 0.88 },
+      "LinearAcceleration": { "X": 0, "Y": -10, "Z": 0 }
+    }
+  ],
+  "Particle": {
+    "Texture": "Particles/Textures/Shapes/Fragment_Earth_GS.png",
+    "FrameSize": { "Width": 32, "Height": 32 },
+    "ScaleRatioConstraint": "OneToOne",
+    "UVOption": "RandomFlipUV",
+    "SoftParticles": "Enable",
+    "InitialAnimationFrame": {
+      "Opacity": 1,
+      "Color": "#d2b48c",
+      "FrameIndex": { "Min": 0, "Max": 3 },
+      "Scale": {
+        "X": { "Min": 0.35, "Max": 0.85 },
+        "Y": { "Min": 0.35, "Max": 0.85 }
+      },
+      "Rotation": {
+        "X": { "Min": 0, "Max": 360 },
+        "Y": { "Min": 0, "Max": 0 },
+        "Z": { "Min": 0, "Max": 360 }
+      }
+    },
+    "Animation": {
+      "0": { "Opacity": 0.0 },
+      "12": { "Opacity": 1.0 },
+      "70": { "Opacity": 0.85, "Color": "#c4a574" },
+      "100": {
+        "Opacity": 0.0,
+        "Scale": {
+          "X": { "Min": 0.2, "Max": 0.45 },
+          "Y": { "Min": 0.2, "Max": 0.45 }
+        }
+      }
+    }
+  }
+}

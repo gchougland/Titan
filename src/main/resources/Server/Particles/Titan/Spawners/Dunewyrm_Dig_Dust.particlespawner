@@ -1,0 +1,72 @@
+{
+  "$Comment": "Low sandy dust plume around a tunneling Dunewyrm.",
+  "RenderMode": "BlendLinear",
+  "EmitOffset": {
+    "X": { "Min": -3.2, "Max": 3.2 },
+    "Y": { "Min": -0.15, "Max": 0.25 },
+    "Z": { "Min": -3.2, "Max": 3.2 }
+  },
+  "ParticleRotationInfluence": "Billboard",
+  "LinearFiltering": true,
+  "LightInfluence": 0.45,
+  "ParticleRotateWithSpawner": false,
+  "MaxConcurrentParticles": 36,
+  "TotalParticles": { "Min": 18, "Max": 28 },
+  "ParticleLifeSpan": { "Min": 0.7, "Max": 1.3 },
+  "SpawnRate": { "Min": 40, "Max": 70 },
+  "SpawnBurst": true,
+  "InitialVelocity": {
+    "Speed": { "Min": 1.2, "Max": 3.8 },
+    "Yaw": { "Min": 0, "Max": 360 },
+    "Pitch": { "Min": 55, "Max": 95 }
+  },
+  "Attractors": [
+    {
+      "Position": { "X": 0, "Y": 0, "Z": 0 },
+      "RadialAxis": { "X": 0, "Y": 1, "Z": 0 },
+      "Radius": 0,
+      "RadialAcceleration": 0,
+      "RadialTangentAcceleration": 0,
+      "DampingMultiplier": { "X": 0.9, "Y": 0.86, "Z": 0.9 }
+    }
+  ],
+  "Particle": {
+    "Texture": "Particles/Textures/Smoke/Smoke_Smooth2.png",
+    "FrameSize": { "Width": 64, "Height": 64 },
+    "ScaleRatioConstraint": "None",
+    "UVOption": "RandomFlipU",
+    "SoftParticles": "Enable",
+    "InitialAnimationFrame": {
+      "Opacity": 0.0,
+      "Color": "#c9b896",
+      "FrameIndex": { "Min": 0, "Max": 2 },
+      "Scale": {
+        "X": { "Min": 0.7, "Max": 1.3 },
+        "Y": { "Min": 0.7, "Max": 1.3 }
+      },
+      "Rotation": {
+        "X": { "Min": 0, "Max": 0 },
+        "Y": { "Min": 0, "Max": 0 },
+        "Z": { "Min": -180, "Max": 180 }
+      }
+    },
+    "Animation": {
+      "0": { "Opacity": 0.0 },
+      "18": { "Opacity": 0.45, "Color": "#bba67e" },
+      "60": {
+        "Opacity": 0.28,
+        "Scale": {
+          "X": { "Min": 1.4, "Max": 2.2 },
+          "Y": { "Min": 1.4, "Max": 2.2 }
+        }
+      },
+      "100": {
+        "Opacity": 0.0,
+        "Scale": {
+          "X": { "Min": 1.8, "Max": 2.8 },
+          "Y": { "Min": 1.8, "Max": 2.8 }
+        }
+      }
+    }
+  }
+}

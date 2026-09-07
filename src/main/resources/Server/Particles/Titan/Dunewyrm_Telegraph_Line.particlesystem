@@ -1,0 +1,11 @@
+{
+  "$Comment": "Red corridor markers for Dunewyrm charge telegraph.",
+  "Spawners": [
+    {
+      "SpawnerId": "Dunewyrm_Telegraph_Line"
+    }
+  ],
+  "BoundingRadius": 12,
+  "CullDistance": 96,
+  "IsImportant": true
+}

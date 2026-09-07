@@ -1,0 +1,11 @@
+{
+  "$Comment": "Red fill disc for Dunewyrm poison telegraph — scaled by packet to grow into the ring.",
+  "Spawners": [
+    {
+      "SpawnerId": "Dunewyrm_Telegraph_Fill"
+    }
+  ],
+  "BoundingRadius": 12,
+  "CullDistance": 96,
+  "IsImportant": true
+}

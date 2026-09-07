@@ -1,0 +1,66 @@
+{
+  "$Comment": [
+    "Soft glowing danger ring for poison windup. Circle_Glow reads as a hazard aura,",
+    "not the hard Talus Ring4 stamp. Authored at radius 1; packet scale = blast radius."
+  ],
+  "RenderMode": "BlendAdd",
+  "ParticleRotationInfluence": "None",
+  "ParticleRotateWithSpawner": true,
+  "LinearFiltering": true,
+  "LightInfluence": 0,
+  "MaxConcurrentParticles": 1,
+  "ParticleLifeSpan": { "Min": 0.65, "Max": 0.65 },
+  "TotalParticles": { "Min": 1, "Max": 1 },
+  "SpawnBurst": true,
+  "SpawnRate": { "Min": 1, "Max": 1 },
+  "Particle": {
+    "Texture": "Particles/Textures/Circles/Circle_Glow.png",
+    "ScaleRatioConstraint": "OneToOne",
+    "UVOption": "None",
+    "SoftParticles": "Disable",
+    "InitialAnimationFrame": {
+      "Opacity": 1,
+      "Color": "#ff2a2a",
+      "FrameIndex": { "Min": 0, "Max": 0 },
+      "Scale": {
+        "X": { "Min": 1.0, "Max": 1.0 },
+        "Y": { "Min": 1.0, "Max": 1.0 }
+      },
+      "Rotation": {
+        "X": { "Min": 90.0, "Max": 90.0 },
+        "Y": { "Min": 0.0, "Max": 0.0 },
+        "Z": { "Min": 0.0, "Max": 0.0 }
+      }
+    },
+    "Animation": {
+      "0": {
+        "Opacity": 0.0,
+        "Color": "#ff3535",
+        "Scale": {
+          "X": { "Min": 1.04, "Max": 1.04 },
+          "Y": { "Min": 1.04, "Max": 1.04 }
+        }
+      },
+      "22": {
+        "Opacity": 0.38,
+        "Color": "#ff4848",
+        "Scale": {
+          "X": { "Min": 1.0, "Max": 1.0 },
+          "Y": { "Min": 1.0, "Max": 1.0 }
+        }
+      },
+      "70": {
+        "Opacity": 0.28,
+        "Color": "#e02020"
+      },
+      "100": {
+        "Opacity": 0.0,
+        "Color": "#8a1010",
+        "Scale": {
+          "X": { "Min": 0.97, "Max": 0.97 },
+          "Y": { "Min": 0.97, "Max": 0.97 }
+        }
+      }
+    }
+  }
+}

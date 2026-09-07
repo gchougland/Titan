@@ -1,0 +1,60 @@
+{
+  "$Comment": [
+    "Dunewyrm — Zone 2 desert snake boss. Body is eight random/mirrored segments with per-segment HP;",
+    "head/jaw/tongue/tail are visual. Combat and chain logic live in com.hexvane.titan.dunewyrm, not TitanAiSystem.",
+    "Dunewyrm: true routes /titan spawn and worldgen sites to DunewyrmSpawner.",
+    "World nests come from Dunewyrm_Structure_Site; command spawn paints GroundPrefab for arena scenery."
+  ],
+  "Skeleton": "Dunewyrm",
+  "DisplayName": "Dunewyrm",
+  "BodyScale": 1.0,
+  "Dunewyrm": true,
+
+  "GroundPrefab": "Titan/Dunewyrm/Dunewyrm_Structure",
+
+  "StartAwake": true,
+  "Passive": false,
+  "Chase": true,
+  "WanderRadius": 40,
+
+  "SpawnFootprintRadius": 16,
+  "SpawnFootprintRelief": 4,
+  "SpawnHeadroom": 20,
+  "SpawnLevelToLowest": false,
+
+  "MoveSpeed": 4.5,
+  "TurnSpeed": 0.55,
+  "WakeRadius": 48,
+  "LoseTargetRadius": 72,
+  "LeashRadius": 64,
+
+  "AttackRange": 28,
+  "AttackCooldown": 4.0,
+  "AttackDamage": 18,
+  "AttackKnockback": 8,
+  "AttackRadius": 3.5,
+
+  "SmashChance": 0,
+  "SlamChance": 0,
+  "PoundChance": 0,
+  "HurlChance": 0,
+  "PlowChance": 0,
+  "StompChance": 0,
+
+  "DropList": "Drop_Dunewyrm",
+  "DropItem": "Ingredient_Crystal_Red",
+  "DropCountMin": 8,
+  "DropCountMax": 16,
+
+  "ImpactParticle": "Block_Land_Hard_Sand",
+  "ImpactSound": "SFX_Golem_Earth_Slam_Impact",
+  "DeathSound": "SFX_Stone_Break",
+  "WakeSound": "SFX_Snake_Alerted",
+
+  "TelegraphRingParticle": "Dunewyrm_Telegraph_Ring",
+  "TelegraphFillParticle": "Dunewyrm_Telegraph_Fill",
+  "TelegraphLineParticle": "Dunewyrm_Telegraph_Line",
+  "TelegraphSound": "SFX_Snake_Alerted",
+
+  "BattleMusic": "Track_Titan_Battle"
+}

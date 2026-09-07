@@ -550,6 +550,11 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
             (a, v) -> a.battleMusic = v,
             a -> a.battleMusic
         ).add()
+        .append(
+            new KeyedCodec<>("Dunewyrm", Codec.BOOLEAN),
+            (a, v) -> a.dunewyrm = v,
+            a -> a.dunewyrm
+        ).add()
         .build();
 
     private String id;
@@ -584,6 +589,8 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     private boolean startAwake;
     private boolean passive;
     private boolean pet;
+    /** Routes spawn through {@code DunewyrmSpawner} instead of the skeletal titan pipeline. */
+    private boolean dunewyrm;
     private float spawnFxRadius;
     private float spawnFxDuration = 1.2f;
     private float spawnFxStagger = 0.5f;
@@ -891,6 +898,11 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
      */
     public boolean isPet() {
         return pet;
+    }
+
+    /** Whether this variant is the procedural Dunewyrm snake boss rather than a skeletal titan. */
+    public boolean isDunewyrm() {
+        return dunewyrm;
     }
 
     /**

@@ -1,0 +1,12 @@
+{
+  "$Comment": "Mouth-shot poison cone for Dunewyrm cobra spray.",
+  "Spawners": [
+    {
+      "SpawnerId": "Dunewyrm_Poison_Cone",
+      "PositionOffset": { "X": 0, "Y": 0.15, "Z": 0 }
+    }
+  ],
+  "BoundingRadius": 16,
+  "CullDistance": 96,
+  "IsImportant": true
+}

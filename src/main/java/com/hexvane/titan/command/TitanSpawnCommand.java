@@ -1,6 +1,7 @@
 package com.hexvane.titan.command;
 
 import com.hexvane.titan.asset.TitanVariantAsset;
+import com.hexvane.titan.dunewyrm.DunewyrmSpawner;
 import com.hexvane.titan.spawn.ColliderMode;
 import com.hexvane.titan.spawn.TitanSpawner;
 import com.hexvane.titan.yaga.YagaSpawn;
@@ -102,7 +103,28 @@ public final class TitanSpawnCommand extends AbstractPlayerCommand {
             : aheadOf(transform.getPosition(), transform.getRotation().yaw());
 
         // Turned to face the caller rather than away, so a spawned titan is looking at whoever summoned it.
-        final var result = TitanSpawner.spawn(store, variantId, position, (float) (yaw + Math.PI), colliderMode);
+        final float faceCaller = (float) (yaw + Math.PI);
+
+        final TitanVariantAsset variant = TitanVariantAsset.find(variantId);
+        if (variant != null && variant.isDunewyrm()) {
+            final DunewyrmSpawner.Result result = DunewyrmSpawner.spawn(store, position, faceCaller);
+            if (!result.ok()) {
+                context.sendMessage(Message.translation("titan_commands.commands.titan.spawn.failed")
+                    .param("error", String.valueOf(result.error())));
+                return;
+            }
+            context.sendMessage(Message.translation("titan_commands.commands.titan.spawn.success")
+                .param("variant", variantId)
+                .param("parts", result.parts())
+                .param("weakpoints", 0)
+                .param("colliders", colliderMode.argument())
+                .param("x", position.x)
+                .param("y", position.y)
+                .param("z", position.z));
+            return;
+        }
+
+        final var result = TitanSpawner.spawn(store, variantId, position, faceCaller, colliderMode);
 
         if (!result.ok()) {
             context.sendMessage(Message.translation("titan_commands.commands.titan.spawn.failed")

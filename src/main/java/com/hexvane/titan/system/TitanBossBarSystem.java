@@ -175,10 +175,31 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
      * variant naming no track still gets its bar. Membership is decided here, once, so whatever was turned
      * on for a player is turned off again when they leave.
      */
+    /**
+     * Tears down bar + music for every player still listed on this titan. Safe to call repeatedly.
+     */
+    public static void dismiss(@Nonnull final ComponentAccessor<EntityStore> accessor,
+                               @Nonnull final Ref<EntityStore> self,
+                               @Nonnull final TitanComponent titan) {
+        if (titan.getBarViewers().isEmpty()) return;
+        final int networkId = networkIdOf(accessor, self);
+        final int music = TitanBattleMusic.resolve(titan.getVariant());
+        for (final Ref<EntityStore> viewer : titan.getBarViewers()) {
+            if (networkId != NO_ENTITY) hide(accessor, viewer, networkId);
+            TitanBattleMusic.clear(accessor, viewer, music);
+        }
+        titan.getBarViewers().clear();
+    }
+
     private static void updateViewers(@Nonnull final ComponentAccessor<EntityStore> accessor,
                                       @Nonnull final Ref<EntityStore> self,
                                       @Nonnull final TitanComponent titan,
                                       @Nonnull final List<Ref<EntityStore>> engaged) {
+
+        if (!isFighting(titan)) {
+            dismiss(accessor, self, titan);
+            return;
+        }
 
         final int networkId = networkIdOf(accessor, self);
         final var viewers = titan.getBarViewers();

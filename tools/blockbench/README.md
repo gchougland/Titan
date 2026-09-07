@@ -1,8 +1,9 @@
 # Titan Rig — Blockbench plugin
 
 Loads a Titan skeleton into Blockbench as a bone rig, fills each bone with the voxels of its prefab
-using real Hytale block textures, and imports the skeleton's clip set as editable animations. Bone
-edits and clip-set edits are written back into the mod's JSON in place.
+using real Hytale block textures, and imports the skeleton's clip set as editable animations. You can
+**create** skeletons and variants here, attach prefabs to bones with a live preview rebuild, edit
+sockets and IK chains, then write everything back into the mod's JSON.
 
 ![Stone Talus imported into Blockbench](docs/stone_talus.png)
 
@@ -13,6 +14,9 @@ edits and clip-set edits are written back into the mod's JSON in place.
 - The official **Hytale** Blockbench plugin, which provides the `hytale_character` format and the
   `.blockyanim` codec this plugin builds on. Install it from Blockbench's plugin store first.
 - An extracted copy of the Hytale assets, see below.
+- `tools/blockbench/core.cjs` must sit next to `titan_rig.js` (it ships in the repo). The plugin loads
+  it from the Titan repo root via `fs` (not Node `require`, which Blockbench's sandbox does not allow
+  for arbitrary files).
 
 ## Install
 
@@ -51,7 +55,29 @@ the archive is about 3.5 GB. Extract it once:
 
 This is the same reason the official Hytale Avatar Loader asks for an extracted folder.
 
-## Import a rig
+## Create a new titan (no hand-written JSON)
+
+1. **File > Create Titan Skeleton...** — picks an id, root bone, hip height, and optional clip set.
+   Writes `Server/Titan/Skeletons/<id>.json` and opens the rig.
+2. **Add Element → Titan Bone** (toolbar dropdown next to Cube/Group), or right-click a bone →
+   **Titan Bone** — grow the hierarchy. Drag groups to place bind offsets; rotations on the group
+   become bind rotations on save.
+3. **Edit > Attach Prefab...** — pick a prefab under `Server/Prefabs`, set yaw, optionally reset the
+   pivot from the prefab bounds. Voxels rebuild in the scene immediately.
+4. Tune **Titan Bone Properties...** for slices, hollow, shell, colliders, etc. Check **Rebuild
+   preview now** to see the change without re-importing.
+5. Optionally **Add Weakpoint Socket**, **Titan Skeleton Globals...**, **Titan IK Chains...**.
+6. **File > Save Titan Skeleton** — writes the JSON. Structural edits (add/remove bone, sockets, IK
+   list) do a full rewrite; transform-only edits splice the existing file so `$Comment` blocks survive.
+7. **File > Create Titan Variant...** — writes a spawnable stub under `Server/Titan/Variants` pointing
+   at the skeleton. Combat chances, drops, and fixtures stay hand-edited (or later dialogs).
+
+Prefab **voxel sculpting** is still done in Hytale's prefab tools. This plugin attaches existing
+prefabs to bones; it does not author `.prefab.json` block lists.
+
+Behavior / AI remains Java. Dunewyrm-style procedural titans are out of scope (stub skeleton only).
+
+## Import an existing rig
 
 **File > Import Titan Rig...**, pick a skeleton and optionally a variant.
 
@@ -70,9 +96,9 @@ What you get:
   animation's `path` pointing back at its `.blockyanim` so Blockbench's own save writes it in place.
 - A **Weakpoint Sockets** group, one entry per `WeakpointSockets` socket, each wearing the ore the
   variant's `WeakpointModel` renders. These are editable, see below.
-- A **Titan Guides** group, hidden and excluded from export, holding the IK rest targets. Bones on an
-  IK chain with `Role: Foot` are tinted in the outliner, because the runtime solver overrides whatever
-  you keyframe on them.
+- A **Titan Guides** group holding the IK rest targets (visible). Drag a rest marker and Save writes
+  `RestOffset` relative to `BodyBone`. Bones on an IK chain with `Role: Foot` / `Hand` are tinted in
+  the outliner, because the runtime solver overrides whatever you keyframe on them.
 
 One model unit is one prefab block, and one Blockbench unit is one model unit, so the numbers in the
 sidebar are the numbers in the JSON.
@@ -97,15 +123,22 @@ handled on both sides. `smooth` interpolation maps to Blockbench's `catmullrom`.
 Drag a bone's pivot to move it. **File > Save Titan Skeleton** derives `Offset` and `Rotation` from
 the group transforms and writes them back.
 
-**Titan Bone Properties...**, on the right-click menu of any bone group, covers the fields Blockbench
-has no equivalent for: prefab, prefab yaw, pivot, scale, mirror X, and the collider flags. Changing any
-of those only changes the file, so re-import to see the voxels move.
+**Menu / outliner actions:**
+
+| Action | Purpose |
+| --- | --- |
+| Titan Bone Properties... | Prefab, yaw, pivot, scale, slices, shell, colliders, hollow |
+| Attach Prefab... | Prefab picker + live voxel rebuild |
+| Rebuild Bone Preview | Rebuild cubes for the selected bone |
+| Titan Bone (Add Element dropdown) | Add a bone under the selection (also on bone context menu) |
+| Rename / Reparent / Delete Titan Bone | Hierarchy edits under Edit and bone context menu |
+| Add / Delete Weakpoint Socket | Socket CRUD (drag/rotate still writes Offset/Normal) |
+| Titan Skeleton Globals... | BodyBone, HipHeight, UnitScale, ClipSet, ColliderConfig |
+| Titan IK Chains... | Add/edit/remove chains (Kind, Role, bones, gait fields) |
 
 `PrefabYaw` turns a bone's blocks about Y as they are read, for a prefab that was built facing a
 different way from the one the rig expects: the runtime's forward is `-Z`, so a prefab built facing east
-needs `90`. The pivot is expressed in the turned coordinates, which is why the preview applies the turn
-before working the bounds out — a rig whose prefab yaw the preview ignored would show every bone facing
-the way it was authored while the game showed it facing forward.
+needs `90`. The pivot is expressed in the turned coordinates.
 
 ### Weakpoint sockets
 
@@ -115,51 +148,37 @@ Each socket is a group holding the ore that socket would carry in game, read fro
 `WeakpointModel`: its `.blockymodel` boxes, its texture, its `WeakpointScale`, and the sink the spawner
 applies so the node's centre, not its origin, lands on the socket. What you see is what will spawn.
 
-The mesh is drawn at 64 units per block, which is the grid the client renders an entity model on. Block
-art is authored at 32, so a mesh taken from `Blocks/` or `Resources/`, as the ore cluster is, draws at
-half the size it was authored at. The sink is taken from the ModelAsset's declared `HitBox`, because
-that is what the spawner reads: when a `HitBox` disagrees with the mesh the node ends up seated wrong in
-game, and the preview shows it seated wrong too rather than quietly correcting it.
-
 Every socket wears its ore, but only as many start visible as the variant actually rolls,
 `WeakpointCountMax`. Showing all of them at once buries the body under ore no single titan carries, so
-the rest are hidden and one outliner click away. The visible set is the most spread one, and it is the
-same on every import, so placements stay comparable as you work.
-
-Variants with no `WeakpointModel`, like the Yaga egg whose weakpoints are its own shell blocks, get a
-magenta spike per socket instead.
+the rest are hidden and one outliner click away.
 
 **Position.** Drag a socket group and the save writes its new `Offset`. The offset is measured against
-the bone the socket hangs off, which is the exact inverse of how the group was placed, so moving the
-bone carries its sockets along without changing their numbers.
-
-Keep them on the body surface. The spawner centres a weakpoint node on its socket and sinks it by the
-variant's `WeakpointEmbed`, so a socket authored short of the surface ends up buried.
+the bone the socket hangs off.
 
 **Facing.** Rotate a socket group and the save writes a `Normal`. Left alone, the spawner aims each node
-straight out from the bone pivot, which is already correct for a body slab that pivots at its own
-centre. It is wrong for a limb that pivots at the joint it hangs from, where every socket down the
-limb would otherwise point along the limb, and that is what `Normal` is for.
+straight out from the bone pivot. Turn one back to the derived direction and the field is removed again.
 
-The field is only written for a socket you actually turned, or one that already had a `Normal`. Simply
-sliding a socket along the surface changes the direction the spawner would derive, and pinning that on
-every socket anyone nudged would bury the handful that genuinely need one. Turn one back to the
-derived direction and the field is removed again.
+**Add / Delete** from the Edit menu or bone context menu. After adding sockets, Save (full rewrite) then
+re-import if you want ore meshes instead of spike placeholders on brand-new sockets.
 
-Each group keeps the index of the entry it came from, so renaming or reordering them in the outliner
-is safe. Adding a group by hand does nothing: the write-back only updates sockets that already exist
-in the file.
+Transform-only write-back splices the original text rather than reprinting the JSON, so `$Comment`
+blocks, blank lines, inline vectors and trailing `.0` on whole numbers all survive. Structural CRUD
+rewrites the file cleanly (comments on that file are not preserved across those saves).
 
-Write-back splices the original text rather than reprinting the JSON, so `$Comment` blocks, blank
-lines, inline vectors and trailing `.0` on whole numbers all survive. A single dragged bone changes a
-single line in the diff.
+### IK chains
+
+**Titan IK Chains...** edits the `IkChains` list (names, bone sequences, Role, pole, stride, phase).
+Rest targets in **Titan Guides** are movable; Save writes `RestOffset` from the marker position relative
+to `BodyBone`. After list edits, Save and re-import to refresh guide markers. Verify gait in-game with
+`/titan debug ik`.
 
 ## Tests
 
-`node harness.mjs` in the test folder exercises the import maths, the prefab reader, the JSON editor
-and the write-back against the real mod files, with no Blockbench involved. One case runs a full rig
-build against a filesystem stub restricted to exactly the methods Blockbench's sandbox exposes, which
-is what catches a call like `fs.openSync` before a user does.
+```
+cd tools/blockbench
+node harness.mjs
+```
 
-`node drive.mjs` attaches to Blockbench over the DevTools protocol, loads the plugin the same way the
-menu item does, drives the real import dialog and reports what ended up in the scene.
+Exercises `core.cjs`: bone table origins, tree validation, skeleton/variant emitters, assemble, and
+comment-preserving JSON splice against real mod skeletons (Yaga_Egg, Roaming_Temple). No Blockbench
+required.

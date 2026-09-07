@@ -141,6 +141,7 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
             case DESTROYED -> {
                 titan.getVelocity().set(0);
                 titan.setState(TitanState.DYING);
+                TitanBossBarSystem.dismiss(commandBuffer, self, titan);
                 TitanSound.play(commandBuffer, variant.getDeathSound(), transform.getPosition());
                 recordKill(store, titan);
                 TitanTrio.detach(store, titan);
@@ -688,6 +689,7 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
                                   @Nonnull final TransformComponent transform) {
 
         titan.addDeathTimer(dt);
+        TitanBossBarSystem.dismiss(commandBuffer, self, titan);
 
         if (!titan.isLootDropped()) {
             titan.setLootDropped(true);

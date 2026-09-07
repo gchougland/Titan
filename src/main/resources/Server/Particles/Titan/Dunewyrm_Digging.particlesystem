@@ -1,0 +1,10 @@
+{
+  "$Comment": "Large low dig FX for Dunewyrm tunneling — debris + dust around the head path.",
+  "Spawners": [
+    { "SpawnerId": "Dunewyrm_Dig_Debris", "PositionOffset": { "X": 0, "Y": 0.05, "Z": 0 } },
+    { "SpawnerId": "Dunewyrm_Dig_Dust", "PositionOffset": { "X": 0, "Y": 0.1, "Z": 0 } }
+  ],
+  "BoundingRadius": 10,
+  "CullDistance": 80,
+  "IsImportant": false
+}

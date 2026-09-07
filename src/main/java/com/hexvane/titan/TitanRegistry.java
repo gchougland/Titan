@@ -9,6 +9,10 @@ import com.hexvane.titan.entity.TitanPartComponent;
 import com.hexvane.titan.entity.TitanShellComponent;
 import com.hexvane.titan.entity.TitanSpawnFxComponent;
 import com.hexvane.titan.entity.TitanWeakpointComponent;
+import com.hexvane.titan.dunewyrm.DunewyrmComponent;
+import com.hexvane.titan.dunewyrm.DunewyrmHitComponent;
+import com.hexvane.titan.dunewyrm.DunewyrmPartComponent;
+import com.hexvane.titan.dunewyrm.DunewyrmSiteComponent;
 import com.hexvane.titan.ledge.TitanLedgeCartComponent;
 import com.hexvane.titan.ledge.TitanLedgeComponent;
 import com.hexvane.titan.ledge.TitanLedgeHangComponent;
@@ -40,6 +44,10 @@ public final class TitanRegistry {
     private static ComponentType<EntityStore, TitanLedgeComponent> ledgeComponentType;
     private static ComponentType<EntityStore, TitanLedgeHangComponent> ledgeHangComponentType;
     private static ComponentType<EntityStore, TitanLedgeCartComponent> ledgeCartComponentType;
+    private static ComponentType<EntityStore, DunewyrmComponent> dunewyrmComponentType;
+    private static ComponentType<EntityStore, DunewyrmPartComponent> dunewyrmPartComponentType;
+    private static ComponentType<EntityStore, DunewyrmHitComponent> dunewyrmHitComponentType;
+    private static ComponentType<EntityStore, DunewyrmSiteComponent> dunewyrmSiteComponentType;
 
     private TitanRegistry() {
     }
@@ -67,6 +75,11 @@ public final class TitanRegistry {
         ledgeComponentType = registry.registerComponent(TitanLedgeComponent.class, TitanLedgeComponent::new);
         ledgeHangComponentType = registry.registerComponent(TitanLedgeHangComponent.class, TitanLedgeHangComponent::new);
         ledgeCartComponentType = registry.registerComponent(TitanLedgeCartComponent.class, TitanLedgeCartComponent::new);
+        dunewyrmComponentType = registry.registerComponent(DunewyrmComponent.class, DunewyrmComponent::new);
+        dunewyrmPartComponentType = registry.registerComponent(DunewyrmPartComponent.class, DunewyrmPartComponent::new);
+        dunewyrmHitComponentType = registry.registerComponent(DunewyrmHitComponent.class, DunewyrmHitComponent::new);
+        dunewyrmSiteComponentType = registry.registerComponent(
+            DunewyrmSiteComponent.class, DunewyrmSiteComponent.ID, DunewyrmSiteComponent.CODEC);
     }
 
     @Nonnull
@@ -137,6 +150,26 @@ public final class TitanRegistry {
     @Nonnull
     public static ComponentType<EntityStore, TitanLedgeCartComponent> getLedgeCartComponentType() {
         return require(ledgeCartComponentType);
+    }
+
+    @Nonnull
+    public static ComponentType<EntityStore, DunewyrmComponent> getDunewyrmComponentType() {
+        return require(dunewyrmComponentType);
+    }
+
+    @Nonnull
+    public static ComponentType<EntityStore, DunewyrmPartComponent> getDunewyrmPartComponentType() {
+        return require(dunewyrmPartComponentType);
+    }
+
+    @Nonnull
+    public static ComponentType<EntityStore, DunewyrmHitComponent> getDunewyrmHitComponentType() {
+        return require(dunewyrmHitComponentType);
+    }
+
+    @Nonnull
+    public static ComponentType<EntityStore, DunewyrmSiteComponent> getDunewyrmSiteComponentType() {
+        return require(dunewyrmSiteComponentType);
     }
 
     @Nonnull

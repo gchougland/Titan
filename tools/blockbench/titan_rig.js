@@ -1,10 +1,13 @@
 /*
- * Titan Rig - a Blockbench companion plugin for authoring titan animations.
+ * Titan Rig - a Blockbench companion plugin for authoring titan skeletons and animations.
  *
  * A titan has no model file. It is assembled at runtime from prefab voxels parented to the bones in
  * Server/Titan/Skeletons/<id>.json, so there is nothing for Blockbench to open. This plugin builds the
  * equivalent scene: one group per bone, one cube per prefab voxel, textured from the game's own block
  * art, and the skeleton's clip set loaded as editable animations.
+ *
+ * Structural authoring (create skeleton/variant, bone CRUD, attach prefab with live rebuild, sockets,
+ * IK chains) lives here too. Pure helpers are in core.cjs so node harness.mjs can test them.
  *
  * It deliberately implements no .blockyanim exporter. The official Hytale plugin already owns that
  * round-trip and patches Animation.prototype.save, so setting animation.path here is enough for Ctrl+S
@@ -52,6 +55,69 @@ function placeIn(menu, action, path) {
 
 let fs = null;
 let nodePath = null;
+/** Shared pure helpers from tools/blockbench/core.cjs (loaded in onload). */
+let Core = null;
+
+function errorText(err) {
+	if (err == null) return String(err);
+	if (typeof err === 'string') return err;
+	if (err.message) return String(err.message);
+	try { return String(err); } catch (ignored) { return 'Unknown error'; }
+}
+
+/**
+ * Load core.cjs without Node's require().
+ * Blockbench's plugin sandbox only exposes requireNativeModule for builtins (fs/path), not arbitrary paths.
+ */
+function loadCore(repoRoot) {
+	const candidates = [];
+	if (repoRoot) candidates.push(joinPath(repoRoot, 'tools', 'blockbench', 'core.cjs'));
+	try {
+		const list = (typeof Plugins !== 'undefined' && (Plugins.registered || Plugins.all)) || [];
+		const arr = Array.isArray(list) ? list : Object.values(list);
+		const plugin = arr.find(p => p && p.id === PLUGIN_ID);
+		if (plugin && plugin.path) candidates.push(joinPath(nodePath.dirname(plugin.path), 'core.cjs'));
+		if (plugin && plugin.source) {
+			const sourceDir = nodePath.dirname(String(plugin.source).replace(/^file:\/\//, ''));
+			candidates.push(joinPath(sourceDir, 'core.cjs'));
+		}
+	} catch (err) { /* Plugins API varies by Blockbench version */ }
+
+	let lastMissing = '';
+	for (const candidate of candidates) {
+		if (!candidate) continue;
+		lastMissing = candidate;
+		if (!fileExists(candidate)) continue;
+		try {
+			const code = fs.readFileSync(candidate, 'utf8');
+			const module = { exports: {} };
+			const dirname = nodePath.dirname(candidate);
+			// core.cjs only uses module.exports — no nested requires.
+			const runner = new Function(
+				'exports', 'module', '__filename', '__dirname', 'console',
+				code + '\n;return module.exports;'
+			);
+			const exported = runner(module.exports, module, candidate, dirname, console);
+			Core = exported && typeof exported === 'object' ? exported : module.exports;
+			if (!Core || typeof Core.emitNewSkeleton !== 'function' || typeof Core.buildBoneTable !== 'function') {
+				throw new Error('core.cjs loaded but is missing expected exports (emitNewSkeleton/buildBoneTable)');
+			}
+			return Core;
+		} catch (err) {
+			throw new Error('Failed to load core.cjs from:\n' + candidate + '\n\n' + errorText(err));
+		}
+	}
+	throw new Error(
+		'Could not find tools/blockbench/core.cjs.\n' +
+		'Set Titan Repo Root to the folder that contains build.gradle.kts' +
+		(lastMissing ? ('\n\nLast looked at:\n' + lastMissing) : '')
+	);
+}
+
+function ensureCore() {
+	if (Core && typeof Core.emitNewSkeleton === 'function') return Core;
+	return loadCore(settingValue('titan_repo_root'));
+}
 
 // ---------------------------------------------------------------------------
 // Small helpers
@@ -75,7 +141,12 @@ function readJsonFile(path) {
 }
 
 function num(value, fallback) {
-	return typeof value === 'number' && isFinite(value) ? value : fallback;
+	if (typeof value === 'number' && isFinite(value)) return value;
+	if (typeof value === 'string' && value.trim() !== '') {
+		const parsed = Number(value);
+		if (isFinite(parsed)) return parsed;
+	}
+	return fallback;
 }
 
 function vec(source, fallback) {
@@ -890,44 +961,8 @@ function chooseSocketSample(sockets, wanted) {
  * IK, which the importer uses to flag them in the outliner.
  */
 function buildBoneTable(skeletonDoc) {
-	const bones = (skeletonDoc.Bones || []).map((def, index) => ({
-		index: index,
-		name: String(def.Name || ('Bone' + index)),
-		parent: def.Parent ? String(def.Parent) : null,
-		offset: vec(def.Offset),
-		rotation: vec(def.Rotation),
-		prefab: def.Prefab ? String(def.Prefab) : null,
-		prefabYaw: num(def.PrefabYaw, 0),
-		pivot: def.Pivot ? vec(def.Pivot) : null,
-		scale: num(def.Scale, 1),
-		mirrorX: def.MirrorX === true,
-		sliceMinY: typeof def.SliceMinY === 'number' ? def.SliceMinY : null,
-		sliceMaxY: typeof def.SliceMaxY === 'number' ? def.SliceMaxY : null,
-		def: def
-	}));
-
-	const byName = new Map();
-	for (const bone of bones) byName.set(bone.name, bone);
-
-	// Blockbench applies a parent group's rotation to its children itself, so origins accumulate as
-	// plain sums here exactly as they do in the blockymodel codec.
-	for (const bone of bones) {
-		const parent = bone.parent ? byName.get(bone.parent) : null;
-		if (bone.parent && !parent) warn('Bone "' + bone.name + '" references missing parent "' + bone.parent + '"');
-		const base = parent && parent.origin ? parent.origin : [0, 0, 0];
-		bone.origin = [base[0] + bone.offset[0], base[1] + bone.offset[1], base[2] + bone.offset[2]];
-	}
-
-	const ikRoles = new Map();
-	for (const chain of (skeletonDoc.IkChains || [])) {
-		const role = String(chain.Role || '');
-		for (const name of (chain.Bones || [])) {
-			if (!ikRoles.has(name)) ikRoles.set(name, role);
-		}
-	}
-	for (const bone of bones) bone.ikRole = ikRoles.get(bone.name) || null;
-
-	return { bones: bones, byName: byName };
+	ensureCore();
+	return Core.buildBoneTable(skeletonDoc);
 }
 
 // ---------------------------------------------------------------------------
@@ -1107,6 +1142,7 @@ async function buildRig(options) {
 
 	Project.titan = {
 		repoRoot: repoRoot,
+		assetRoot: options.assetRoot || settingValue('titan_asset_root'),
 		skeletonId: skeleton.id,
 		skeletonPath: skeleton.path,
 		skeletonRaw: skeleton.raw,
@@ -1115,7 +1151,19 @@ async function buildRig(options) {
 		clipSetPath: clipSet ? clipSet.path : null,
 		clipSetRaw: clipSet ? clipSet.raw : null,
 		clipSetDoc: clipSet ? clipSet.doc : null,
-		bones: table.bones.map(bone => bone.name)
+		bones: table.bones.map(bone => bone.name),
+		bodyBone: skeleton.doc.BodyBone ? String(skeleton.doc.BodyBone) : (table.bones[0] && table.bones[0].name),
+		unitScale: num(skeleton.doc.UnitScale, 1),
+		hipHeight: num(skeleton.doc.HipHeight, 0),
+		colliderConfig: skeleton.doc.ColliderConfig ? String(skeleton.doc.ColliderConfig) : 'Titan_Platform',
+		clipSet: clipSetId,
+		animationPositionScale: num(skeleton.doc.AnimationPositionScale, 1),
+		ikChains: JSON.parse(JSON.stringify(skeleton.doc.IkChains || [])),
+		sockets: JSON.parse(JSON.stringify(skeleton.doc.WeakpointSockets || [])),
+		proceduralWobble: JSON.parse(JSON.stringify(skeleton.doc.ProceduralWobble || [])),
+		structureDirty: false,
+		isNew: options.isNew === true,
+		atlasTexture: texture
 	};
 	// Bone metadata that has no Blockbench equivalent rides on the group so the properties dialog and
 	// the write-back can both find it after a reload.
@@ -1324,8 +1372,7 @@ function buildSockets(skeletonDoc, table, texture, cell, ore, oreCell) {
 }
 
 /**
- * IK rest positions are numbers in the skeleton that are hard to picture, but nothing reads them back,
- * so they stay hidden markers in a non-exporting group.
+ * IK rest positions are editable guides. Drag a rest marker and Save writes RestOffset relative to BodyBone.
  */
 function buildGuides(skeletonDoc, table) {
 	const chains = skeletonDoc.IkChains || [];
@@ -1336,7 +1383,6 @@ function buildGuides(skeletonDoc, table) {
 	root.init();
 	root.color = COLOR_GUIDE;
 	root.export = false;
-	root.visibility = false;
 
 	const group = new Group({ name: 'IK Rest Targets', origin: [0, 0, 0] });
 	group.addTo(root);
@@ -1345,7 +1391,7 @@ function buildGuides(skeletonDoc, table) {
 
 	const bodyBone = table.byName.get(String(skeletonDoc.BodyBone || ''));
 	const base = bodyBone ? bodyBone.origin : [0, 0, 0];
-	for (const chain of chains) {
+	chains.forEach((chain, index) => {
 		const offset = vec(chain.RestOffset);
 		const cube = marker(group, String(chain.Name || 'Chain') + '_Rest', [
 			base[0] + offset[0],
@@ -1353,8 +1399,10 @@ function buildGuides(skeletonDoc, table) {
 			base[2] + offset[2]
 		], 0.7);
 		cube.export = false;
-		cube.visibility = false;
-	}
+		cube.visibility = true;
+		cube.color = COLOR_GUIDE;
+		cube.titan_ik_rest = { index: index, name: String(chain.Name || 'Chain') };
+	});
 }
 
 // ---------------------------------------------------------------------------
@@ -1777,6 +1825,37 @@ function collectSkeletonEdits(doc) {
 	});
 
 	moved.push.apply(moved, collectSocketEdits(doc, origins));
+	moved.push.apply(moved, collectIkRestEdits(doc, origins));
+	return moved;
+}
+
+/**
+ * Rest markers sit in world space; RestOffset is stored relative to BodyBone origin.
+ */
+function collectIkRestEdits(doc, origins) {
+	const chains = doc.value.IkChains || [];
+	if (!chains.length) return [];
+
+	const bodyName = String(doc.value.BodyBone || '');
+	const bodyOrigin = origins.get(bodyName) || [0, 0, 0];
+	const markers = new Map();
+	for (const cube of Cube.all) {
+		if (cube.titan_ik_rest) markers.set(cube.titan_ik_rest.index, cube);
+	}
+
+	const moved = [];
+	chains.forEach((chain, index) => {
+		const cube = markers.get(index);
+		if (!cube) return;
+		const path = '/IkChains/' + index;
+		const centre = [
+			(cube.from[0] + cube.to[0]) / 2,
+			(cube.from[1] + cube.to[1]) / 2,
+			(cube.from[2] + cube.to[2]) / 2
+		];
+		const offset = [0, 1, 2].map(axis => round4(centre[axis] - bodyOrigin[axis]));
+		if (setVector(doc, path, 'RestOffset', offset, true)) moved.push('ik ' + String(chain.Name || index));
+	});
 	return moved;
 }
 
@@ -1832,11 +1911,19 @@ function writeBoneMetadata(doc, bonePath, meta) {
 	else doc.setMember(bonePath, 'Pivot', null);
 	setNumber(doc, bonePath, 'Scale', round4(meta.scale), 1);
 	setFlag(doc, bonePath, 'MirrorX', meta.mirrorX);
+	setFlag(doc, bonePath, 'Shell', meta.shell);
+	doc.setMember(bonePath, 'Collider', meta.collider === false ? 'false' : null);
+	setFlag(doc, bonePath, 'Usable', meta.usable);
+	doc.setMember(bonePath, 'UseHint', meta.useHint ? JSON.stringify(meta.useHint) : null);
 	setNumber(doc, bonePath, 'ColliderStride', meta.colliderStride || 0, 0);
 	setFlag(doc, bonePath, 'ColliderAllFaces', meta.colliderAllFaces);
 	setNumber(doc, bonePath, 'MaxParts', meta.maxParts || 0, 0);
 	setFlag(doc, bonePath, 'Hollow', meta.hollow);
 	doc.setMember(bonePath, 'Detachable', meta.detachable === false ? 'false' : null);
+	if (meta.sliceMinY != null) doc.setMember(bonePath, 'SliceMinY', numberText(meta.sliceMinY));
+	else doc.setMember(bonePath, 'SliceMinY', null);
+	if (meta.sliceMaxY != null) doc.setMember(bonePath, 'SliceMaxY', numberText(meta.sliceMaxY));
+	else doc.setMember(bonePath, 'SliceMaxY', null);
 }
 
 function saveSkeleton() {
@@ -1844,13 +1931,17 @@ function saveSkeleton() {
 	if (!session) return fail('Titan Rig', 'This project was not imported by Titan Rig.');
 
 	try {
+		ensureCore();
+		if (session.structureDirty || session.isNew) {
+			saveSkeletonFullRewrite(session);
+			return;
+		}
+
 		const doc = new JsonDocument(session.skeletonRaw);
 		const moved = collectSkeletonEdits(doc);
 		if (!doc.changed()) return Blockbench.showQuickMessage('Skeleton unchanged', 2000);
 
 		const text = doc.apply();
-		// Re-parsing before writing turns a bug in the splicing into a refused save rather than a
-		// corrupted skeleton.
 		parseJson(text, session.skeletonPath);
 
 		fs.writeFileSync(session.skeletonPath, text, 'utf8');
@@ -1861,8 +1952,138 @@ function saveSkeleton() {
 			: 'Saved skeleton', 2500);
 	} catch (err) {
 		console.error(err);
-		fail('Titan Rig', 'Could not save the skeleton:\n\n' + err.message);
+		fail('Titan Rig', 'Could not save the skeleton:\n\n' + errorText(err));
 	}
+}
+
+/**
+ * Full rewrite path used after structural CRUD (add/remove/rename bone, sockets, IK list edits).
+ * Preserves transforms by reading the scene into metas first.
+ */
+function saveSkeletonFullRewrite(session) {
+	const metas = collectBoneMetasFromScene(session);
+	const sockets = collectSocketsFromScene(session);
+	const ikChains = collectIkChainsFromScene(session);
+
+	const assembled = Core.assembleSkeletonDoc({
+		bones: metas,
+		bodyBone: session.bodyBone,
+		unitScale: session.unitScale,
+		hipHeight: session.hipHeight,
+		colliderConfig: session.colliderConfig,
+		clipSet: session.clipSet,
+		animationPositionScale: session.animationPositionScale,
+		ikChains: ikChains,
+		sockets: sockets,
+		proceduralWobble: session.proceduralWobble
+	});
+
+	const text = Core.prettyJson(assembled);
+	parseJson(text, session.skeletonPath);
+	fs.mkdirSync(nodePath.dirname(session.skeletonPath), { recursive: true });
+	fs.writeFileSync(session.skeletonPath, text, 'utf8');
+	session.skeletonRaw = text;
+	session.structureDirty = false;
+	session.isNew = false;
+	session.sockets = sockets;
+	session.ikChains = ikChains;
+	Blockbench.showQuickMessage('Saved skeleton (full rewrite)', 2500);
+}
+
+function collectBoneMetasFromScene(session) {
+	const metas = [];
+	const origins = new Map();
+	for (const name of session.bones) {
+		const group = Group.all.find(g => g.name === name && g.titan_bone);
+		if (group) origins.set(name, group.origin.slice());
+	}
+	for (const name of session.bones) {
+		const group = Group.all.find(g => g.name === name && g.titan_bone);
+		if (!group) continue;
+		const meta = group.titan_bone;
+		const parentOrigin = meta.parent && origins.has(meta.parent) ? origins.get(meta.parent) : [0, 0, 0];
+		metas.push({
+			name: meta.name,
+			parent: meta.parent,
+			offset: [0, 1, 2].map(axis => round4(group.origin[axis] - parentOrigin[axis])),
+			rotation: groupRotationToBind(group.rotation).map(round4),
+			prefab: meta.prefab,
+			prefabYaw: meta.prefabYaw,
+			pivot: meta.pivot,
+			scale: meta.scale,
+			mirrorX: meta.mirrorX,
+			shell: meta.shell,
+			collider: meta.collider,
+			usable: meta.usable,
+			useHint: meta.useHint,
+			colliderStride: meta.colliderStride != null ? meta.colliderStride : (meta.def && meta.def.ColliderStride) || 0,
+			colliderAllFaces: meta.colliderAllFaces != null ? meta.colliderAllFaces : meta.def && meta.def.ColliderAllFaces === true,
+			maxParts: meta.maxParts != null ? meta.maxParts : (meta.def && meta.def.MaxParts) || 0,
+			hollow: meta.hollow != null ? meta.hollow : meta.def && meta.def.Hollow === true,
+			detachable: meta.detachable != null ? meta.detachable : !(meta.def && meta.def.Detachable === false),
+			sliceMinY: meta.sliceMinY,
+			sliceMaxY: meta.sliceMaxY
+		});
+	}
+	return metas;
+}
+
+function collectSocketsFromScene(session) {
+	const byIndex = new Map();
+	for (const group of Group.all) {
+		if (!group.titan_socket) continue;
+		byIndex.set(group.titan_socket.index, group);
+	}
+	const origins = new Map();
+	for (const name of session.bones) {
+		const g = Group.all.find(x => x.name === name && x.titan_bone);
+		if (g) origins.set(name, g.origin.slice());
+	}
+
+	const out = [];
+	const count = Math.max(session.sockets.length, byIndex.size);
+	for (let index = 0; index < count; index++) {
+		const group = byIndex.get(index);
+		const fallback = session.sockets[index];
+		if (!group && !fallback) continue;
+		if (!group) {
+			out.push(JSON.parse(JSON.stringify(fallback)));
+			continue;
+		}
+		const boneName = group.titan_socket.bone;
+		const origin = origins.get(boneName) || [0, 0, 0];
+		const offset = [0, 1, 2].map(axis => round4(group.origin[axis] - origin[axis]));
+		const entry = { Bone: boneName, Offset: Core.vectorObject(offset) };
+		const meta = group.titan_socket;
+		const rotation = group.rotation.map(round4);
+		const turned = meta.rotation ? rotation.some((angle, axis) => angle !== meta.rotation[axis]) : false;
+		const normal = markerRotationToNormal(group.rotation).map(round4);
+		const derived = (derivedNormal(offset) || [0, 1, 0]).map(round4);
+		const wanted = (meta.declared || turned) && normal.some((n, axis) => n !== derived[axis]);
+		if (wanted) entry.Normal = Core.vectorObject(normal);
+		out.push(entry);
+	}
+	return out;
+}
+
+function collectIkChainsFromScene(session) {
+	const chains = JSON.parse(JSON.stringify(session.ikChains || []));
+	const bodyName = session.bodyBone || '';
+	const bodyGroup = Group.all.find(g => g.name === bodyName && g.titan_bone);
+	const bodyOrigin = bodyGroup ? bodyGroup.origin.slice() : [0, 0, 0];
+
+	for (const cube of Cube.all) {
+		if (!cube.titan_ik_rest) continue;
+		const index = cube.titan_ik_rest.index;
+		if (!chains[index]) continue;
+		const centre = [
+			(cube.from[0] + cube.to[0]) / 2,
+			(cube.from[1] + cube.to[1]) / 2,
+			(cube.from[2] + cube.to[2]) / 2
+		];
+		chains[index].RestOffset = Core.vectorObject([0, 1, 2].map(axis => round4(centre[axis] - bodyOrigin[axis])));
+	}
+	return chains;
 }
 
 // ---------------------------------------------------------------------------
@@ -1901,6 +2122,10 @@ function openImportDialog() {
 	}
 	if (!assetRoot) {
 		return fail('Titan Rig', 'Set the Hytale asset root first, with File > Titan Rig Paths...\n\n' + EXTRACT_HINT);
+	}
+
+	try { ensureCore(); } catch (err) {
+		return fail('Titan Rig', errorText(err));
 	}
 
 	const skeletons = listJsonNames(joinPath(repoRoot, REPO.skeletons));
@@ -1946,25 +2171,201 @@ async function runImport(options) {
 		}
 	} catch (err) {
 		console.error(err);
-		fail('Titan Rig', 'Import failed:\n\n' + (err && err.message ? err.message : String(err)));
+		fail('Titan Rig', 'Import failed:\n\n' + errorText(err));
+	}
+}
+
+function selectedBoneGroup() {
+	const group = Group.first_selected || (Group.selected && Group.selected[0]);
+	if (!group || !group.titan_bone) return null;
+	return group;
+}
+
+function requireTitanSession() {
+	const session = Project && Project.titan;
+	if (!session) {
+		fail('Titan Rig', 'This project was not imported by Titan Rig.');
+		return null;
+	}
+	return session;
+}
+
+function listPrefabKeys(repoRoot) {
+	const root = joinPath(repoRoot, REPO.prefabs);
+	const out = [];
+	const stack = [root];
+	while (stack.length) {
+		const dir = stack.pop();
+		let items;
+		try { items = fs.readdirSync(dir, { withFileTypes: true }); } catch (err) { continue; }
+		for (const item of items) {
+			const full = joinPath(dir, item.name);
+			if (item.isDirectory()) stack.push(full);
+			else if (/\.prefab\.json$/i.test(item.name)) {
+				out.push(nodePath.relative(root, full).replace(/\\/g, '/').replace(/\.prefab\.json$/i, ''));
+			}
+		}
+	}
+	return out.sort();
+}
+
+function removeGroupCubes(group) {
+	const children = (group.children || []).slice();
+	for (const child of children) {
+		if (!child) continue;
+		if ((typeof Cube !== 'undefined' && child instanceof Cube) || child.type === 'cube') {
+			child.remove();
+		}
+	}
+}
+
+/**
+ * Rebuilds prefab voxels for one bone without tearing down the whole project.
+ * Builds a real block-texture atlas the same way full import does (not a flat grey placeholder).
+ */
+async function rebuildBonePreview(group) {
+	const session = requireTitanSession();
+	if (!session || !group || !group.titan_bone) return;
+
+	const meta = group.titan_bone;
+	removeGroupCubes(group);
+	if (!meta.prefab) {
+		Canvas.updateAll();
+		return;
+	}
+
+	const assetRoot = session.assetRoot || settingValue('titan_asset_root');
+	if (!assetRoot) {
+		fail('Titan Rig', 'Set the Hytale asset root first (File > Titan Rig Paths...) so block textures can be loaded.\n\n' + EXTRACT_HINT);
+		return;
+	}
+
+	const variant = loadVariant(session.repoRoot, session.variantId);
+	const rockType = variant && variant.doc.RockType ? String(variant.doc.RockType) : null;
+	const key = resolvePrefabKey(session.repoRoot, meta.prefab, rockType);
+	const prefab = readPrefab(session.repoRoot, key, prefabYawSteps(meta.prefabYaw));
+	if (!prefab) {
+		fail('Titan Rig', 'Missing prefab: ' + key);
+		return;
+	}
+
+	let blocks = prefab.blocks.filter(block =>
+		(meta.sliceMinY == null || block.y >= meta.sliceMinY) &&
+		(meta.sliceMaxY == null || block.y <= meta.sliceMaxY));
+
+	if (meta.hollow) {
+		const set = new Set(blocks.map(b => b.x + ',' + b.y + ',' + b.z));
+		blocks = blocks.filter(b => {
+			const n = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+			return n.some(([dx, dy, dz]) => !set.has((b.x + dx) + ',' + (b.y + dy) + ',' + (b.z + dz)));
+		});
+	}
+
+	const pivot = meta.pivot || prefab.pivot;
+	const scale = num(meta.scale, 1);
+	const half = scale / 2;
+	const mirror = meta.mirrorX ? -1 : 1;
+
+	const missingBlocks = new Set();
+	let texture = null;
+	let voxels = [];
+
+	Blockbench.showStatusMessage('Texturing ' + group.name + '...', 3000);
+	try {
+		const source = openAssetSource(assetRoot);
+		try {
+			const index = new BlockTypeIndex(source);
+			const atlas = new AtlasBuilder(source);
+
+			for (const block of blocks) {
+				const description = index.describe(block.name);
+				if (!description) {
+					missingBlocks.add(block.name);
+					continue;
+				}
+				const variantPick = index.pickVariant(description, block.x, block.y, block.z);
+				const faces = rotateFaceMap(variantPick.faces, block.rotation);
+				const cells = {};
+				for (const face of FACES) {
+					if (!faces[face]) continue;
+					cells[face] = atlas.request(faces[face]);
+				}
+				voxels.push({ block: block, cells: cells });
+			}
+
+			const atlasResult = await atlas.build();
+			if (atlasResult) {
+				const texName = 'Titan_' + group.name + '_Blocks';
+				const existing = Texture.all.find(t => t.name === texName);
+				if (existing) {
+					try { existing.remove(true); } catch (err) {
+						try { existing.delete(); } catch (err2) { /* older Blockbench */ }
+					}
+				}
+				texture = new Texture({ name: texName, keep_size: true }).fromDataURL(atlasResult.dataUrl).add(false);
+				texture.uv_width = atlasResult.width;
+				texture.uv_height = atlasResult.height;
+				if (!session.atlasTexture) session.atlasTexture = texture;
+				session.assetRoot = assetRoot;
+			}
+		} finally {
+			source.close();
+		}
+	} catch (err) {
+		console.error(err);
+		fail('Titan Rig', 'Could not build block textures:\n\n' + errorText(err));
+		return;
+	}
+
+	for (const voxel of voxels) {
+		const block = voxel.block;
+		const cx = group.origin[0] + (block.x + 0.5 - pivot[0]) * scale * mirror;
+		const cy = group.origin[1] + (block.y + 0.5 - pivot[1]) * scale;
+		const cz = group.origin[2] + (block.z + 0.5 - pivot[2]) * scale;
+		const cube = new Cube({
+			name: block.name,
+			autouv: 0,
+			box_uv: false,
+			from: [cx - half, cy - half, cz - half],
+			to: [cx + half, cy + half, cz + half]
+		});
+		cube.addTo(group);
+
+		for (const face of FACES) {
+			const cell = voxel.cells[face];
+			if (!cell || !texture) {
+				cube.faces[face].texture = null;
+				cube.faces[face].uv = [0, 0, 0, 0];
+				continue;
+			}
+			cube.faces[face].texture = texture.uuid;
+			cube.faces[face].uv = [cell.x, cell.y, cell.x + cell.size, cell.y + cell.size];
+		}
+		cube.init();
+	}
+
+	Canvas.updateAll();
+	let message = 'Rebuilt ' + group.name + ' (' + voxels.length + ' voxels)';
+	if (missingBlocks.size) message += ' — unknown blocks: ' + Array.from(missingBlocks).join(', ');
+	Blockbench.showQuickMessage(message, 3000);
+	if (missingBlocks.size) {
+		fail('Titan Rig - textured with gaps', message);
 	}
 }
 
 function openBonePropertiesDialog() {
-	const session = Project && Project.titan;
-	if (!session) return fail('Titan Rig', 'This project was not imported by Titan Rig.');
+	const session = requireTitanSession();
+	if (!session) return;
 
-	const group = Group.first_selected || (Group.selected && Group.selected[0]);
-	if (!group || !group.titan_bone) {
-		return fail('Titan Rig', 'Select a bone group in the outliner first.');
-	}
+	const group = selectedBoneGroup();
+	if (!group) return fail('Titan Rig', 'Select a bone group in the outliner first.');
 
 	const meta = group.titan_bone;
 	const dialog = new Dialog({
 		id: 'titan_bone_properties',
 		title: 'Titan Bone: ' + group.name,
 		form: {
-			info: { type: 'info', text: 'Offset and Rotation come from the group transform and are written on save. These are the fields Blockbench has no equivalent for.' },
+			info: { type: 'info', text: 'Offset and Rotation come from the group transform and are written on save.' },
 			prefab: { label: 'Prefab', type: 'text', value: meta.prefab || '' },
 			prefabYaw: {
 				label: 'Prefab Yaw',
@@ -1975,20 +2376,31 @@ function openBonePropertiesDialog() {
 			pivot: { label: 'Pivot', type: 'vector', value: meta.pivot || [0, 0, 0], step: 0.1 },
 			scale: { label: 'Scale', type: 'number', value: meta.scale, step: 0.05, min: 0.01 },
 			mirrorX: { label: 'Mirror X', type: 'checkbox', value: meta.mirrorX },
-			colliderStride: { label: 'Collider Stride', type: 'number', value: meta.def.ColliderStride || 0, step: 1, min: 0 },
-			colliderAllFaces: { label: 'Collider All Faces', type: 'checkbox', value: meta.def.ColliderAllFaces === true },
-			maxParts: { label: 'Max Parts', type: 'number', value: meta.def.MaxParts || 0, step: 1, min: 0 },
-			hollow: { label: 'Hollow', type: 'checkbox', value: meta.def.Hollow === true },
-			detachable: { label: 'Detachable', type: 'checkbox', value: meta.def.Detachable !== false },
-			reimport: { type: 'info', text: 'Changing Prefab, Prefab Yaw, Pivot, Scale or Mirror X only affects the file. Re-import the rig to see the voxels move.' }
+			sliceMinY: { label: 'Slice Min Y', type: 'number', value: meta.sliceMinY != null ? meta.sliceMinY : '', step: 1 },
+			sliceMaxY: { label: 'Slice Max Y', type: 'number', value: meta.sliceMaxY != null ? meta.sliceMaxY : '', step: 1 },
+			shell: { label: 'Shell', type: 'checkbox', value: meta.shell === true || meta.def && meta.def.Shell === true },
+			collider: { label: 'Collider', type: 'checkbox', value: meta.collider !== false && !(meta.def && meta.def.Collider === false) },
+			usable: { label: 'Usable', type: 'checkbox', value: meta.usable === true || meta.def && meta.def.Usable === true },
+			useHint: { label: 'Use Hint', type: 'text', value: meta.useHint || (meta.def && meta.def.UseHint) || '' },
+			colliderStride: { label: 'Collider Stride', type: 'number', value: meta.colliderStride != null ? meta.colliderStride : ((meta.def && meta.def.ColliderStride) || 0), step: 1, min: 0 },
+			colliderAllFaces: { label: 'Collider All Faces', type: 'checkbox', value: meta.colliderAllFaces != null ? meta.colliderAllFaces : !!(meta.def && meta.def.ColliderAllFaces) },
+			maxParts: { label: 'Max Parts', type: 'number', value: meta.maxParts != null ? meta.maxParts : ((meta.def && meta.def.MaxParts) || 0), step: 1, min: 0 },
+			hollow: { label: 'Hollow', type: 'checkbox', value: meta.hollow != null ? meta.hollow : !!(meta.def && meta.def.Hollow) },
+			detachable: { label: 'Detachable', type: 'checkbox', value: meta.detachable != null ? meta.detachable : !(meta.def && meta.def.Detachable === false) },
+			rebuild: { label: 'Rebuild preview now', type: 'checkbox', value: true }
 		},
 		onConfirm(result) {
 			meta.prefab = String(result.prefab || '').trim() || null;
-			// A select hands back its key as a string, and num only takes numbers.
 			meta.prefabYaw = num(Number(result.prefabYaw), 0);
 			meta.pivot = (result.pivot[0] || result.pivot[1] || result.pivot[2]) ? result.pivot.slice() : null;
 			meta.scale = num(result.scale, 1);
 			meta.mirrorX = result.mirrorX === true;
+			meta.sliceMinY = result.sliceMinY === '' || result.sliceMinY == null ? null : (num(result.sliceMinY, 0) | 0);
+			meta.sliceMaxY = result.sliceMaxY === '' || result.sliceMaxY == null ? null : (num(result.sliceMaxY, 0) | 0);
+			meta.shell = result.shell === true;
+			meta.collider = result.collider !== false;
+			meta.usable = result.usable === true;
+			meta.useHint = String(result.useHint || '').trim() || null;
 			meta.colliderStride = num(result.colliderStride, 0);
 			meta.colliderAllFaces = result.colliderAllFaces === true;
 			meta.maxParts = num(result.maxParts, 0);
@@ -1996,7 +2408,516 @@ function openBonePropertiesDialog() {
 			meta.detachable = result.detachable !== false;
 			meta.dirty = true;
 			dialog.hide();
-			Blockbench.showQuickMessage('Bone updated - use "Save Titan Skeleton" to write it out', 2500);
+			if (result.rebuild) rebuildBonePreview(group);
+			else Blockbench.showQuickMessage('Bone updated - use "Save Titan Skeleton" to write it out', 2500);
+		}
+	});
+	dialog.show();
+}
+
+function openAttachPrefabDialog() {
+	const session = requireTitanSession();
+	if (!session) return;
+	const group = selectedBoneGroup();
+	if (!group) return fail('Titan Rig', 'Select a bone group first.');
+
+	const keys = listPrefabKeys(session.repoRoot);
+	if (!keys.length) return fail('Titan Rig', 'No prefabs under ' + REPO.prefabs);
+
+	const options = {};
+	for (const key of keys) options[key] = key;
+	const meta = group.titan_bone;
+
+	const dialog = new Dialog({
+		id: 'titan_attach_prefab',
+		title: 'Attach Prefab: ' + group.name,
+		form: {
+			prefab: { label: 'Prefab', type: 'select', options: options, value: meta.prefab && options[meta.prefab] ? meta.prefab : keys[0] },
+			prefabYaw: {
+				label: 'Prefab Yaw',
+				type: 'select',
+				value: String(prefabYawSteps(meta.prefabYaw) * 90),
+				options: { 0: '0', 90: '90', 180: '180', 270: '270' }
+			},
+			useDefaultPivot: { label: 'Reset pivot to prefab default', type: 'checkbox', value: !meta.pivot },
+			hollow: { label: 'Hollow (preview)', type: 'checkbox', value: meta.hollow === true || meta.def && meta.def.Hollow === true }
+		},
+		onConfirm(result) {
+			meta.prefab = result.prefab;
+			meta.prefabYaw = num(Number(result.prefabYaw), 0);
+			meta.hollow = result.hollow === true;
+			const prefab = readPrefab(session.repoRoot, result.prefab, prefabYawSteps(meta.prefabYaw));
+			if (result.useDefaultPivot && prefab) meta.pivot = prefab.pivot.slice();
+			meta.dirty = true;
+			dialog.hide();
+			rebuildBonePreview(group);
+		}
+	});
+	dialog.show();
+}
+
+function openCreateSkeletonDialog() {
+	if (!requireDesktop() || !requireHytalePlugin()) return;
+	const repoRoot = settingValue('titan_repo_root');
+	const assetRoot = settingValue('titan_asset_root');
+	if (!repoRoot || !fileExists(joinPath(repoRoot, REPO.skeletons))) {
+		return fail('Titan Rig', 'Set "Titan Repo Root" first (File > Titan Rig Paths...).');
+	}
+	if (!assetRoot) return fail('Titan Rig', 'Set the Hytale asset root first.\n\n' + EXTRACT_HINT);
+
+	const dialog = new Dialog({
+		id: 'titan_create_skeleton',
+		title: 'Create Titan Skeleton',
+		form: {
+			id: { label: 'Skeleton Id', type: 'text', value: 'New_Titan' },
+			rootBone: { label: 'Root Bone', type: 'text', value: 'Root' },
+			hipHeight: { label: 'Hip Height', type: 'number', value: 6, step: 0.5 },
+			unitScale: { label: 'Unit Scale', type: 'number', value: 1, step: 0.05, min: 0.01 },
+			clipSet: { label: 'Clip Set (optional)', type: 'text', value: '' },
+			note: { type: 'info', text: 'Writes Server/Titan/Skeletons/<id>.json and opens it as a new rig session.' }
+		},
+		onConfirm(result) {
+			const id = String(result.id || '').trim();
+			if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(id)) {
+				return fail('Titan Rig', 'Skeleton id must be letters, numbers, underscores, starting with a letter.');
+			}
+			try {
+				ensureCore();
+				const path = joinPath(repoRoot, REPO.skeletons, id + '.json');
+				if (fileExists(path)) return fail('Titan Rig', 'Skeleton already exists: ' + id);
+
+				const emitted = Core.emitNewSkeleton({
+					id: id,
+					rootBone: String(result.rootBone || 'Root').trim() || 'Root',
+					hipHeight: num(result.hipHeight, 6),
+					unitScale: num(result.unitScale, 1),
+					clipSet: String(result.clipSet || '').trim() || null
+				});
+				fs.writeFileSync(path, emitted.text, 'utf8');
+				dialog.hide();
+				runImport({
+					repoRoot: repoRoot,
+					assetRoot: assetRoot,
+					skeletonId: id,
+					variantId: null,
+					isNew: true
+				});
+			} catch (err) {
+				console.error(err);
+				fail('Titan Rig', 'Could not create skeleton:\n\n' + errorText(err));
+			}
+		}
+	});
+	dialog.show();
+}
+
+function openAddBoneDialog() {
+	const session = requireTitanSession();
+	if (!session) return;
+	const parentGroup = selectedBoneGroup();
+	const parentName = parentGroup ? parentGroup.name : null;
+
+	const dialog = new Dialog({
+		id: 'titan_add_bone',
+		title: 'Add Titan Bone',
+		form: {
+			name: { label: 'Name', type: 'text', value: parentName ? parentName + '_Child' : 'Bone' },
+			parent: { label: 'Parent', type: 'text', value: parentName || '' },
+			offset: { label: 'Offset', type: 'vector', value: [0, 0, 0], step: 0.5 },
+			note: { type: 'info', text: 'Creates a joint in the scene. Attach a prefab afterwards if it should carry geometry.' }
+		},
+		onConfirm(result) {
+			const name = String(result.name || '').trim();
+			if (!name) return;
+			if (session.bones.indexOf(name) !== -1) return fail('Titan Rig', 'Bone "' + name + '" already exists.');
+			const parent = String(result.parent || '').trim() || null;
+			if (parent && session.bones.indexOf(parent) === -1) {
+				return fail('Titan Rig', 'Unknown parent "' + parent + '"');
+			}
+
+			const parentG = parent ? Group.all.find(g => g.name === parent && g.titan_bone) : null;
+			const parentOrigin = parentG ? parentG.origin.slice() : [0, 0, 0];
+			const offset = result.offset.slice();
+			const origin = [0, 1, 2].map(axis => parentOrigin[axis] + offset[axis]);
+
+			const group = new Group({ name: name, origin: origin, rotation: [0, 0, 0] });
+			group.addTo(parentG || 'root');
+			group.init();
+			group.titan_bone = {
+				name: name,
+				parent: parent,
+				offset: offset,
+				rotation: [0, 0, 0],
+				prefab: null,
+				prefabYaw: 0,
+				pivot: null,
+				scale: 1,
+				mirrorX: false,
+				sliceMinY: null,
+				sliceMaxY: null,
+				shell: false,
+				collider: true,
+				usable: false,
+				useHint: null,
+				colliderStride: 0,
+				colliderAllFaces: false,
+				maxParts: 0,
+				hollow: false,
+				detachable: true,
+				def: {},
+				dirty: true
+			};
+			session.bones.push(name);
+			session.structureDirty = true;
+			dialog.hide();
+			group.select();
+			Canvas.updateAll();
+			Blockbench.showQuickMessage('Added bone "' + name + '" - Save Titan Skeleton to write', 3000);
+		}
+	});
+	dialog.show();
+}
+
+function deleteSelectedBone() {
+	const session = requireTitanSession();
+	if (!session) return;
+	const group = selectedBoneGroup();
+	if (!group) return fail('Titan Rig', 'Select a bone group first.');
+
+	const name = group.name;
+	const children = session.bones.filter(n => {
+		const g = Group.all.find(x => x.name === n && x.titan_bone);
+		return g && g.titan_bone.parent === name;
+	});
+	if (children.length) {
+		return fail('Titan Rig', 'Cannot delete "' + name + '" while it still has child bones: ' + children.join(', '));
+	}
+	if (session.bones.length <= 1) {
+		return fail('Titan Rig', 'A skeleton needs at least one bone.');
+	}
+
+	removeGroupCubes(group);
+	group.remove();
+	session.bones = session.bones.filter(n => n !== name);
+	session.sockets = (session.sockets || []).filter(s => String(s.Bone) !== name);
+	if (session.bodyBone === name) session.bodyBone = session.bones[0];
+	session.structureDirty = true;
+	Canvas.updateAll();
+	Blockbench.showQuickMessage('Deleted bone "' + name + '"', 2500);
+}
+
+function openRenameBoneDialog() {
+	const session = requireTitanSession();
+	if (!session) return;
+	const group = selectedBoneGroup();
+	if (!group) return fail('Titan Rig', 'Select a bone group first.');
+
+	const oldName = group.name;
+	const dialog = new Dialog({
+		id: 'titan_rename_bone',
+		title: 'Rename Bone',
+		form: {
+			name: { label: 'New Name', type: 'text', value: oldName },
+			parent: { label: 'Parent (empty = root)', type: 'text', value: group.titan_bone.parent || '' }
+		},
+		onConfirm(result) {
+			const newName = String(result.name || '').trim();
+			const parent = String(result.parent || '').trim() || null;
+			if (!newName) return;
+			if (newName !== oldName && session.bones.indexOf(newName) !== -1) {
+				return fail('Titan Rig', 'Bone "' + newName + '" already exists.');
+			}
+			if (parent === newName) return fail('Titan Rig', 'A bone cannot parent itself.');
+			if (parent && session.bones.indexOf(parent) === -1 && parent !== oldName) {
+				return fail('Titan Rig', 'Unknown parent "' + parent + '"');
+			}
+
+			group.name = newName;
+			group.titan_bone.name = newName;
+			group.titan_bone.parent = parent;
+			group.titan_bone.dirty = true;
+
+			for (const n of session.bones) {
+				const g = Group.all.find(x => x.name === n && x.titan_bone);
+				if (g && g.titan_bone.parent === oldName) g.titan_bone.parent = newName;
+			}
+			for (const socket of session.sockets || []) {
+				if (String(socket.Bone) === oldName) socket.Bone = newName;
+			}
+			for (const g of Group.all) {
+				if (g.titan_socket && g.titan_socket.bone === oldName) g.titan_socket.bone = newName;
+			}
+			for (const chain of session.ikChains || []) {
+				chain.Bones = (chain.Bones || []).map(b => b === oldName ? newName : b);
+			}
+
+			session.bones = session.bones.map(n => n === oldName ? newName : n);
+			if (session.bodyBone === oldName) session.bodyBone = newName;
+
+			if (parent) {
+				const parentG = Group.all.find(x => x.name === parent && x.titan_bone);
+				if (parentG) group.addTo(parentG);
+			} else {
+				group.addTo('root');
+			}
+
+			session.structureDirty = true;
+			dialog.hide();
+			Canvas.updateAll();
+			Blockbench.showQuickMessage('Renamed to "' + newName + '"', 2500);
+		}
+	});
+	dialog.show();
+}
+
+function openAddSocketDialog() {
+	const session = requireTitanSession();
+	if (!session) return;
+	const group = selectedBoneGroup();
+	if (!group) return fail('Titan Rig', 'Select the bone the socket should hang from.');
+
+	const boneName = group.name;
+	const index = (session.sockets || []).length;
+	const offset = [0, 1, 0];
+	const at = [
+		group.origin[0] + offset[0],
+		group.origin[1] + offset[1],
+		group.origin[2] + offset[2]
+	];
+
+	let root = Group.all.find(g => g.name === SOCKET_GROUP_NAME);
+	if (!root) {
+		root = new Group({ name: SOCKET_GROUP_NAME, origin: [0, 0, 0] });
+		root.addTo('root');
+		root.init();
+		root.color = COLOR_SOCKET;
+	}
+
+	const socketGroup = new Group({
+		name: 'Socket_' + index + '_' + boneName,
+		origin: at.slice(),
+		rotation: normalToMarkerRotation([0, 1, 0])
+	});
+	socketGroup.addTo(root);
+	socketGroup.init();
+	socketGroup.color = COLOR_SOCKET;
+	socketGroup.titan_socket = {
+		index: index,
+		bone: boneName,
+		declared: false,
+		rotation: socketGroup.rotation.map(round4)
+	};
+	buildSpike(socketGroup, at, null, null);
+
+	session.sockets.push({ Bone: boneName, Offset: { X: 0, Y: 1, Z: 0 } });
+	session.structureDirty = true;
+	socketGroup.select();
+	Canvas.updateAll();
+	Blockbench.showQuickMessage('Added socket on ' + boneName, 2500);
+}
+
+function deleteSelectedSocket() {
+	const session = requireTitanSession();
+	if (!session) return;
+	const group = Group.first_selected || (Group.selected && Group.selected[0]);
+	if (!group || !group.titan_socket) {
+		return fail('Titan Rig', 'Select a weakpoint socket group first.');
+	}
+	const index = group.titan_socket.index;
+	group.remove();
+	session.sockets.splice(index, 1);
+	for (const g of Group.all) {
+		if (g.titan_socket && g.titan_socket.index > index) g.titan_socket.index--;
+	}
+	session.structureDirty = true;
+	Canvas.updateAll();
+	Blockbench.showQuickMessage('Removed socket ' + index, 2000);
+}
+
+function openSkeletonGlobalsDialog() {
+	const session = requireTitanSession();
+	if (!session) return;
+
+	const boneOptions = {};
+	for (const name of session.bones) boneOptions[name] = name;
+	const clipSets = listJsonNames(joinPath(session.repoRoot, REPO.clips));
+	const clipOptions = { '': '(none)' };
+	for (const name of clipSets) clipOptions[name] = name;
+
+	const dialog = new Dialog({
+		id: 'titan_skeleton_globals',
+		title: 'Titan Skeleton Globals',
+		form: {
+			bodyBone: { label: 'Body Bone', type: 'select', options: boneOptions, value: session.bodyBone || session.bones[0] },
+			hipHeight: { label: 'Hip Height', type: 'number', value: num(session.hipHeight, 0), step: 0.5 },
+			unitScale: { label: 'Unit Scale', type: 'number', value: num(session.unitScale, 1), step: 0.05, min: 0.01 },
+			colliderConfig: { label: 'Collider Config', type: 'text', value: session.colliderConfig || 'Titan_Platform' },
+			clipSet: { label: 'Clip Set', type: 'select', options: clipOptions, value: session.clipSet || '' },
+			animationPositionScale: { label: 'Animation Position Scale', type: 'number', value: num(session.animationPositionScale, 1), step: 0.001, min: 0 }
+		},
+		onConfirm(result) {
+			session.bodyBone = result.bodyBone;
+			session.hipHeight = num(result.hipHeight, 0);
+			session.unitScale = num(result.unitScale, 1);
+			session.colliderConfig = String(result.colliderConfig || 'Titan_Platform').trim();
+			session.clipSet = result.clipSet || null;
+			session.clipSetId = session.clipSet;
+			session.animationPositionScale = num(result.animationPositionScale, 1);
+			session.structureDirty = true;
+			dialog.hide();
+			Blockbench.showQuickMessage('Globals updated - Save Titan Skeleton to write', 2500);
+		}
+	});
+	dialog.show();
+}
+
+function openCreateVariantDialog() {
+	if (!requireDesktop()) return;
+	const repoRoot = settingValue('titan_repo_root');
+	if (!repoRoot || !fileExists(joinPath(repoRoot, REPO.variants))) {
+		return fail('Titan Rig', 'Set Titan Repo Root first.');
+	}
+
+	const session = Project && Project.titan;
+	const skeletons = listJsonNames(joinPath(repoRoot, REPO.skeletons));
+	const skeletonOptions = {};
+	for (const name of skeletons) skeletonOptions[name] = name;
+
+	const dialog = new Dialog({
+		id: 'titan_create_variant',
+		title: 'Create Titan Variant',
+		form: {
+			id: { label: 'Variant Id', type: 'text', value: session ? session.skeletonId : 'New_Variant' },
+			skeleton: {
+				label: 'Skeleton',
+				type: 'select',
+				options: skeletonOptions,
+				value: session ? session.skeletonId : skeletons[0]
+			},
+			displayName: { label: 'Display Name', type: 'text', value: '' },
+			rockType: { label: 'Rock Type (optional)', type: 'text', value: '' },
+			weakpointModel: { label: 'Weakpoint Model (optional)', type: 'text', value: '' },
+			weakpointCountMin: { label: 'Weakpoint Count Min', type: 'number', value: 0, step: 1, min: 0 },
+			weakpointCountMax: { label: 'Weakpoint Count Max', type: 'number', value: 0, step: 1, min: 0 },
+			weakpointHealth: { label: 'Weakpoint Health', type: 'number', value: 100, step: 1, min: 0 },
+			shellHealth: { label: 'Shell Health (0 = omit)', type: 'number', value: 0, step: 1, min: 0 },
+			note: { type: 'info', text: 'Writes a spawnable stub under Server/Titan/Variants. Combat chances and drops stay hand-edited.' }
+		},
+		onConfirm(result) {
+			const id = String(result.id || '').trim();
+			if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(id)) {
+				return fail('Titan Rig', 'Variant id must be letters, numbers, underscores.');
+			}
+			try {
+				ensureCore();
+				const path = joinPath(repoRoot, REPO.variants, id + '.json');
+				if (fileExists(path)) return fail('Titan Rig', 'Variant already exists: ' + id);
+				const emitted = Core.emitVariantStub({
+					id: id,
+					skeleton: result.skeleton,
+					displayName: String(result.displayName || '').trim() || id.replace(/_/g, ' '),
+					rockType: String(result.rockType || '').trim() || null,
+					weakpointModel: String(result.weakpointModel || '').trim() || null,
+					weakpointCountMin: num(result.weakpointCountMin, 0),
+					weakpointCountMax: num(result.weakpointCountMax, 0),
+					weakpointHealth: num(result.weakpointHealth, 100),
+					shellHealth: num(result.shellHealth, 0) > 0 ? num(result.shellHealth, 0) : null
+				});
+				fs.writeFileSync(path, emitted.text, 'utf8');
+				dialog.hide();
+				Blockbench.showQuickMessage('Created variant ' + id, 3000);
+			} catch (err) {
+				console.error(err);
+				fail('Titan Rig', 'Could not create variant:\n\n' + errorText(err));
+			}
+		}
+	});
+	dialog.show();
+}
+
+function openIkChainsDialog() {
+	const session = requireTitanSession();
+	if (!session) return;
+
+	const summary = (session.ikChains || []).map((chain, i) => {
+		return (i + 1) + '. ' + (chain.Name || 'Chain') + ' [' + (chain.Role || '?') + '] ' +
+			(chain.Bones || []).join(' > ');
+	}).join('\n') || '(no chains yet)';
+
+	const dialog = new Dialog({
+		id: 'titan_ik_chains',
+		title: 'Titan IK Chains',
+		form: {
+			list: { type: 'info', text: summary },
+			action: {
+				label: 'Action',
+				type: 'select',
+				value: 'add',
+				options: {
+					add: 'Add chain',
+					edit: 'Edit chain by index',
+					remove: 'Remove chain by index'
+				}
+			},
+			index: { label: 'Chain Index (0-based)', type: 'number', value: 0, step: 1, min: 0 },
+			name: { label: 'Name', type: 'text', value: 'FL_Leg' },
+			kind: { label: 'Kind', type: 'select', value: 'TwoBone', options: { TwoBone: 'TwoBone', Fabrik: 'Fabrik' } },
+			role: { label: 'Role', type: 'select', value: 'Foot', options: { Foot: 'Foot', Hand: 'Hand' } },
+			bones: { label: 'Bones (comma-separated root→tip)', type: 'text', value: '' },
+			side: { label: 'Side (-1 left / +1 right)', type: 'number', value: -1, step: 1 },
+			pole: { label: 'Pole Direction', type: 'vector', value: [0, 0, 1], step: 0.1 },
+			restOffset: { label: 'Rest Offset', type: 'vector', value: [0, 0, 0], step: 0.5 },
+			strideLength: { label: 'Stride Length', type: 'number', value: 4, step: 0.1, min: 0 },
+			stepHeight: { label: 'Step Height', type: 'number', value: 1.5, step: 0.1, min: 0 },
+			gaitPhase: { label: 'Gait Phase', type: 'number', value: 0, step: 0.05 }
+		},
+		onConfirm(result) {
+			ensureCore();
+			session.ikChains = session.ikChains || [];
+			const action = result.action;
+			const index = num(result.index, 0) | 0;
+
+			if (action === 'remove') {
+				if (index < 0 || index >= session.ikChains.length) {
+					return fail('Titan Rig', 'No chain at index ' + index);
+				}
+				session.ikChains.splice(index, 1);
+			} else {
+				const boneNames = String(result.bones || '').split(',').map(s => s.trim()).filter(Boolean);
+				if (action === 'add' && !boneNames.length) {
+					return fail('Titan Rig', 'List at least one bone name.');
+				}
+				for (const bone of boneNames) {
+					if (session.bones.indexOf(bone) === -1) {
+						return fail('Titan Rig', 'Unknown bone "' + bone + '"');
+					}
+				}
+				const chain = {
+					Name: String(result.name || 'Chain').trim(),
+					Kind: result.kind,
+					Role: result.role,
+					Bones: boneNames,
+					Side: num(result.side, -1),
+					PoleDirection: Core.vectorObject(result.pole),
+					RestOffset: Core.vectorObject(result.restOffset),
+					StrideLength: round4(num(result.strideLength, 4)),
+					StepHeight: round4(num(result.stepHeight, 1.5)),
+					GaitPhase: round4(num(result.gaitPhase, 0))
+				};
+				if (action === 'edit') {
+					if (index < 0 || index >= session.ikChains.length) {
+						return fail('Titan Rig', 'No chain at index ' + index);
+					}
+					if (!boneNames.length) chain.Bones = session.ikChains[index].Bones || [];
+					session.ikChains[index] = chain;
+				} else {
+					session.ikChains.push(chain);
+				}
+			}
+
+			session.structureDirty = true;
+			dialog.hide();
+			Blockbench.showQuickMessage('IK chains updated - Save, then re-import to refresh guide markers', 3500);
 		}
 	});
 	dialog.show();
@@ -2138,7 +3059,10 @@ function openPathsDialog() {
 			}
 		},
 		onConfirm(result) {
-			if (result.repo) settings.titan_repo_root.set(result.repo);
+			if (result.repo) {
+				settings.titan_repo_root.set(result.repo);
+				try { loadCore(result.repo); } catch (err) { warn(err.message); }
+			}
 			if (result.assets) settings.titan_asset_root.set(result.assets);
 			dialog.hide();
 			Blockbench.showQuickMessage('Titan Rig paths updated', 2000);
@@ -2154,15 +3078,21 @@ function openPathsDialog() {
 BBPlugin.register(PLUGIN_ID, {
 	title: 'Titan Rig',
 	author: 'Hexvane',
-	description: 'Imports Titan skeletons with their prefab voxels for animation authoring, and writes skeleton edits back to the mod.',
+	description: 'Author Titan skeletons in Blockbench: create bones, attach prefabs, edit sockets/IK, and write JSON back to the mod.',
 	icon: 'precision_manufacturing',
-	version: '1.0.0',
+	version: '1.1.3',
 	min_version: '5.0.5',
 	variant: 'desktop',
 	tags: ['Hytale', 'Titan'],
 	onload() {
 		fs = requireNativeModule('fs');
 		nodePath = requireNativeModule('path');
+
+		try {
+			loadCore(settingValue('titan_repo_root'));
+		} catch (err) {
+			warn('Core not loaded yet (set Titan Repo Root): ' + err.message);
+		}
 
 		track(new Setting('titan_repo_root', {
 			name: 'Titan Repo Root',
@@ -2186,6 +3116,20 @@ BBPlugin.register(PLUGIN_ID, {
 				category: 'file',
 				click: openImportDialog
 			}));
+		const createSkeleton = track(new Action('titan_create_skeleton', {
+				name: 'Create Titan Skeleton...',
+				description: 'Create a new skeleton JSON and open it as a rig',
+				icon: 'note_add',
+				category: 'file',
+				click: openCreateSkeletonDialog
+			}));
+		const createVariant = track(new Action('titan_create_variant', {
+				name: 'Create Titan Variant...',
+				description: 'Write a spawnable stub variant JSON',
+				icon: 'person_add',
+				category: 'file',
+				click: openCreateVariantDialog
+			}));
 		const saveSkeletonAction = track(new Action('titan_save_skeleton', {
 				name: 'Save Titan Skeleton',
 				description: 'Write bone offsets, rotations and properties back to the skeleton JSON',
@@ -2201,6 +3145,82 @@ BBPlugin.register(PLUGIN_ID, {
 				category: 'edit',
 				condition: () => !!(Project && Project.titan),
 				click: openBonePropertiesDialog
+			}));
+		const attachPrefab = track(new Action('titan_attach_prefab', {
+				name: 'Attach Prefab...',
+				description: 'Pick a prefab for the selected bone and rebuild its voxels',
+				icon: 'extension',
+				category: 'edit',
+				condition: () => !!(Project && Project.titan),
+				click: openAttachPrefabDialog
+			}));
+		const addBone = track(new Action('titan_add_bone', {
+				name: 'Titan Bone',
+				description: 'Add a titan skeleton bone under the selection',
+				icon: 'account_tree',
+				category: 'edit',
+				condition: () => !!(Project && Project.titan),
+				click: openAddBoneDialog
+			}));
+		const renameBone = track(new Action('titan_rename_bone', {
+				name: 'Rename / Reparent Bone...',
+				description: 'Rename or reparent the selected bone',
+				icon: 'drive_file_rename_outline',
+				category: 'edit',
+				condition: () => !!(Project && Project.titan),
+				click: openRenameBoneDialog
+			}));
+		const deleteBone = track(new Action('titan_delete_bone', {
+				name: 'Delete Titan Bone',
+				description: 'Remove the selected bone (no children)',
+				icon: 'delete',
+				category: 'edit',
+				condition: () => !!(Project && Project.titan),
+				click: deleteSelectedBone
+			}));
+		const addSocket = track(new Action('titan_add_socket', {
+				name: 'Add Weakpoint Socket',
+				description: 'Add a socket on the selected bone',
+				icon: 'add_circle',
+				category: 'edit',
+				condition: () => !!(Project && Project.titan),
+				click: openAddSocketDialog
+			}));
+		const deleteSocket = track(new Action('titan_delete_socket', {
+				name: 'Delete Weakpoint Socket',
+				description: 'Remove the selected socket group',
+				icon: 'remove_circle',
+				category: 'edit',
+				condition: () => !!(Project && Project.titan),
+				click: deleteSelectedSocket
+			}));
+		const skeletonGlobals = track(new Action('titan_skeleton_globals', {
+				name: 'Titan Skeleton Globals...',
+				description: 'Edit BodyBone, HipHeight, ClipSet and related fields',
+				icon: 'tune',
+				category: 'edit',
+				condition: () => !!(Project && Project.titan),
+				click: openSkeletonGlobalsDialog
+			}));
+		const ikChains = track(new Action('titan_ik_chains', {
+				name: 'Titan IK Chains...',
+				description: 'Add, edit or remove IK chains',
+				icon: 'account_tree',
+				category: 'edit',
+				condition: () => !!(Project && Project.titan),
+				click: openIkChainsDialog
+			}));
+		const rebuildPreview = track(new Action('titan_rebuild_bone', {
+				name: 'Rebuild Bone Preview',
+				description: 'Rebuild prefab voxels for the selected bone',
+				icon: 'refresh',
+				category: 'edit',
+				condition: () => !!(Project && Project.titan),
+				click: () => {
+					const group = selectedBoneGroup();
+					if (!group) return fail('Titan Rig', 'Select a bone group first.');
+					rebuildBonePreview(group);
+				}
 			}));
 		const clipSettings = track(new Action('titan_clip_settings', {
 				name: 'Titan Clip Settings...',
@@ -2229,14 +3249,40 @@ BBPlugin.register(PLUGIN_ID, {
 		// Blockbench builds a BarMenu's label but never mounts it, so a plugin cannot add a top-level
 		// menu. These go into the existing ones, as the official Hytale plugin does, and every action is
 		// reachable from the action search regardless.
+		placeIn(MenuBar.menus.file, createSkeleton);
 		placeIn(MenuBar.menus.file, importRig);
+		placeIn(MenuBar.menus.file, createVariant);
 		placeIn(MenuBar.menus.file, saveSkeletonAction);
 		placeIn(MenuBar.menus.file, paths);
+		placeIn(MenuBar.menus.edit, renameBone);
+		placeIn(MenuBar.menus.edit, deleteBone);
+		placeIn(MenuBar.menus.edit, attachPrefab);
+		placeIn(MenuBar.menus.edit, rebuildPreview);
+		placeIn(MenuBar.menus.edit, addSocket);
+		placeIn(MenuBar.menus.edit, deleteSocket);
+		placeIn(MenuBar.menus.edit, skeletonGlobals);
+		placeIn(MenuBar.menus.edit, ikChains);
 		placeIn(MenuBar.menus.animation, clipSettings);
 		placeIn(MenuBar.menus.animation, registerClip);
 
+		// Same slot as Cube / Group / Quad: the Add Element toolbar dropdown.
+		try {
+			const addElement = BarItems && BarItems.add_element;
+			const addElementMenu = addElement && addElement.side_menu;
+			if (addElementMenu) placeIn(addElementMenu, addBone);
+			else warn('BarItems.add_element.side_menu not found; Titan Bone stays on the bone context menu only');
+		} catch (err) {
+			warn('Could not place Titan Bone in Add Element menu: ' + errorText(err));
+		}
+
 		// Bone properties belongs on the bone itself, which is where you are when you want it.
 		placeIn(Group.prototype.menu, boneProperties);
+		placeIn(Group.prototype.menu, attachPrefab);
+		placeIn(Group.prototype.menu, addBone);
+		placeIn(Group.prototype.menu, renameBone);
+		placeIn(Group.prototype.menu, deleteBone);
+		placeIn(Group.prototype.menu, addSocket);
+		placeIn(Group.prototype.menu, deleteSocket);
 	},
 	onunload() {
 		while (placements.length) {

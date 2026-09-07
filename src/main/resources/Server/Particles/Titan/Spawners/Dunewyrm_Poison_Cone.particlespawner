@@ -1,0 +1,75 @@
+{
+  "$Comment": "Forward poison spit from the Dunewyrm mouth — readable green/purple jets.",
+  "RenderMode": "BlendLinear",
+  "EmitOffset": {
+    "X": { "Min": -0.25, "Max": 0.25 },
+    "Y": { "Min": -0.15, "Max": 0.15 },
+    "Z": { "Min": -0.25, "Max": 0.25 }
+  },
+  "ParticleRotationInfluence": "Billboard",
+  "LinearFiltering": true,
+  "LightInfluence": 0.45,
+  "ParticleRotateWithSpawner": true,
+  "MaxConcurrentParticles": 40,
+  "ParticleLifeSpan": { "Min": 0.7, "Max": 1.2 },
+  "SpawnRate": { "Min": 24, "Max": 36 },
+  "TotalParticles": { "Min": 18, "Max": 28 },
+  "SpawnBurst": true,
+  "InitialVelocity": {
+    "Speed": { "Min": 5.0, "Max": 9.5 },
+    "Yaw": { "Min": -22, "Max": 22 },
+    "Pitch": { "Min": -12, "Max": 22 }
+  },
+  "Attractors": [
+    {
+      "Position": { "X": 0, "Y": 0, "Z": 0 },
+      "RadialAxis": { "X": 0, "Y": 1, "Z": 0 },
+      "Radius": 0,
+      "RadialAcceleration": 0,
+      "RadialTangentAcceleration": 0,
+      "DampingMultiplier": { "X": 0.9, "Y": 0.88, "Z": 0.9 },
+      "LinearAcceleration": { "X": 0, "Y": -1.5, "Z": 0 }
+    }
+  ],
+  "Particle": {
+    "Texture": "Particles/Textures/Smoke/Smoke_Smooth2.png",
+    "FrameSize": { "Width": 64, "Height": 64 },
+    "ScaleRatioConstraint": "None",
+    "UVOption": "RandomFlipU",
+    "SoftParticles": "Disable",
+    "InitialAnimationFrame": {
+      "Opacity": 0.0,
+      "Color": "#6b3a9a",
+      "Scale": {
+        "X": { "Min": 0.22, "Max": 0.38 },
+        "Y": { "Min": 0.22, "Max": 0.38 }
+      },
+      "Rotation": {
+        "X": { "Min": 0, "Max": 0 },
+        "Y": { "Min": 0, "Max": 0 },
+        "Z": { "Min": -180, "Max": 180 }
+      },
+      "FrameIndex": { "Min": 0, "Max": 2 }
+    },
+    "Animation": {
+      "0": { "Opacity": 0.0, "Color": "#7a4aad" },
+      "12": { "Opacity": 0.65, "Color": "#4a9a3a" },
+      "50": {
+        "Opacity": 0.4,
+        "Color": "#6b3a9a",
+        "Scale": {
+          "X": { "Min": 0.4, "Max": 0.65 },
+          "Y": { "Min": 0.4, "Max": 0.65 }
+        }
+      },
+      "100": {
+        "Opacity": 0.0,
+        "Color": "#2a6b3a",
+        "Scale": {
+          "X": { "Min": 0.55, "Max": 0.85 },
+          "Y": { "Min": 0.55, "Max": 0.85 }
+        }
+      }
+    }
+  }
+}
