@@ -1,0 +1,102 @@
+{
+  "$Comment": "Friendly scorpion summoned by the Scarab Battleaxe signature. Uses Titan's timer-only summoned-ally template so Creative summoners keep it.",
+  "Type": "Variant",
+  "Reference": "Template_Titan_Summoned_Ally",
+  "Modify": {
+    "Appearance": "Scorpion",
+    "MaxHealth": 124,
+    "MaxSpeed": 8,
+    "HearingRange": 8,
+    "ViewSector": 270,
+    "Weapons": [],
+    "OffHand": [],
+    "DefaultOffHandSlot": -1,
+    "FlockArray": [
+      "Titan_Summoned_Scorpion"
+    ],
+    "Attack": "Root_NPC_Scorpion_Attack",
+    "AttackDistance": 3,
+    "DesiredAttackDistanceRange": [
+      1,
+      2
+    ],
+    "CombatBehaviorDistance": 4,
+    "CombatRelativeTurnSpeed": 1,
+    "CombatDirectWeight": 0,
+    "CombatStrafeWeight": 10,
+    "CombatStrafingFrequencyRange": [
+      1,
+      2
+    ],
+    "CombatStrafingDurationRange": [
+      2,
+      3
+    ],
+    "CombatBackOffAfterAttack": false,
+    "ChaseRelativeSpeed": 0.6,
+    "CombatMovingRelativeSpeed": 0.8,
+    "ApplySeparation": true,
+    "BlockProbability": 0,
+    "DespawnTimer": 180,
+    "NameTranslationKey": "server.npcRoles.Titan_Summoned_Scorpion.name",
+    "_InteractionVars": {
+      "Snap_Left_Damage": {
+        "Interactions": [
+          {
+            "Parent": "Scorpion_Snap_Left_Damage",
+            "DamageCalculator": {
+              "Type": "Absolute",
+              "BaseDamage": {
+                "Physical": 35
+              },
+              "RandomPercentageModifier": 0.1
+            },
+            "DamageEffects": {
+              "Knockback": {
+                "Force": 1
+              }
+            }
+          }
+        ]
+      },
+      "Snap_Right_Damage": {
+        "Interactions": [
+          {
+            "Parent": "Scorpion_Snap_Right_Damage",
+            "DamageCalculator": {
+              "Type": "Absolute",
+              "BaseDamage": {
+                "Physical": 35
+              },
+              "RandomPercentageModifier": 0.1
+            },
+            "DamageEffects": {
+              "Knockback": {
+                "Force": 1
+              }
+            }
+          }
+        ]
+      },
+      "Sting_Damage": {
+        "Interactions": [
+          {
+            "Parent": "Scorpion_Sting_Damage",
+            "DamageCalculator": {
+              "Type": "Absolute",
+              "BaseDamage": {
+                "Physical": 35
+              },
+              "RandomPercentageModifier": 0.1
+            },
+            "DamageEffects": {
+              "Knockback": {
+                "Force": 1
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

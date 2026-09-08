@@ -31,6 +31,7 @@ public final class DunewyrmPartComponent implements Component<EntityStore> {
     private final Vector3d localOffset = new Vector3d();
     private int blockRotation;
     private float scale = 1f;
+    private boolean climbable;
     private float scaleRefreshTimer = SCALE_REFRESH_SECONDS;
     private boolean spawnScalePassPending = true;
     private float spawnScalePassTimer = -1f;
@@ -51,11 +52,21 @@ public final class DunewyrmPartComponent implements Component<EntityStore> {
                                  @Nonnull final Vector3d localOffset,
                                  final int blockRotation,
                                  final float scale) {
+        this(owner, segmentIndex, localOffset, blockRotation, scale, false);
+    }
+
+    public DunewyrmPartComponent(@Nonnull final Ref<EntityStore> owner,
+                                 final int segmentIndex,
+                                 @Nonnull final Vector3d localOffset,
+                                 final int blockRotation,
+                                 final float scale,
+                                 final boolean climbable) {
         this.owner = owner;
         this.segmentIndex = segmentIndex;
         this.localOffset.set(localOffset);
         this.blockRotation = blockRotation;
         this.scale = scale;
+        this.climbable = climbable;
     }
 
     @Nullable
@@ -82,6 +93,14 @@ public final class DunewyrmPartComponent implements Component<EntityStore> {
 
     public float getScale() {
         return scale;
+    }
+
+    public boolean isClimbable() {
+        return climbable;
+    }
+
+    public void setClimbable(final boolean climbable) {
+        this.climbable = climbable;
     }
 
     public boolean consumeSpawnScalePass(final float dt, final float delay, final float stagger) {

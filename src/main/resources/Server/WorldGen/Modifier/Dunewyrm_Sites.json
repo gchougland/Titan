@@ -28,11 +28,11 @@
         ],
         "PointGrid": {
           "Seed": "DunewyrmSite",
-          "Scale": 128.0,
+          "Scale": 160.0,
           "Jitter": 0.7,
           "Density": {
             "Min": 0.0,
-            "Max": 0.28
+            "Max": 0.2
           }
         },
         "FitHeightmap": true,

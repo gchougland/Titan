@@ -1,5 +1,6 @@
 package com.hexvane.titan.dunewyrm;
 
+import com.hexvane.titan.combat.TitanPoolHitGate;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Vector3d;
@@ -28,9 +29,17 @@ public final class DunewyrmSegment {
     private final Vector3d position = new Vector3d();
     private float yaw;
     private float pitch;
+    private double viewerDistance;
+    private boolean syncThisTick = true;
+    private double drapeSampleX = Double.NaN;
+    private double drapeSampleZ = Double.NaN;
+    private double drapeSampleY = Double.NaN;
+    private double smoothGroundY = Double.NaN;
 
     @Nonnull
     private final List<Ref<EntityStore>> voxels = new ArrayList<>();
+    @Nonnull
+    private final TitanPoolHitGate hitGate = new TitanPoolHitGate();
 
     public DunewyrmSegment() {
     }
@@ -88,8 +97,18 @@ public final class DunewyrmSegment {
         this.maxHealth = maxHealth;
     }
 
+    /**
+     * Returns true when this is the first voxel of a swing to land on this segment this tick.
+     *
+     * <p>Wide melee hits many surface voxels at once; without this gate each one would drain the shared
+     * pool independently and a single swing could delete a segment.
+     */
+    public boolean acceptHit(final int attackerIndex, final long tick) {
+        return hitGate.accept(attackerIndex, tick);
+    }
+
     /** Returns true when the segment's pool is empty. */
-    public boolean absorb(final float amount) {
+    public synchronized boolean absorb(final float amount) {
         if (!role.hasHealth()) return false;
         health = Math.max(0f, health - amount);
         return health <= 0f;
@@ -114,6 +133,52 @@ public final class DunewyrmSegment {
 
     public void setPitch(final float pitch) {
         this.pitch = pitch;
+    }
+
+    /** Distance to the nearest player, refreshed by the AI tick; lets far segments sync less often. */
+    public double getViewerDistance() {
+        return viewerDistance;
+    }
+
+    public void setViewerDistance(final double viewerDistance) {
+        this.viewerDistance = viewerDistance;
+    }
+
+    /** Whether this segment's voxels pose this tick (false only for distant segments on their off ticks). */
+    public boolean isSyncThisTick() {
+        return syncThisTick;
+    }
+
+    public void setSyncThisTick(final boolean syncThisTick) {
+        this.syncThisTick = syncThisTick;
+    }
+
+    /** Cached ground sample for draping — only re-read once the segment has moved off the sampled column. */
+    public double getDrapeSampleX() {
+        return drapeSampleX;
+    }
+
+    public double getDrapeSampleZ() {
+        return drapeSampleZ;
+    }
+
+    public double getDrapeSampleY() {
+        return drapeSampleY;
+    }
+
+    public void setDrapeSample(final double x, final double z, final double y) {
+        this.drapeSampleX = x;
+        this.drapeSampleZ = z;
+        this.drapeSampleY = y;
+    }
+
+    /** Ground height the segment is currently resting at, eased toward the sampled terrain (NaN = unset). */
+    public double getSmoothGroundY() {
+        return smoothGroundY;
+    }
+
+    public void setSmoothGroundY(final double smoothGroundY) {
+        this.smoothGroundY = smoothGroundY;
     }
 
     @Nonnull

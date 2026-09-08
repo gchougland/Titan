@@ -34,11 +34,13 @@ import com.hexvane.titan.yaga.YagaEggSiteSystem;
 import com.hexvane.titan.yaga.YagaEggSystem;
 import com.hexvane.titan.yaga.YagaFurnaceSystem;
 import com.hexvane.titan.yaga.YagaInteractSystem;
+import com.hexvane.titan.combat.TitanScarabSummonInteraction;
 import com.hexvane.titan.yaga.YagaLeapInteraction;
 import com.hexvane.titan.yaga.YagaMemory;
 import com.hexvane.titan.yaga.YagaPetSystem;
 import com.hexvane.titan.yaga.YagaPointInteraction;
 import com.hexvane.titan.yaga.YagaRespawnSystem;
+import com.hexvane.titan.combat.TitanClimbFallGuardSystem;
 import com.hexvane.titan.dunewyrm.DunewyrmAiSystem;
 import com.hexvane.titan.dunewyrm.DunewyrmContactDamageSystem;
 import com.hexvane.titan.dunewyrm.DunewyrmHealthSyncSystem;
@@ -115,6 +117,8 @@ public final class TitanBootstrap {
     private static void registerInteractions() {
         Interaction.CODEC.register(YagaLeapInteraction.TYPE, YagaLeapInteraction.class, YagaLeapInteraction.CODEC);
         Interaction.CODEC.register(YagaPointInteraction.TYPE, YagaPointInteraction.class, YagaPointInteraction.CODEC);
+        Interaction.CODEC.register(TitanScarabSummonInteraction.TYPE, TitanScarabSummonInteraction.class,
+            TitanScarabSummonInteraction.CODEC);
     }
 
     /**
@@ -244,6 +248,7 @@ public final class TitanBootstrap {
 
         registry.registerSystem(new DunewyrmSiteSystem.EnsureComponents());
         registry.registerSystem(new DunewyrmSiteSystem.SpawnOnAdd());
+        registry.registerSystem(new DunewyrmSiteSystem.Maintain());
         registry.registerSystem(new DunewyrmAiSystem());
         registry.registerSystem(new DunewyrmPartSyncSystem());
         registry.registerSystem(new DunewyrmContactDamageSystem());
@@ -251,6 +256,8 @@ public final class TitanBootstrap {
         registry.registerSystem(new DunewyrmHealthSyncSystem.Removal());
         registry.registerSystem(new DunewyrmRootDamageSystem());
         registry.registerSystem(new DunewyrmSegmentDamageSystem());
+        registry.registerSystem(new TitanClimbFallGuardSystem.FallFilter());
+        registry.registerSystem(new TitanClimbFallGuardSystem.SoftLand());
 
         worldSpawnSystem = new TitanWorldSpawnSystem(siteMemoryType);
         registry.registerSystem(worldSpawnSystem);

@@ -1,5 +1,8 @@
 package com.hexvane.titan.command;
 
+import com.hexvane.titan.dunewyrm.DunewyrmComponent;
+import com.hexvane.titan.dunewyrm.DunewyrmSegmentDamageSystem;
+import com.hexvane.titan.dunewyrm.DunewyrmState;
 import com.hexvane.titan.entity.TitanComponent;
 import com.hexvane.titan.entity.TitanState;
 import com.hypixel.hytale.component.Ref;
@@ -24,6 +27,7 @@ import java.util.ArrayList;
  * {@code /titan kill [--radius=n] [--instant]}
  *
  * <p>Without {@code --instant} this plays the full death: the titan falls apart and drops its ore.
+ * Dunewyrm roots are included — they use a separate component from Talus titans.
  */
 public final class TitanKillCommand extends AbstractPlayerCommand {
 
@@ -54,15 +58,27 @@ public final class TitanKillCommand extends AbstractPlayerCommand {
         int killed = 0;
         for (final Ref<EntityStore> candidate : candidates) {
             if (!candidate.isValid()) continue;
-            final var titan = store.getComponent(candidate, TitanComponent.getComponentType());
-            if (titan == null || titan.getState() == TitanState.DYING) continue;
 
-            if (instant) {
-                store.removeEntity(candidate, RemoveReason.REMOVE);
-            } else {
-                titan.setState(TitanState.DYING);
+            final var titan = store.getComponent(candidate, TitanComponent.getComponentType());
+            if (titan != null && titan.getState() != TitanState.DYING) {
+                if (instant) {
+                    store.removeEntity(candidate, RemoveReason.REMOVE);
+                } else {
+                    titan.setState(TitanState.DYING);
+                }
+                killed++;
+                continue;
             }
-            killed++;
+
+            final var worm = store.getComponent(candidate, DunewyrmComponent.getComponentType());
+            if (worm != null && worm.getState() != DunewyrmState.DYING) {
+                if (instant) {
+                    DunewyrmSegmentDamageSystem.forceKill(store, candidate, worm);
+                } else {
+                    DunewyrmSegmentDamageSystem.forceKill(store, candidate, worm);
+                }
+                killed++;
+            }
         }
 
         context.sendMessage(Message.translation("titan_commands.commands.titan.kill.result").param("count", killed));

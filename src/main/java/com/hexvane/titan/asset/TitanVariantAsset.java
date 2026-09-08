@@ -551,6 +551,11 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
             a -> a.battleMusic
         ).add()
         .append(
+            new KeyedCodec<>("BattleWeather", Codec.STRING),
+            (a, v) -> a.battleWeather = v,
+            a -> a.battleWeather
+        ).add()
+        .append(
             new KeyedCodec<>("Dunewyrm", Codec.BOOLEAN),
             (a, v) -> a.dunewyrm = v,
             a -> a.dunewyrm
@@ -694,6 +699,8 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     private String plowSound;
     @Nullable
     private String battleMusic = "Track_Z1D_Goblin_Boss_Battle";
+    @Nullable
+    private String battleWeather;
 
     @Nonnull
     @Override
@@ -1434,6 +1441,15 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     @Nullable
     public String getBattleMusic() {
         return battleMusic;
+    }
+
+    /**
+     * Weather asset id forced onto players inside the fight (a sandstorm, say), or {@code null} to leave
+     * the zone weather alone. Cleared again when they walk away or it dies.
+     */
+    @Nullable
+    public String getBattleWeather() {
+        return battleWeather;
     }
 
     /** The variant with this id, or {@code null} if there is none. */

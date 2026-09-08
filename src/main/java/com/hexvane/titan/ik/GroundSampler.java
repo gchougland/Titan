@@ -27,6 +27,32 @@ public final class GroundSampler {
     }
 
     /**
+     * Lowest solid surface in a square around {@code (x,z)}.
+     *
+     * <p>Used to reject pillar / structure tops: a column that sticks far above its neighbours is not
+     * walkable ground for something the size of a Dunewyrm.
+     */
+    public static double sampleLowestInRadius(@Nonnull final ChunkStore chunkStore,
+                                              final double x,
+                                              final double startY,
+                                              final double z,
+                                              final int radius,
+                                              final int above,
+                                              final int below) {
+        double lowest = NO_GROUND;
+        final int cx = (int) Math.floor(x);
+        final int cz = (int) Math.floor(z);
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                final double ground = sample(chunkStore, cx + dx + 0.5, startY, cz + dz + 0.5, above, below);
+                if (!isValid(ground)) continue;
+                if (!isValid(lowest) || ground < lowest) lowest = ground;
+            }
+        }
+        return lowest;
+    }
+
+    /**
      * Finds the top surface of the highest solid block in a vertical window around {@code startY}.
      *
      * @param above how far above {@code startY} to begin scanning, in blocks

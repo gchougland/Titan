@@ -24,6 +24,7 @@ import org.joml.Vector3d;
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 /**
@@ -107,7 +108,10 @@ public final class TitanSpawnCommand extends AbstractPlayerCommand {
 
         final TitanVariantAsset variant = TitanVariantAsset.find(variantId);
         if (variant != null && variant.isDunewyrm()) {
-            final DunewyrmSpawner.Result result = DunewyrmSpawner.spawn(store, position, faceCaller);
+            // No ground prefab: the Dunewyrm's ruin only comes from worldgen sites. The command just spawns
+            // the snake wherever the caller is pointing.
+            final DunewyrmSpawner.Result result = DunewyrmSpawner.spawn(
+                store, position, faceCaller, ThreadLocalRandom.current().nextLong(), false);
             if (!result.ok()) {
                 context.sendMessage(Message.translation("titan_commands.commands.titan.spawn.failed")
                     .param("error", String.valueOf(result.error())));

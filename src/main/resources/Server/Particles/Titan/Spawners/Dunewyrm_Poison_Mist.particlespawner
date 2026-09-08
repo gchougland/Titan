@@ -1,73 +1,63 @@
 {
-  "$Comment": "Visible green/purple ground mist for Dunewyrm poison — SoftParticles off so floor contact doesn't erase it.",
+  "$Comment": "Visible poison mist for Dunewyrm — uses the vanilla poison bubble texture (same as Impact_Poison).",
   "RenderMode": "BlendLinear",
   "EmitOffset": {
-    "X": { "Min": -2.0, "Max": 2.0 },
-    "Y": { "Min": 0.05, "Max": 0.35 },
-    "Z": { "Min": -2.0, "Max": 2.0 }
+    "X": { "Min": -2.5, "Max": 2.5 },
+    "Y": { "Min": 0.2, "Max": 1.2 },
+    "Z": { "Min": -2.5, "Max": 2.5 }
   },
   "ParticleRotationInfluence": "Billboard",
   "LinearFiltering": true,
-  "LightInfluence": 0.4,
+  "LightInfluence": 0,
   "ParticleRotateWithSpawner": false,
-  "MaxConcurrentParticles": 36,
-  "ParticleLifeSpan": { "Min": 1.2, "Max": 2.0 },
-  "SpawnRate": { "Min": 18, "Max": 28 },
-  "TotalParticles": { "Min": 16, "Max": 24 },
+  "MaxConcurrentParticles": 80,
+  "ParticleLifeSpan": { "Min": 0.8, "Max": 1.4 },
+  "SpawnRate": { "Min": 30, "Max": 45 },
+  "TotalParticles": { "Min": 40, "Max": 55 },
   "SpawnBurst": true,
+  "UseEmitDirection": true,
   "InitialVelocity": {
-    "Speed": { "Min": 0.6, "Max": 1.6 },
+    "Speed": { "Min": 0.8, "Max": 3.5 },
     "Yaw": { "Min": 0, "Max": 360 },
-    "Pitch": { "Min": 70, "Max": 95 }
+    "Pitch": { "Min": 40, "Max": 95 }
   },
-  "Attractors": [
-    {
-      "Position": { "X": 0, "Y": 0, "Z": 0 },
-      "RadialAxis": { "X": 0, "Y": 1, "Z": 0 },
-      "Radius": 0,
-      "RadialAcceleration": 0,
-      "RadialTangentAcceleration": 0,
-      "DampingMultiplier": { "X": 0.92, "Y": 0.9, "Z": 0.92 }
-    }
-  ],
   "Particle": {
-    "Texture": "Particles/Textures/Smoke/Smoke_Smooth2.png",
-    "FrameSize": { "Width": 64, "Height": 64 },
-    "ScaleRatioConstraint": "None",
+    "Texture": "Particles/Textures/Shapes/Effect_Poison_Bubble.png",
+    "FrameSize": { "Width": 32, "Height": 32 },
+    "ScaleRatioConstraint": "OneToOne",
     "UVOption": "RandomFlipU",
     "SoftParticles": "Disable",
     "InitialAnimationFrame": {
-      "Opacity": 0.0,
-      "Color": "#6b3a9a",
+      "Opacity": 1.0,
+      "Color": "#3d8f45",
       "Scale": {
-        "X": { "Min": 0.35, "Max": 0.55 },
-        "Y": { "Min": 0.35, "Max": 0.55 }
+        "X": { "Min": 0.45, "Max": 0.9 },
+        "Y": { "Min": 0.45, "Max": 0.9 }
       },
       "Rotation": {
         "X": { "Min": 0, "Max": 0 },
         "Y": { "Min": 0, "Max": 0 },
-        "Z": { "Min": -180, "Max": 180 }
+        "Z": { "Min": -90, "Max": 90 }
       },
-      "FrameIndex": { "Min": 0, "Max": 2 }
+      "FrameIndex": { "Min": 0, "Max": 0 }
     },
     "Animation": {
-      "0": { "Opacity": 0.0, "Color": "#7a4aad" },
-      "15": { "Opacity": 0.55, "Color": "#4a9a3a" },
-      "45": {
-        "Opacity": 0.45,
+      "0": { "Opacity": 1.0, "Color": "#6b3a9a" },
+      "25": { "Opacity": 1.0, "Color": "#4a9a3a" },
+      "60": {
+        "Opacity": 0.75,
         "Color": "#7a4aad",
         "Scale": {
-          "X": { "Min": 0.55, "Max": 0.85 },
-          "Y": { "Min": 0.55, "Max": 0.85 }
+          "X": { "Min": 0.8, "Max": 1.3 },
+          "Y": { "Min": 0.8, "Max": 1.3 }
         }
       },
-      "75": { "Opacity": 0.28, "Color": "#3d8f45" },
       "100": {
         "Opacity": 0.0,
         "Color": "#2a6b3a",
         "Scale": {
-          "X": { "Min": 0.7, "Max": 1.0 },
-          "Y": { "Min": 0.7, "Max": 1.0 }
+          "X": { "Min": 1.2, "Max": 1.8 },
+          "Y": { "Min": 1.2, "Max": 1.8 }
         }
       }
     }

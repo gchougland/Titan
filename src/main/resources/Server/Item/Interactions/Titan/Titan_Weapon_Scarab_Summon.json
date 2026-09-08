@@ -1,0 +1,106 @@
+{
+  "$Comment": "Signature gate matching battleaxe Whirlwind: require a full SignatureEnergy bar, play a slam cast, then summon and drain.",
+  "Type": "StatsCondition",
+  "Costs": {
+    "SignatureEnergy": 100
+  },
+  "ValueType": "Percent",
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "Simple",
+        "HorizontalSpeedMultiplier": 0.45,
+        "Effects": {
+          "ItemAnimationId": "WhirlwindCharging",
+          "WorldSoundEventId": "SFX_Battleaxe_T2_Signature_Swing",
+          "LocalSoundEventId": "SFX_Battleaxe_T2_Signature_Swing_Local",
+          "Particles": [
+            {
+              "SystemId": "Sword_Charging",
+              "TargetNodeName": "Handle",
+              "TargetEntityPart": "PrimaryItem",
+              "PositionOffset": {
+                "X": 0.8
+              }
+            },
+            {
+              "SystemId": "Sword_Signature_Ready",
+              "TargetNodeName": "Handle",
+              "TargetEntityPart": "PrimaryItem",
+              "PositionOffset": {
+                "X": 0.5
+              }
+            },
+            {
+              "SystemId": "Praetorian_Summon_Energy",
+              "TargetEntityPart": "Entity",
+              "TargetNodeName": "Handle",
+              "Scale": 1.25
+            }
+          ]
+        },
+        "RunTime": 0.55
+      },
+      {
+        "Type": "Simple",
+        "HorizontalSpeedMultiplier": 0.25,
+        "Effects": {
+          "ItemAnimationId": "DownstrikeCharged",
+          "WaitForAnimationToFinish": false,
+          "WorldSoundEventId": "SFX_Battleaxe_T2_Swing_Charged",
+          "LocalSoundEventId": "SFX_Battleaxe_T2_Swing_Charged_Local",
+          "CameraEffect": "Battleaxe_Downstrike",
+          "Trails": [
+            {
+              "PositionOffset": {
+                "X": 0.8,
+                "Y": 0,
+                "Z": 0
+              },
+              "RotationOffset": {
+                "Pitch": 0,
+                "Roll": 90,
+                "Yaw": 0
+              },
+              "TargetNodeName": "Handle",
+              "TrailId": "Medium_Signature"
+            }
+          ],
+          "Particles": [
+            {
+              "SystemId": "Praetorian_Summon_Ground",
+              "TargetEntityPart": "Entity",
+              "DetachedFromModel": true
+            },
+            {
+              "SystemId": "Battleaxe_Signature_Whirlwind",
+              "TargetNodeName": "Hip",
+              "TargetEntityPart": "Entity",
+              "PositionOffset": {
+                "Y": 1.0
+              }
+            },
+            {
+              "SystemId": "Praetorian_Summon_Energy",
+              "TargetEntityPart": "Entity",
+              "TargetNodeName": "Handle",
+              "Scale": 1.5
+            }
+          ]
+        },
+        "RunTime": 0.4
+      },
+      {
+        "Type": "TitanScarabSummon"
+      },
+      {
+        "Type": "ChangeStat",
+        "StatModifiers": {
+          "SignatureEnergy": -100
+        },
+        "ValueType": "Percent"
+      }
+    ]
+  }
+}

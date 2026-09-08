@@ -78,6 +78,15 @@ public final class DunewyrmSegmentDamageSystem extends DamageEventSystem {
         final float amount = damage.getAmount();
         if (amount <= 0f) return;
 
+        final int attackerIndex = damage.getSource() instanceof Damage.EntitySource entitySource
+            && entitySource.getRef().isValid()
+            ? entitySource.getRef().getIndex()
+            : -1;
+        final long tick = store.getExternalData().getWorld().getTick();
+        if (!segment.acceptHit(attackerIndex, tick)) {
+            return;
+        }
+
         final boolean destroyed = segment.absorb(amount);
         final DunewyrmEncounter encounter = DunewyrmEncounter.getOrCreate(worm.getEncounterId());
         encounter.setRemainingBodyHealth(encounter.getRemainingBodyHealth() - amount);
@@ -144,7 +153,7 @@ public final class DunewyrmSegmentDamageSystem extends DamageEventSystem {
         if (segmentIndex < 0) return;
 
         final DunewyrmSegment removed = worm.getSegments().get(segmentIndex);
-        DunewyrmSpawner.destroySegmentVoxels(store, removed);
+        DunewyrmSpawner.releaseSegmentAsDebris(store, removed);
         worm.getSegments().remove(segmentIndex);
 
         if (worm.bodyCount() == 0) {
@@ -153,7 +162,7 @@ public final class DunewyrmSegmentDamageSystem extends DamageEventSystem {
         }
 
         rebindVoxelIndices(store, worm);
-        DunewyrmSpawner.layoutAlongPath(worm);
+        DunewyrmSpawner.layoutAlongPath(worm, store.getExternalData().getWorld().getChunkStore());
         DunewyrmSpawner.rebuildVisuals(store, root, worm);
         worm.setSegmentsDirty(true);
     }
@@ -181,7 +190,7 @@ public final class DunewyrmSegmentDamageSystem extends DamageEventSystem {
         }
 
         if (destroyed != null) {
-            DunewyrmSpawner.destroySegmentVoxels(store, destroyed);
+            DunewyrmSpawner.releaseSegmentAsDebris(store, destroyed);
         }
 
         final float yaw = worm.getYaw();
@@ -191,6 +200,7 @@ public final class DunewyrmSegmentDamageSystem extends DamageEventSystem {
 
         final DunewyrmEncounter encounter = DunewyrmEncounter.getOrCreate(encounterId);
         encounter.removeSnake();
+        worm.setEncounterReleased(true);
         store.removeEntity(root, RemoveReason.REMOVE);
 
         // Separate along the break tangent so the two snakes do not stack on the same path.
@@ -237,9 +247,9 @@ public final class DunewyrmSegmentDamageSystem extends DamageEventSystem {
         live.setYaw(fleeYaw);
         live.setChargeYaw(fleeYaw);
         live.setFleeTimer(DunewyrmTuning.SPLIT_FLEE_DURATION);
-        live.setState(DunewyrmState.SLITHER);
+        live.setState(DunewyrmState.FLAIL);
         live.addOrbitAngle((float) (Math.PI * 0.75));
-        DunewyrmSpawner.layoutAlongPath(live);
+        DunewyrmSpawner.layoutAlongPath(live, store.getExternalData().getWorld().getChunkStore());
     }
 
     private static void rebindVoxelIndices(@Nonnull final Store<EntityStore> store,
@@ -255,13 +265,27 @@ public final class DunewyrmSegmentDamageSystem extends DamageEventSystem {
         }
     }
 
+    /** Force-kills one snake instance (used by {@code /titan kill}). */
+    public static void forceKill(@Nonnull final Store<EntityStore> store,
+                                 @Nonnull final Ref<EntityStore> root,
+                                 @Nonnull final DunewyrmComponent worm) {
+        final DunewyrmEncounter encounter = DunewyrmEncounter.getOrCreate(worm.getEncounterId());
+        encounter.setRemainingBodyHealth(encounter.getRemainingBodyHealth() - worm.bodyHealth());
+        if (encounter.getLivingSnakes() <= 1) {
+            encounter.setRemainingBodyHealth(0f);
+        }
+        finishSnake(store, root, worm);
+    }
+
     private static void finishSnake(@Nonnull final Store<EntityStore> store,
                                     @Nonnull final Ref<EntityStore> root,
                                     @Nonnull final DunewyrmComponent worm) {
-        worm.setState(DunewyrmState.DYING);
-        DunewyrmHealthSyncSystem.dismiss(store, root, worm);
         final Vector3d pos = new Vector3d(worm.getHeadPosition());
-        DunewyrmSpawner.destroyAllVoxels(store, worm);
+        // Detach voxels as debris before DYING — part sync deletes Dunewyrm parts on a dying owner.
+        DunewyrmSpawner.releaseAllAsDebris(store, worm);
+        worm.setState(DunewyrmState.DYING);
+        worm.setEncounterReleased(true);
+        DunewyrmHealthSyncSystem.dismiss(store, root, worm);
         final DunewyrmEncounter encounter = DunewyrmEncounter.getOrCreate(worm.getEncounterId());
         encounter.removeSnake();
 
@@ -273,6 +297,7 @@ public final class DunewyrmSegmentDamageSystem extends DamageEventSystem {
                 DunewyrmLoot.drop(store, variant, pos);
                 TitanSound.play(store, variant.getDeathSound(), pos);
             }
+            DunewyrmSiteSystem.markClearedForEncounter(store, worm.getEncounterId());
             DunewyrmSiteSystem.markClearedNear(store, pos);
             DunewyrmEncounter.remove(worm.getEncounterId());
         }

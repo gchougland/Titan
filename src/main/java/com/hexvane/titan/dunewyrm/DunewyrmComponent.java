@@ -6,6 +6,7 @@ import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
@@ -51,12 +52,15 @@ public final class DunewyrmComponent implements Component<EntityStore> {
     private float stateTimer;
     private float attackCooldown;
     private float contactTimer;
+    @Nonnull
+    private final IntOpenHashSet rammedPlayers = new IntOpenHashSet();
     private float tongueTimer = DunewyrmTuning.TONGUE_INTERVAL_MIN;
     private float tongueActive;
     private float jawOpen;
     private float cobraRise;
     private float tunnelDepth;
     private float digParticleTimer;
+    private float smashCooldown;
     private float scorpionBudget;
     private float sinePhase;
     private float orbitAngle;
@@ -65,6 +69,8 @@ public final class DunewyrmComponent implements Component<EntityStore> {
     private float cobraLean;
     private boolean segmentsDirty = true;
     private boolean pendingStructural;
+    /** Set before an intentional root removal (split / death) so unload bookkeeping does not double-count. */
+    private boolean encounterReleased;
     @Nullable
     private Ref<EntityStore> target;
     @Nullable
@@ -126,6 +132,14 @@ public final class DunewyrmComponent implements Component<EntityStore> {
         this.state = state;
         this.stateTimer = 0f;
         this.telegraphTimer = 0f;
+        // Each charge gets to ram each player once.
+        this.rammedPlayers.clear();
+    }
+
+    /** Entity indices already hit by the current charge, so a ram is one big hit and not a damage tick. */
+    @Nonnull
+    public IntOpenHashSet getRammedPlayers() {
+        return rammedPlayers;
     }
 
     @Nonnull
@@ -240,6 +254,18 @@ public final class DunewyrmComponent implements Component<EntityStore> {
         this.digParticleTimer = digParticleTimer;
     }
 
+    public float getSmashCooldown() {
+        return smashCooldown;
+    }
+
+    public void setSmashCooldown(final float smashCooldown) {
+        this.smashCooldown = smashCooldown;
+    }
+
+    public void tickSmashCooldown(final float dt) {
+        if (smashCooldown > 0f) smashCooldown = Math.max(0f, smashCooldown - dt);
+    }
+
     public float getScorpionBudget() {
         return scorpionBudget;
     }
@@ -335,6 +361,14 @@ public final class DunewyrmComponent implements Component<EntityStore> {
         this.pendingStructural = pendingStructural;
     }
 
+    public boolean isEncounterReleased() {
+        return encounterReleased;
+    }
+
+    public void setEncounterReleased(final boolean encounterReleased) {
+        this.encounterReleased = encounterReleased;
+    }
+
     @Nullable
     public Ref<EntityStore> getTarget() {
         return target;
@@ -375,6 +409,21 @@ public final class DunewyrmComponent implements Component<EntityStore> {
             if (segment.getRole() == DunewyrmSegmentRole.BODY) n++;
         }
         return n;
+    }
+
+    /** 1 for a full-length snake, falling linearly with every body segment lost. */
+    public float lengthFraction() {
+        return Math.min(1f, bodyCount() / (float) DunewyrmTuning.BODY_COUNT);
+    }
+
+    /** Movement multiplier: a short snake is a slow snake, down to {@link DunewyrmTuning#SHORT_SPEED_FLOOR}. */
+    public float speedScale() {
+        return DunewyrmTuning.SHORT_SPEED_FLOOR + (1f - DunewyrmTuning.SHORT_SPEED_FLOOR) * lengthFraction();
+    }
+
+    /** Hit-damage multiplier, down to {@link DunewyrmTuning#SHORT_DAMAGE_FLOOR} for the last stub. */
+    public float damageScale() {
+        return DunewyrmTuning.SHORT_DAMAGE_FLOOR + (1f - DunewyrmTuning.SHORT_DAMAGE_FLOOR) * lengthFraction();
     }
 
     public float bodyHealth() {

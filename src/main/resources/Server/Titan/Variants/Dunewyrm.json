@@ -22,15 +22,15 @@
   "SpawnHeadroom": 20,
   "SpawnLevelToLowest": false,
 
-  "MoveSpeed": 4.5,
-  "TurnSpeed": 0.55,
+  "MoveSpeed": 6.0,
+  "TurnSpeed": 0.85,
   "WakeRadius": 48,
   "LoseTargetRadius": 72,
   "LeashRadius": 64,
 
   "AttackRange": 28,
   "AttackCooldown": 4.0,
-  "AttackDamage": 18,
+  "AttackDamage": 54,
   "AttackKnockback": 8,
   "AttackRadius": 3.5,
 
@@ -56,5 +56,6 @@
   "TelegraphLineParticle": "Dunewyrm_Telegraph_Line",
   "TelegraphSound": "SFX_Snake_Alerted",
 
-  "BattleMusic": "Track_Titan_Battle"
+  "BattleMusic": "Track_Titan_Battle",
+  "BattleWeather": "Zone2_Sand_Storm"
 }

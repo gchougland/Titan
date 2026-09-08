@@ -1,6 +1,7 @@
 package com.hexvane.titan.entity;
 
 import com.hexvane.titan.TitanRegistry;
+import com.hexvane.titan.combat.TitanPoolHitGate;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -31,6 +32,8 @@ public final class TitanShellComponent implements Component<EntityStore> {
 
     private float health;
     private boolean broken;
+    @Nonnull
+    private final TitanPoolHitGate hitGate = new TitanPoolHitGate();
 
     /** For the component registry. */
     public TitanShellComponent() {
@@ -39,6 +42,13 @@ public final class TitanShellComponent implements Component<EntityStore> {
     /** @param health total damage the whole shell absorbs, however many voxels that is spread over */
     public TitanShellComponent(final float health) {
         this.health = health;
+    }
+
+    /**
+     * Returns true when this is the first voxel of a swing to land on this shell this tick.
+     */
+    public boolean acceptHit(final int attackerIndex, final long tick) {
+        return hitGate.accept(attackerIndex, tick);
     }
 
     /**

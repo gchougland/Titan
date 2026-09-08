@@ -5,9 +5,13 @@ import com.hexvane.titan.asset.TitanBoneDef;
 import com.hexvane.titan.asset.TitanSkeletonAsset;
 import com.hexvane.titan.asset.TitanSocketDef;
 import com.hexvane.titan.asset.TitanVariantAsset;
+import com.hexvane.titan.combat.TitanEncounterScale;
 import com.hexvane.titan.config.TitanConfig;
 import com.hexvane.titan.entity.TitanComponent;
+import com.hexvane.titan.entity.TitanPartComponent;
 import com.hexvane.titan.entity.TitanShellComponent;
+import com.hexvane.titan.entity.TitanWeakpointComponent;
+import com.hexvane.titan.system.TitanPartSyncSystem;
 import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
@@ -199,7 +203,9 @@ public final class TitanSpawner {
         pose.resetToBind(skeleton);
         pose.computeWorld(skeleton, TitanPose.rootMatrix(position, yaw, titan.getScale(), new Matrix4d()));
 
-        final float healthMultiplier = TitanConfig.get().getWeakpointHealthMultiplier();
+        final float encounterScale = TitanEncounterScale.healthScaleNear(
+            store, position, Math.max(32.0, variant.getWakeRadius()));
+        final float healthMultiplier = TitanConfig.get().getWeakpointHealthMultiplier() * encounterScale;
         final float nodeHealth = variant.getWeakpointHealth() * healthMultiplier;
         final float shellHealth = variant.getShellHealth() * healthMultiplier;
 
@@ -321,7 +327,7 @@ public final class TitanSpawner {
             // hitch when a titan appears, and the bulk call does the walk once for the whole bone. Sized to
             // the voxel count, which is the most this loop can produce.
             @SuppressWarnings("unchecked")
-            final Holder<EntityStore>[] holders = new Holder[voxels.size()];
+            final Holder<EntityStore>[] holders = new Holder[voxels.size() + 1];
             int holderCount = 0;
 
             int index = -1;
@@ -410,10 +416,61 @@ public final class TitanSpawner {
                 holders[holderCount++] = holder;
             }
 
+            // Seal the underside of hollow climbable bones (Yaga house floor from below) without filling
+            // the walkable interior. Dunewyrm uses a full solid core separately.
+            if (hollow && !bone.isShell() && boneWantsColliders && colliderConfig != null) {
+                holders[holderCount++] = buildBoneUndersideSeal(
+                    store, root, bone, voxels, pivot, mirror, boneScale, pose, colliderConfig);
+                counts.colliders++;
+            }
+
             if (holderCount > 0) store.addEntities(holders, 0, holderCount, AddReason.SPAWN);
         }
 
         return counts;
+    }
+
+    /**
+     * Thin hard plate just above the prefab's bottom face.
+     *
+     * <p>Stops players clipping up into a hollow house from the stilts/undercroft without occupying the
+     * living space higher in the same bone.
+     */
+    @Nonnull
+    private static Holder<EntityStore> buildBoneUndersideSeal(
+        @Nonnull final Store<EntityStore> store,
+        @Nonnull final Ref<EntityStore> root,
+        @Nonnull final TitanBoneDef bone,
+        @Nonnull final PrefabVoxels voxels,
+        @Nonnull final Vector3d pivot,
+        final double mirror,
+        final float boneScale,
+        @Nonnull final TitanPose pose,
+        @Nonnull final HitboxCollisionConfig colliderConfig) {
+
+        final float inset = TitanPartBuilder.SOLID_FILL_INSET;
+        // Sit the slab in the first block of floor thickness, not at mid-height of the whole house.
+        final double localY = (voxels.minY() + 1.0 - pivot.y) * bone.getScale();
+        final var local = new Vector3d(
+            (voxels.center().x - pivot.x) * bone.getScale() * mirror,
+            localY,
+            (voxels.center().z - pivot.z) * bone.getScale());
+        final var worldPos = new Vector3d();
+        pose.transformLocal(bone.getIndex(), local, worldPos);
+        final var rotation = new Rotation3f();
+        pose.getWorldRotation(bone.getIndex(), rotation);
+
+        final double hx = voxels.sizeX() * 0.5 * inset * boneScale;
+        final double hz = voxels.sizeZ() * 0.5 * inset * boneScale;
+        final double hy = 0.6 * boneScale;
+        final var box = new Box(-hx, -hy, -hz, hx, hy, hz);
+
+        final Holder<EntityStore> holder = TitanPartBuilder.buildSolidFill(
+            store, worldPos, rotation, box, colliderConfig);
+        holder.addComponent(TitanPartComponent.getComponentType(),
+            new TitanPartComponent(root, bone.getIndex(), local, 0, boneScale,
+                TitanPartSyncSystem.SCALE_REFRESH_SECONDS));
+        return holder;
     }
 
     private static int spawnWeakpoints(@Nonnull final Store<EntityStore> store,

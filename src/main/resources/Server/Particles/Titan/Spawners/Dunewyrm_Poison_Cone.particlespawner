@@ -1,24 +1,25 @@
 {
-  "$Comment": "Forward poison spit from the Dunewyrm mouth — readable green/purple jets.",
+  "$Comment": "Forward poison spit — vanilla poison bubble texture, high opacity.",
   "RenderMode": "BlendLinear",
   "EmitOffset": {
-    "X": { "Min": -0.25, "Max": 0.25 },
-    "Y": { "Min": -0.15, "Max": 0.15 },
-    "Z": { "Min": -0.25, "Max": 0.25 }
+    "X": { "Min": -0.4, "Max": 0.4 },
+    "Y": { "Min": -0.2, "Max": 0.4 },
+    "Z": { "Min": -0.4, "Max": 0.4 }
   },
   "ParticleRotationInfluence": "Billboard",
   "LinearFiltering": true,
-  "LightInfluence": 0.45,
+  "LightInfluence": 0,
   "ParticleRotateWithSpawner": true,
-  "MaxConcurrentParticles": 40,
-  "ParticleLifeSpan": { "Min": 0.7, "Max": 1.2 },
-  "SpawnRate": { "Min": 24, "Max": 36 },
-  "TotalParticles": { "Min": 18, "Max": 28 },
+  "MaxConcurrentParticles": 80,
+  "ParticleLifeSpan": { "Min": 0.6, "Max": 1.1 },
+  "SpawnRate": { "Min": 40, "Max": 60 },
+  "TotalParticles": { "Min": 35, "Max": 50 },
   "SpawnBurst": true,
+  "UseEmitDirection": true,
   "InitialVelocity": {
-    "Speed": { "Min": 5.0, "Max": 9.5 },
-    "Yaw": { "Min": -22, "Max": 22 },
-    "Pitch": { "Min": -12, "Max": 22 }
+    "Speed": { "Min": 6.0, "Max": 12.0 },
+    "Yaw": { "Min": -28, "Max": 28 },
+    "Pitch": { "Min": -8, "Max": 28 }
   },
   "Attractors": [
     {
@@ -27,47 +28,47 @@
       "Radius": 0,
       "RadialAcceleration": 0,
       "RadialTangentAcceleration": 0,
-      "DampingMultiplier": { "X": 0.9, "Y": 0.88, "Z": 0.9 },
-      "LinearAcceleration": { "X": 0, "Y": -1.5, "Z": 0 }
+      "DampingMultiplier": { "X": 0.92, "Y": 0.9, "Z": 0.92 },
+      "LinearAcceleration": { "X": 0, "Y": -2.0, "Z": 0 }
     }
   ],
   "Particle": {
-    "Texture": "Particles/Textures/Smoke/Smoke_Smooth2.png",
-    "FrameSize": { "Width": 64, "Height": 64 },
-    "ScaleRatioConstraint": "None",
+    "Texture": "Particles/Textures/Shapes/Effect_Poison_Bubble.png",
+    "FrameSize": { "Width": 32, "Height": 32 },
+    "ScaleRatioConstraint": "OneToOne",
     "UVOption": "RandomFlipU",
     "SoftParticles": "Disable",
     "InitialAnimationFrame": {
-      "Opacity": 0.0,
-      "Color": "#6b3a9a",
+      "Opacity": 1.0,
+      "Color": "#4a9a3a",
       "Scale": {
-        "X": { "Min": 0.22, "Max": 0.38 },
-        "Y": { "Min": 0.22, "Max": 0.38 }
+        "X": { "Min": 0.35, "Max": 0.7 },
+        "Y": { "Min": 0.35, "Max": 0.7 }
       },
       "Rotation": {
         "X": { "Min": 0, "Max": 0 },
         "Y": { "Min": 0, "Max": 0 },
-        "Z": { "Min": -180, "Max": 180 }
+        "Z": { "Min": -90, "Max": 90 }
       },
-      "FrameIndex": { "Min": 0, "Max": 2 }
+      "FrameIndex": { "Min": 0, "Max": 0 }
     },
     "Animation": {
-      "0": { "Opacity": 0.0, "Color": "#7a4aad" },
-      "12": { "Opacity": 0.65, "Color": "#4a9a3a" },
-      "50": {
-        "Opacity": 0.4,
-        "Color": "#6b3a9a",
+      "0": { "Opacity": 1.0, "Color": "#6b3a9a" },
+      "20": { "Opacity": 1.0, "Color": "#4a9a3a" },
+      "55": {
+        "Opacity": 0.7,
+        "Color": "#7a4aad",
         "Scale": {
-          "X": { "Min": 0.4, "Max": 0.65 },
-          "Y": { "Min": 0.4, "Max": 0.65 }
+          "X": { "Min": 0.7, "Max": 1.2 },
+          "Y": { "Min": 0.7, "Max": 1.2 }
         }
       },
       "100": {
         "Opacity": 0.0,
         "Color": "#2a6b3a",
         "Scale": {
-          "X": { "Min": 0.55, "Max": 0.85 },
-          "Y": { "Min": 0.55, "Max": 0.85 }
+          "X": { "Min": 1.0, "Max": 1.6 },
+          "Y": { "Min": 1.0, "Max": 1.6 }
         }
       }
     }

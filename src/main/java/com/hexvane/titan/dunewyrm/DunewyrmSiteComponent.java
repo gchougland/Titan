@@ -9,6 +9,8 @@ import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.UUID;
 
 /**
  * Worldgen marker inside {@code Dunewyrm_Structure_Site}. Serializable so cleared sites stay cleared across
@@ -36,6 +38,13 @@ public final class DunewyrmSiteComponent implements Component<EntityStore> {
 
     private boolean cleared;
     private transient boolean pending;
+    private transient float maintainTimer;
+    /**
+     * Encounter of the snake this site spawned, so the site can find its own snake (and its split halves)
+     * wherever the fight has wandered. Not saved: snakes do not survive unload, so a fresh one is built.
+     */
+    @Nullable
+    private transient UUID encounterId;
 
     public DunewyrmSiteComponent() {
     }
@@ -54,6 +63,23 @@ public final class DunewyrmSiteComponent implements Component<EntityStore> {
 
     public void setPending(final boolean pending) {
         this.pending = pending;
+    }
+
+    public float getMaintainTimer() {
+        return maintainTimer;
+    }
+
+    public void setMaintainTimer(final float maintainTimer) {
+        this.maintainTimer = maintainTimer;
+    }
+
+    @Nullable
+    public UUID getEncounterId() {
+        return encounterId;
+    }
+
+    public void setEncounterId(@Nullable final UUID encounterId) {
+        this.encounterId = encounterId;
     }
 
     @Nonnull

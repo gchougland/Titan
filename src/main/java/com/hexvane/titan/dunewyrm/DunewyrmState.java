@@ -14,6 +14,8 @@ public enum DunewyrmState {
     COBRA,
     /** Underground dig with surface particles and scorpion spawns. */
     TUNNEL,
+    /** Post-split thrash (up/down) before fleeing. */
+    FLAIL,
     /** Despawning after its last body segment died. */
     DYING
 }

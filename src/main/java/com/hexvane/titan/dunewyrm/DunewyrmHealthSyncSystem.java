@@ -1,6 +1,7 @@
 package com.hexvane.titan.dunewyrm;
 
 import com.hexvane.titan.combat.TitanBattleMusic;
+import com.hexvane.titan.combat.TitanBattleWeather;
 import com.hexvane.titan.spawn.TitanPartBuilder;
 import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.Archetype;
@@ -16,14 +17,12 @@ import com.hypixel.hytale.component.system.HolderSystem;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.protocol.packets.interface_.UpdateBossBar;
 import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.core.util.TargetUtil;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
@@ -102,9 +101,11 @@ public final class DunewyrmHealthSyncSystem extends EntityTickingSystem<EntitySt
         if (worm.getBarViewers().isEmpty()) return;
         final int networkId = networkIdOf(accessor, self);
         final int music = TitanBattleMusic.resolve(worm.getVariant());
+        final int weather = TitanBattleWeather.resolve(worm.getVariant());
         for (final Ref<EntityStore> viewer : worm.getBarViewers()) {
             if (networkId != NO_ENTITY) hide(accessor, viewer, networkId);
             TitanBattleMusic.clear(accessor, viewer, music);
+            TitanBattleWeather.clear(accessor, viewer, weather);
         }
         worm.getBarViewers().clear();
     }
@@ -118,6 +119,7 @@ public final class DunewyrmHealthSyncSystem extends EntityTickingSystem<EntitySt
         final var viewers = worm.getBarViewers();
         final var variant = worm.getVariant();
         final int music = TitanBattleMusic.resolve(variant);
+        final int weather = TitanBattleWeather.resolve(variant);
         final String name = variant != null && variant.getDisplayName() != null
             ? variant.getDisplayName()
             : "Dunewyrm";
@@ -128,11 +130,13 @@ public final class DunewyrmHealthSyncSystem extends EntityTickingSystem<EntitySt
             viewers.remove(i);
             if (networkId != NO_ENTITY) hide(accessor, viewer, networkId);
             TitanBattleMusic.clear(accessor, viewer, music);
+            TitanBattleWeather.clear(accessor, viewer, weather);
         }
 
         for (final Ref<EntityStore> player : engaged) {
             if (!player.isValid()) continue;
             TitanBattleMusic.apply(accessor, player, music);
+            TitanBattleWeather.apply(accessor, player, weather);
             if (viewers.contains(player)) continue;
             if (networkId != NO_ENTITY) {
                 write(accessor, player, new UpdateBossBar(networkId, Message.raw(name).getFormattedMessage(), false));
@@ -176,11 +180,7 @@ public final class DunewyrmHealthSyncSystem extends EntityTickingSystem<EntitySt
     private static void collectNearbyPlayers(@Nonnull final Store<EntityStore> store,
                                              @Nonnull final Vector3d position,
                                              @Nonnull final List<Ref<EntityStore>> out) {
-        for (final Ref<EntityStore> candidate : TargetUtil.getAllEntitiesInCylinder(
-            position, VIEW_RADIUS, VIEW_RADIUS, store)) {
-            if (store.getComponent(candidate, Player.getComponentType()) == null) continue;
-            out.add(candidate);
-        }
+        DunewyrmPlayers.collectWithin(store, position, VIEW_RADIUS, out);
     }
 
     private static void write(@Nonnull final ComponentAccessor<EntityStore> accessor,
@@ -215,15 +215,29 @@ public final class DunewyrmHealthSyncSystem extends EntityTickingSystem<EntitySt
                                     @Nonnull final RemoveReason reason,
                                     @Nonnull final Store<EntityStore> store) {
             final var worm = holder.getComponent(DunewyrmComponent.getComponentType());
-            if (worm == null || worm.getBarViewers().isEmpty()) return;
+            if (worm == null) return;
 
-            final var networkId = holder.getComponent(NetworkId.getComponentType());
-            final int music = TitanBattleMusic.resolve(worm.getVariant());
-            for (final Ref<EntityStore> viewer : worm.getBarViewers()) {
-                if (networkId != null) hide(store, viewer, networkId.getId());
-                TitanBattleMusic.clear(store, viewer, music);
+            if (!worm.getBarViewers().isEmpty()) {
+                final var networkId = holder.getComponent(NetworkId.getComponentType());
+                final int music = TitanBattleMusic.resolve(worm.getVariant());
+                final int weather = TitanBattleWeather.resolve(worm.getVariant());
+                for (final Ref<EntityStore> viewer : worm.getBarViewers()) {
+                    if (networkId != null) hide(store, viewer, networkId.getId());
+                    TitanBattleMusic.clear(store, viewer, music);
+                    TitanBattleWeather.clear(store, viewer, weather);
+                }
+                worm.getBarViewers().clear();
             }
-            worm.getBarViewers().clear();
+
+            // Unload / reap — site stays uncleared so Maintain can respawn a fresh snake. Splits and deaths
+            // already did their own bookkeeping.
+            if (worm.getState() != DunewyrmState.DYING && !worm.isEncounterReleased()) {
+                final DunewyrmEncounter encounter = DunewyrmEncounter.getOrCreate(worm.getEncounterId());
+                encounter.removeSnake();
+                if (encounter.getLivingSnakes() <= 0 && encounter.getRemainingBodyHealth() > 0.5f) {
+                    DunewyrmEncounter.remove(worm.getEncounterId());
+                }
+            }
         }
     }
 }

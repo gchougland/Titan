@@ -101,12 +101,19 @@ public final class TitanShellDamageSystem extends DamageEventSystem {
 
         // ProjectileSource extends EntitySource and reports the shooter, so an egg cracked with arrows
         // still knows whose it is.
+        int attackerIndex = -1;
         if (damage.getSource() instanceof Damage.EntitySource entitySource && entitySource.getRef().isValid()) {
             titan.reportAttacker(entitySource.getRef());
+            attackerIndex = entitySource.getRef().getIndex();
         }
 
         final float amount = damage.getAmount();
         if (amount <= 0f) return;
+
+        final long tick = store.getExternalData().getWorld().getTick();
+        if (!shell.acceptHit(attackerIndex, tick)) {
+            return;
+        }
 
         shell.absorb(amount);
         knock(archetypeChunk, index, commandBuffer, titan);

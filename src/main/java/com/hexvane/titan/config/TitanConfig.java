@@ -37,6 +37,11 @@ public final class TitanConfig {
             c -> c.attackKnockbackMultiplier
         ).add()
         .append(
+            new KeyedCodec<>("PlayerHealthScalePerExtra", Codec.DOUBLE),
+            (c, v) -> c.playerHealthScalePerExtra = v,
+            c -> c.playerHealthScalePerExtra
+        ).add()
+        .append(
             new KeyedCodec<>("PickaxeDamageMultiplier", Codec.DOUBLE),
             (c, v) -> c.pickaxeDamageMultiplier = v,
             c -> c.pickaxeDamageMultiplier
@@ -111,6 +116,7 @@ public final class TitanConfig {
     private double weakpointHealthMultiplier = 1.5;
     private double attackDamageMultiplier = 1.5;
     private double attackKnockbackMultiplier = 0.8;
+    private double playerHealthScalePerExtra = 0.35;
     private double pickaxeDamageMultiplier = 18;
     private double maceDamageMultiplier = 1.4;
     private boolean battleMusic = true;
@@ -137,6 +143,15 @@ public final class TitanConfig {
     /** Scales how far a smash or body slam throws whoever it catches. */
     public float getAttackKnockbackMultiplier() {
         return clamp(attackKnockbackMultiplier);
+    }
+
+    /**
+     * Extra health per additional player in a fight (1 player = no bonus).
+     *
+     * <p>Default {@code 0.35} means 2 players → 1.35× HP, 3 → 1.7×, and so on.
+     */
+    public float getPlayerHealthScalePerExtra() {
+        return (float) Math.max(0.0, Math.min(2.0, playerHealthScalePerExtra));
     }
 
     /**

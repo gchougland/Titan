@@ -14,6 +14,8 @@ import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.modules.entity.component.EntityScaleComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
+import com.hypixel.hytale.server.core.modules.entity.hitboxcollision.HitboxCollision;
+import com.hypixel.hytale.server.core.modules.entity.hitboxcollision.HitboxCollisionConfig;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Quaterniond;
 import org.joml.Vector3d;
@@ -48,6 +50,12 @@ public final class DunewyrmPartSyncSystem extends EntityTickingSystem<EntityStor
     @Override
     public Query<EntityStore> getQuery() {
         return query;
+    }
+
+    /** Same switch as the walking titans; everything below goes through the command buffer / thread-local scratch. */
+    @Override
+    public boolean isParallel(final int archetypeChunkSize, final int taskCount) {
+        return TitanConfig.get().isParallelPartSync() && useParallel(archetypeChunkSize, taskCount);
     }
 
     @Override
@@ -87,9 +95,17 @@ public final class DunewyrmPartSyncSystem extends EntityTickingSystem<EntityStor
         if (segmentIndex < 0 || segmentIndex >= worm.getSegments().size()) return;
         final DunewyrmSegment segment = worm.getSegments().get(segmentIndex);
 
-        if (!part.consumeSyncSlot(dt, TitanConfig.get().getPartSyncInterval()) && !worm.isSegmentsDirty()) {
-            return;
-        }
+        // Segments nobody is near only pose on some ticks. Decided per segment (by the AI tick) rather than
+        // per voxel, so a whole segment moves together: per-voxel staggering tore the body into jitter.
+        if (!segment.isSyncThisTick()) return;
+        if (!part.consumeSyncSlot(dt, TitanConfig.get().getPartSyncInterval())) return;
+
+        final Ref<EntityStore> self = archetypeChunk.getReferenceTo(index);
+        // Climbable voxels drag anchored players with them. While the snake dives, strip collision so
+        // riders are not yanked underground (and flung when they hit solid ground). On the sync slot rather
+        // than every tick: a tenth of a second of lag on the swap is invisible.
+        final boolean buried = worm.getState() == DunewyrmState.TUNNEL || worm.getTunnelDepth() > 0.25f;
+        syncClimbable(part, self, commandBuffer, buried);
 
         final Scratch scratch = SCRATCH.get();
         final float yaw = segment.getYaw();
@@ -123,7 +139,33 @@ public final class DunewyrmPartSyncSystem extends EntityTickingSystem<EntityStor
             return;
         }
 
+        // No per-voxel vertical step cap here: only every other voxel is climbable, so capping just those
+        // split each segment into two interleaved halves whenever it crossed a bump. Rider safety comes from
+        // the segment's own ground easing (DunewyrmSpawner.easeGround) moving the whole platform gently,
+        // plus the fall guard for landings.
         transform.getPosition().set(scratch.worldPosition);
         transform.getRotation().set(scratch.rotation);
+    }
+
+    private static void syncClimbable(@Nonnull final DunewyrmPartComponent part,
+                                      @Nonnull final Ref<EntityStore> self,
+                                      @Nonnull final CommandBuffer<EntityStore> commandBuffer,
+                                      final boolean buried) {
+        if (!part.isClimbable()) return;
+
+        final var collision = commandBuffer.getComponent(self, HitboxCollision.getComponentType());
+        if (buried) {
+            if (collision != null) {
+                commandBuffer.tryRemoveComponent(self, HitboxCollision.getComponentType());
+            }
+            return;
+        }
+        if (collision != null) return;
+
+        final HitboxCollisionConfig config =
+            HitboxCollisionConfig.getAssetMap().getAsset(DunewyrmTuning.COLLIDER_CONFIG);
+        if (config != null) {
+            commandBuffer.putComponent(self, HitboxCollision.getComponentType(), new HitboxCollision(config));
+        }
     }
 }

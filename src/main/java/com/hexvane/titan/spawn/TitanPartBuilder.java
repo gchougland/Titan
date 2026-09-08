@@ -378,6 +378,34 @@ public final class TitanPartBuilder {
     }
 
     /**
+     * Invisible solid volume used to fill hollow prefab shells so players cannot fall inside them.
+     *
+     * <p>No block model and no {@link RespondToHit}: it is collision only. Sized in local bone/segment
+     * space and inset from the prefab bounds so the outer climbable voxels still form the walkable skin.
+     */
+    public static final float SOLID_FILL_INSET = 0.72f;
+
+    @Nonnull
+    public static Holder<EntityStore> buildSolidFill(@Nonnull final Store<EntityStore> store,
+                                                     @Nonnull final Vector3d worldPosition,
+                                                     @Nonnull final Rotation3f rotation,
+                                                     @Nonnull final Box localBox,
+                                                     @Nonnull final HitboxCollisionConfig colliderConfig) {
+
+        final var holder = EntityStore.REGISTRY.newHolder();
+        holder.addComponent(TransformComponent.getComponentType(),
+            new TransformComponent(new Vector3d(worldPosition), new Rotation3f(rotation)));
+        final var bounds = new BoundingBox(localBox);
+        bounds.setBaseModelBox(localBox);
+        holder.addComponent(BoundingBox.getComponentType(), bounds);
+        holder.addComponent(HitboxCollision.getComponentType(), new HitboxCollision(colliderConfig));
+        holder.addComponent(NetworkId.getComponentType(), new NetworkId(store.getExternalData().takeNextNetworkId()));
+        holder.ensureComponent(EntityModule.get().getVisibleComponentType());
+        holder.ensureComponent(EntityStore.REGISTRY.getNonSerializedComponentType());
+        return holder;
+    }
+
+    /**
      * Builds an ore weakpoint. It renders the ore's own model but is a real damageable entity rather than a
      * dropped item, because item entities are intangible and cannot be attacked.
      *

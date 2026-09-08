@@ -1,11 +1,11 @@
 {
-  "$Comment": "Guaranteed Dunewyrm kill rewards: scarab battleaxe, ruby, and zephyr. Red crystal shards come from the variant DropItem.",
+  "$Comment": "Guaranteed Dunewyrm kill rewards: legendary Scarab Battleaxe, ruby, and zephyr. Red crystal shards come from the variant DropItem.",
   "Container": {
     "Type": "Multiple",
     "Containers": [
       {
         "Type": "Single",
-        "Item": { "ItemId": "Weapon_Battleaxe_Scarab", "QuantityMin": 1, "QuantityMax": 1 }
+        "Item": { "ItemId": "Titan_Weapon_Battleaxe_Scarab", "QuantityMin": 1, "QuantityMax": 1 }
       },
       {
         "Type": "Single",
@@ -18,3 +18,4 @@
     ]
   }
 }
+

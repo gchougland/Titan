@@ -65,6 +65,42 @@ public final class PrefabVoxels {
         return surfaceSize;
     }
 
+    public int sizeX() {
+        return maxX - minX + 1;
+    }
+
+    public int sizeY() {
+        return maxY - minY + 1;
+    }
+
+    public int sizeZ() {
+        return maxZ - minZ + 1;
+    }
+
+    public int minX() {
+        return minX;
+    }
+
+    public int minY() {
+        return minY;
+    }
+
+    public int minZ() {
+        return minZ;
+    }
+
+    public int maxX() {
+        return maxX;
+    }
+
+    public int maxY() {
+        return maxY;
+    }
+
+    public int maxZ() {
+        return maxZ;
+    }
+
     /**
      * @return default pivot for a bone that does not declare one: the bottom centre of the prefab's bounds,
      *         where a limb segment hinges

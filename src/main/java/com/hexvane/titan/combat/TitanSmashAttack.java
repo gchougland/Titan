@@ -143,8 +143,18 @@ public final class TitanSmashAttack {
                                @Nonnull final Ref<EntityStore> victim,
                                @Nonnull final Vector3d velocity) {
         if (!victim.isValid()) return;
-
         write(commandBuffer, victim, new Vector3d(velocity).mul(TitanConfig.get().getAttackKnockbackMultiplier()));
+    }
+
+    /**
+     * Like {@link #impulse}, but skips the throw when the victim is standing on a climbable titan part.
+     */
+    public static void impulseUnlessStandingOn(@Nonnull final Store<EntityStore> store,
+                                               @Nonnull final CommandBuffer<EntityStore> commandBuffer,
+                                               @Nonnull final Ref<EntityStore> victim,
+                                               @Nonnull final Vector3d velocity) {
+        if (!victim.isValid() || TitanStandingOn.isOnClimbable(store, victim)) return;
+        impulse(commandBuffer, victim, velocity);
     }
 
     private static void applyKnockback(@Nonnull final Store<EntityStore> store,
@@ -155,6 +165,9 @@ public final class TitanSmashAttack {
                                        final double verticalShare) {
         final var transform = store.getComponent(victim, TransformComponent.getComponentType());
         if (transform == null) return;
+
+        // Anchored to a climbing platform + knockback can fling hundreds of blocks.
+        if (TitanStandingOn.isOnClimbable(store, victim)) return;
 
         final var away = new Vector3d(transform.getPosition()).sub(impactPoint);
         away.y = 0;
@@ -191,6 +204,16 @@ public final class TitanSmashAttack {
             velocity.x /= hack;
             velocity.z /= hack;
         }
+
+        // Hard cap so platform constraint + residual velocity cannot launch absurd distances.
+        final double horiz = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+        final float maxPost = hack > 0f ? 12f / hack : 12f;
+        if (horiz > maxPost && horiz > 1e-6) {
+            final double scale = maxPost / horiz;
+            velocity.x *= scale;
+            velocity.z *= scale;
+        }
+        if (velocity.y > 8.0) velocity.y = 8.0;
 
         final var knockback = commandBuffer.ensureAndGetComponent(victim, KnockbackComponent.getComponentType());
         knockback.setVelocity(velocity);
