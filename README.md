@@ -62,6 +62,4 @@ Optional compatibility with **RPG Leveling** and **Endless Leveling** is include
 
 ---
 
-For server owners: [commands and settings](docs/SERVER_GUIDE.md).
-
 All rights reserved. See [LICENSE](LICENSE).
