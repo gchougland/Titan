@@ -1,0 +1,23 @@
+{
+  "AudioCategory": "AudioCat_NPC",
+  "Volume": -2,
+  "SpatialBlend": 1,
+  "StartAttenuationDistance": 10,
+  "MaxDistance": 96,
+  "MaxInstance": 6,
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Titan/Temple/Temple_Boulder_Shatter_01.ogg",
+        "Sounds/Titan/Temple/Temple_Boulder_Shatter_02.ogg"
+      ],
+      "RoundRobinHistorySize": 1,
+      "RandomSettings": {
+        "MinPitch": -0.3,
+        "MaxPitch": 0.1,
+        "MinVolume": -1,
+        "MaxVolume": 0
+      }
+    }
+  ]
+}

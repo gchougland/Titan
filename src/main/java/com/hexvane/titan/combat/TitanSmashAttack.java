@@ -7,8 +7,6 @@ import com.hexvane.titan.entity.TitanWeakpointComponent;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.protocol.ChangeVelocityType;
-import com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageCause;
@@ -31,8 +29,7 @@ import java.util.ArrayList;
  * Knockback is aimed outwards and up; the vertical share is what separates the attacks, since a smash
  * mostly shoves outwards while a ground pound throws almost straight up.
  *
- * <p>Knockback values are speeds in blocks per second on every axis. See {@link #write} for how the
- * horizontal axes are normalized to make that hold.
+ * <p>Knockback values are speeds in blocks per second on every axis.
  */
 public final class TitanSmashAttack {
 
@@ -99,7 +96,9 @@ public final class TitanSmashAttack {
         if (source != null && source.isValid()) {
             final int damageCauseIndex = DamageCause.getAssetMap().getIndex("Physical");
             final var config = TitanConfig.get();
-            final float scaledDamage = damage * config.getAttackDamageMultiplier();
+            var titan = commandBuffer.getComponent(source, com.hexvane.titan.entity.TitanComponent.getComponentType());
+            final float scaledDamage = damage * config.getAttackDamageMultiplier()
+                * (titan == null ? 1 : titan.getLevelDamageMultiplier());
             final float scaledKnockback = knockback * config.getAttackKnockbackMultiplier();
 
             // The spatial query returns a shared thread-local list and dealing damage can run queries of its
@@ -113,7 +112,7 @@ public final class TitanSmashAttack {
                 DamageSystems.executeDamage(victim, commandBuffer,
                     new Damage(new Damage.EntitySource(source), damageCauseIndex, scaledDamage));
 
-                applyKnockback(store, commandBuffer, victim, impactPoint, scaledKnockback, verticalShare);
+                if (scaledKnockback > 0) applyKnockback(store, commandBuffer, victim, impactPoint, scaledKnockback, verticalShare);
                 hits++;
             }
         }
@@ -183,43 +182,23 @@ public final class TitanSmashAttack {
     }
 
     /**
-     * Hands one throw to the engine, in blocks per second.
-     *
-     * <p>The horizontal components are divided back down on the way out. {@link
-     * DamageSystems.HackKnockbackValues} multiplies X and Z by {@code PLAYER_KNOCKBACK_SCALE} before the
-     * velocity system sees them and leaves Y untouched, so without this a knockback of {@code 6} would
-     * mean a small hop upwards and a hundred and fifty blocks sideways. Dividing it out keeps all three
-     * axes in the same units.
-     *
-     * <p>Duration is zero because {@code KnockbackSystems} re-applies the velocity every tick until the
-     * timer passes the duration, so any larger value would multiply the throw by the tick count. Zero is
-     * the engine's convention for a single impulse.
+     * Hands one capped throw to the engine, in blocks per second. A velocity instruction is consumed
+     * once and does not pass through the legacy knockback scaling system.
      */
     private static void write(@Nonnull final CommandBuffer<EntityStore> commandBuffer,
                               @Nonnull final Ref<EntityStore> victim,
                               @Nonnull final Vector3d velocity) {
 
-        final float hack = DamageSystems.HackKnockbackValues.PLAYER_KNOCKBACK_SCALE;
-        if (hack > 0f) {
-            velocity.x /= hack;
-            velocity.z /= hack;
-        }
-
         // Hard cap so platform constraint + residual velocity cannot launch absurd distances.
         final double horiz = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
-        final float maxPost = hack > 0f ? 12f / hack : 12f;
-        if (horiz > maxPost && horiz > 1e-6) {
-            final double scale = maxPost / horiz;
+        if (horiz > 12.0) {
+            final double scale = 12.0 / horiz;
             velocity.x *= scale;
             velocity.z *= scale;
         }
         if (velocity.y > 8.0) velocity.y = 8.0;
 
-        final var knockback = commandBuffer.ensureAndGetComponent(victim, KnockbackComponent.getComponentType());
-        knockback.setVelocity(velocity);
-        knockback.setVelocityType(ChangeVelocityType.Set);
-        knockback.setDuration(0f);
-        knockback.setTimer(0f);
+        TitanImpulse.set(commandBuffer, victim, velocity);
     }
 
     private static void playEffects(@Nonnull final CommandBuffer<EntityStore> commandBuffer,

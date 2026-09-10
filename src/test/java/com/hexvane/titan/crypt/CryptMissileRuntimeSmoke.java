@@ -4,7 +4,6 @@ import com.hexvane.titan.ik.GroundSampler;
 import com.hexvane.titan.spawn.TitanPartBuilder;
 import com.hypixel.hytale.component.*;
 import com.hypixel.hytale.math.shape.Box;
-import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -13,10 +12,15 @@ import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.BlockOperations;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
+import com.hypixel.hytale.server.core.universe.world.SetBlockSettings;
+import com.hypixel.hytale.server.core.util.FillerBlockUtil;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
 import com.hypixel.hytale.server.npc.NPCPlugin;
+import com.hypixel.hytale.server.npc.role.support.WorldSupport;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -48,7 +52,7 @@ public final class CryptMissileRuntimeSmoke {
                 return true;
             });
         }
-        System.out.println("[CRYPT RUNTIME SMOKE] visible emerald models / ordinary hostile NPC / touching+1-3+9-15 blocks / strafe+slow tick / thin wall / owner immunity PASS");
+        System.out.println("[CRYPT RUNTIME SMOKE] cold NPC attitude caches / neutral NPC safety / visible emerald models / ordinary hostile NPC / touching+1-3+9-15 blocks / strafe+slow tick / thin wall / owner immunity PASS");
     }
 
     private static Fixture create(World world,Vector3d position) {
@@ -72,6 +76,7 @@ public final class CryptMissileRuntimeSmoke {
         try {
             check(CryptSpellSystem.enemy(store,fixture.owner,fixture.npc),"native Skeleton_Soldier attitude is hostile to spell owner");
             check(!CryptSpellSystem.enemy(store,fixture.owner,fixture.owner),"spell cannot target its owner");
+            coldAttitudeCache(store,origin,fixture);
             check(ModelAsset.getAssetMap().getAsset(CryptStaff.MISSILE_MODEL)!=null,"emerald soul model asset resolved");
             for(double distance:new double[]{.55,1,2,3,9,15})
                 fire(store,origin,fixture,distance,.05f,false,false);
@@ -91,6 +96,33 @@ public final class CryptMissileRuntimeSmoke {
         } finally {
             clear(store,fixture.owner);
             store.removeComponent(fixture.owner,Player.getComponentType());
+        }
+    }
+
+    private static void coldAttitudeCache(Store<EntityStore> store,Vector3d origin,Fixture fixture) {
+        // Reproduce roles that never requested an attitude sensor, even if Skeleton_Soldier's native
+        // role initializes its cache. Reflection is limited to arranging this engine regression fixture.
+        var neutral=NPCPlugin.get().spawnNPC(store,"Cow",null,new Vector3d(origin).add(8,0,3),new Rotation3f());
+        check(neutral!=null,"neutral NPC attitude fixture spawned");
+        try {
+            var cache=WorldSupport.class.getDeclaredField("attitudeCache");cache.setAccessible(true);
+            var hostileWorld=store.getComponent(fixture.npc,WorldSupport.getComponentType());
+            cache.set(hostileWorld,null);
+            check(cache.get(hostileWorld)==null,"hostile fixture starts without an attitude cache");
+            // Execute the actual projectile ticks, including target acquisition and repeated filtering.
+            fire(store,origin,fixture,3,.05f,false,false);
+            check(cache.get(hostileWorld)!=null,"spell initialized the hostile NPC cache");
+            check(CryptSpellSystem.enemy(store,fixture.owner,fixture.npc),"repeated query preserves hostility");
+
+            var neutralWorld=store.getComponent(neutral.first(),WorldSupport.getComponentType());
+            cache.set(neutralWorld,null);
+            check(!CryptSpellSystem.enemy(store,fixture.owner,neutral.first()),"uncached cow is not a spell target");
+            check(cache.get(neutralWorld)!=null,"neutral NPC cache initialized without assuming hostility");
+            check(!CryptSpellSystem.enemy(store,fixture.owner,neutral.first()),"cached cow remains protected");
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError("could not arrange uninitialized NPC cache regression",e);
+        } finally {
+            if(neutral.first().isValid()) store.removeEntity(neutral.first(),RemoveReason.REMOVE);
         }
     }
 
@@ -144,8 +176,12 @@ public final class CryptMissileRuntimeSmoke {
         for(var ref:missiles(store,owner)) if(ref.isValid()) store.removeEntity(ref,RemoveReason.REMOVE);
     }
     private static void block(World world,Vector3i p,String id) {
-        var chunk=world.getChunkStore().getChunkComponent(ChunkUtil.indexChunkFromBlock(p.x,p.z),WorldChunk.getComponentType());
-        check(chunk!=null,"wall fixture chunk loaded");chunk.setBlock(p.x,p.y,p.z,id);
+        var chunks=world.getChunkStore();
+        var section=chunks.getChunkSectionReferenceAtBlock(p.x,p.y,p.z);
+        check(section!=null,"wall fixture section loaded");
+        int blockId=BlockType.getAssetMap().getIndex(id);
+        BlockOperations.setBlock(chunks,section,p.x,p.y,p.z,blockId,BlockType.getAssetMap().getAsset(blockId),
+            RotationTuple.NONE_INDEX,FillerBlockUtil.NO_FILLER,SetBlockSettings.NONE);
     }
     private static <T> T on(World world,Supplier<T> task) throws Exception { return CompletableFuture.supplyAsync(task,world).get(10,TimeUnit.SECONDS); }
     private static void check(boolean okay,String message) { if(!okay) throw new AssertionError(message); }

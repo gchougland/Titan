@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Temple_Boulder_Impact_Dust"
+    },
+    {
+      "SpawnerId": "Temple_Boulder_Chips"
+    }
+  ],
+  "LifeSpan": 1.4,
+  "BoundingRadius": 8,
+  "CullDistance": 112,
+  "IsImportant": true
+}

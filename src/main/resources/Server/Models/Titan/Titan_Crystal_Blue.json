@@ -4,9 +4,26 @@
   "Texture": "Items/Titan/Crystal/Textures/Blue.png",
   "EyeHeight": 0.2,
   "HitBox": {
-    "Min": { "X": -0.56, "Y": -0.24, "Z": -0.11 },
-    "Max": { "X": 0.31, "Y": 0.56, "Z": 0.75 }
+    "Min": {
+      "X": -0.56,
+      "Y": -0.24,
+      "Z": -0.11
+    },
+    "Max": {
+      "X": 0.31,
+      "Y": 0.56,
+      "Z": 0.75
+    }
   },
   "MinScale": 1,
-  "MaxScale": 8
+  "MaxScale": 8,
+  "AnimationSets": {
+    "Hurt": {
+      "Animations": [
+        {
+          "Animation": "Items/Titan/OreNode/Hurt.blockyanim"
+        }
+      ]
+    }
+  }
 }

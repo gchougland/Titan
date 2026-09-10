@@ -151,6 +151,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.test {
     useJUnitPlatform()
+    systemProperty("java.util.logging.manager", "com.hypixel.hytale.logger.backend.HytaleLogManager")
 }
 
 tasks.named<ProcessResources>("processResources") {

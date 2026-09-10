@@ -205,7 +205,10 @@ public final class TitanSpawner {
 
         final float encounterScale = TitanEncounterScale.healthScaleNear(
             store, position, Math.max(32.0, variant.getWakeRadius()));
-        final float healthMultiplier = TitanConfig.get().getWeakpointHealthMultiplier() * encounterScale;
+        final var leveling = com.hexvane.titan.compat.LevelingCompatibility.near(store, position, Math.max(32.0, variant.getWakeRadius()));
+        titan.setLevelDamageMultiplier(leveling.damage());
+        titan.levelHealthMultiplier = leveling.health();
+        final float healthMultiplier = TitanConfig.get().getWeakpointHealthMultiplier() * encounterScale * leveling.health();
         final float nodeHealth = variant.getWeakpointHealth() * healthMultiplier;
         final float shellHealth = variant.getShellHealth() * healthMultiplier;
 
@@ -326,8 +329,9 @@ public final class TitanSpawner {
             // could care about it and then drains a command buffer; paying that per voxel is most of the
             // hitch when a titan appears, and the bulk call does the walk once for the whole bone. Sized to
             // the voxel count, which is the most this loop can produce.
+            var coreSlices = bone.isSolidCore() ? voxels.horizontalSlices() : java.util.List.of(voxels);
             @SuppressWarnings("unchecked")
-            final Holder<EntityStore>[] holders = new Holder[voxels.size() + 1];
+            final Holder<EntityStore>[] holders = new Holder[voxels.size() + coreSlices.size()];
             int holderCount = 0;
 
             int index = -1;
@@ -416,12 +420,19 @@ public final class TitanSpawner {
                 holders[holderCount++] = holder;
             }
 
-            // Seal the underside of hollow climbable bones (Yaga house floor from below) without filling
-            // the walkable interior. Dunewyrm uses a full solid core separately.
+            // Houses retain a thin underside seal. Solid limbs follow each step in the prefab's taper.
             if (hollow && !bone.isShell() && boneWantsColliders && colliderConfig != null) {
-                holders[holderCount++] = buildBoneUndersideSeal(
-                    store, root, bone, voxels, pivot, mirror, boneScale, pose, colliderConfig);
-                counts.colliders++;
+                for (var slice : coreSlices) {
+                    holders[holderCount++] = buildBoneUndersideSeal(
+                        store, root, bone, slice, pivot, mirror, boneScale, pose, colliderConfig);
+                    counts.colliders++;
+                    if (bone.isSolidCore()) {
+                        var center = slice.center().sub(pivot).mul(bone.getScale());
+                        center.x *= mirror;
+                        titan.getSolidCores().add(new com.hexvane.titan.combat.TitanCoreSafety.Volume(bone.getIndex(), center,
+                            new Vector3d(slice.sizeX(), slice.sizeY(), slice.sizeZ()).mul(.5 * bone.getScale())));
+                    }
+                }
             }
 
             if (holderCount > 0) store.addEntities(holders, 0, holderCount, AddReason.SPAWN);
@@ -450,7 +461,7 @@ public final class TitanSpawner {
 
         final float inset = TitanPartBuilder.SOLID_FILL_INSET;
         // Sit the slab in the first block of floor thickness, not at mid-height of the whole house.
-        final double localY = (voxels.minY() + 1.0 - pivot.y) * bone.getScale();
+        final double localY = ((bone.isSolidCore() ? voxels.center().y : voxels.minY() + 1.0) - pivot.y) * bone.getScale();
         final var local = new Vector3d(
             (voxels.center().x - pivot.x) * bone.getScale() * mirror,
             localY,
@@ -462,7 +473,7 @@ public final class TitanSpawner {
 
         final double hx = voxels.sizeX() * 0.5 * inset * boneScale;
         final double hz = voxels.sizeZ() * 0.5 * inset * boneScale;
-        final double hy = 0.6 * boneScale;
+        final double hy = bone.isSolidCore() ? voxels.sizeY() * .5 * inset * boneScale : 0.6 * boneScale;
         final var box = new Box(-hx, -hy, -hz, hx, hy, hz);
 
         final Holder<EntityStore> holder = TitanPartBuilder.buildSolidFill(

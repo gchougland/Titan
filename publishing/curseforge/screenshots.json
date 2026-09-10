@@ -1,0 +1,48 @@
+[
+  {
+    "slot": "01-talus",
+    "title": "More than a pile of rocks",
+    "brief": "Your screenshot of a standing Talus in its surroundings. Avoid showing combat mechanics.",
+    "caption": "That was not there a moment ago.",
+    "url": "https://i.imgur.com/7COKEbQ.png",
+    "section": "Stone Talus"
+  },
+  {
+    "slot": "02-temple",
+    "title": "A world worth looking up at",
+    "brief": "Your screenshot of the Roaming Temple from ground level. Include a player nearby to show its scale.",
+    "caption": "Some landmarks have somewhere else to be.",
+    "url": "https://i.imgur.com/GYG4fF2.png",
+    "section": "Roaming Temple"
+  },
+  {
+    "slot": "03-dunewyrm",
+    "title": "Trouble in the sand",
+    "brief": "Your screenshot of the Dunewyrm in the desert, outside an attack animation. Show its scale without revealing fight mechanics.",
+    "caption": "You are a long way from home.",
+    "url": "https://i.imgur.com/dKdHRxi.png",
+    "section": "Dunewyrm"
+  },
+  {
+    "slot": "04-crypt",
+    "title": "Below the surface",
+    "brief": "Your atmospheric screenshot of the crypt interior. Keep the boss encounter and its surprises out of frame.",
+    "caption": "How far down does this go?",
+    "url": "https://i.imgur.com/fzLYc1P.png",
+    "section": "The crypt"
+  },
+  {
+    "slot": "05-house",
+    "title": "Home, wherever you stop",
+    "brief": "Your screenshot of the Baba Yaga House resting beside its owner. A forest clearing or campsite works well.",
+    "caption": "A little less walking back to base.",
+    "url": "https://i.imgur.com/MW0kfQ2.png",
+    "section": "Baba Yaga House"
+  },
+  {
+    "slot": "06-party",
+    "title": "Better with company",
+    "brief": "Your screenshot of a group setting out toward a titan in the distance. Use ordinary gear and avoid revealing reward items.",
+    "caption": "Bring someone who will believe the story."
+  }
+]

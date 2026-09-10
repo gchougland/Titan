@@ -1,0 +1,18 @@
+{
+  "Parent": "SFX_Attn_Loud",
+  "AudioCategory": "AudioCat_SFX",
+  "Volume": 3,
+  "PreventSoundInterruption": true,
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Environments/Zone3/Global/Cave/Emitters/Z3_Emit_Ice_Rumble_01.ogg"
+      ],
+      "Volume": 0,
+      "RandomSettings": {
+        "MinPitch": -4,
+        "MaxPitch": 0
+      }
+    }
+  ]
+}

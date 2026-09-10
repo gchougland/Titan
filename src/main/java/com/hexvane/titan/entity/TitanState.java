@@ -79,6 +79,12 @@ public enum TitanState {
     /** Leg planted, weight still on it, before the gait takes it back. */
     STOMP_RECOVER("Idle"),
 
+    /** Shaking loose marked stalactites, then waiting for the falling stones to land. */
+    STALACTITES("Idle"),
+
+    /** Stone gathers beneath the island before its pursuing boulders are released. */
+    BOULDER_FORMATION("Idle"),
+
     /** Falling apart. */
     DYING("Death"),
     /**
@@ -155,7 +161,7 @@ public enum TitanState {
 
     /** Whether any attack is in progress. */
     public boolean isAttacking() {
-        return isOneArmed() || isTwoArmed() || isLegStomp();
+        return isOneArmed() || isTwoArmed() || isLegStomp() || this == STALACTITES || this == BOULDER_FORMATION;
     }
 
     /** Whether this is a windup, and so the point at which the attack should be telegraphed. */

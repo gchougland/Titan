@@ -1,0 +1,140 @@
+{
+  "Model": "VFX/Titan/RollingBoulder/Boulder.blockymodel",
+  "Texture": "VFX/Titan/RollingBoulder/Boulder.png",
+  "MinScale": 1,
+  "MaxScale": 1,
+  "HitBox": {
+    "Min": {
+      "X": -1.65,
+      "Y": -1.65,
+      "Z": -1.65
+    },
+    "Max": {
+      "X": 1.65,
+      "Y": 1.65,
+      "Z": 1.65
+    }
+  },
+  "AnimationSets": {
+    "Form_0": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_0.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_1": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_1.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_2": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_2.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_3": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_3.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_4": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_4.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_5": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_5.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_6": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_6.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_7": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_7.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_8": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_8.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_9": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_9.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_10": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_10.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_11": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_11.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_12": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_12.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Form_13": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Form_13.blockyanim",
+          "Looping": false
+        }
+      ]
+    },
+    "Complete": {
+      "Animations": [
+        {
+          "Animation": "VFX/Titan/RollingBoulder/Complete.blockyanim",
+          "Looping": false
+        }
+      ]
+    }
+  }
+}

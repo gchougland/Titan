@@ -121,6 +121,15 @@ public final class TitanComponent implements Component<EntityStore> {
     private int weakpointsToKill;
     private int weakpointsBroken;
     private float nodeHealth;
+    private final List<com.hexvane.titan.combat.TitanCoreSafety.Volume> solidCores = new ArrayList<>();
+    public List<com.hexvane.titan.combat.TitanCoreSafety.Volume> getSolidCores() { return solidCores; }
+    public final com.hexvane.titan.ai.TitanStalactiteAttack.Rain stalactites = new com.hexvane.titan.ai.TitanStalactiteAttack.Rain();
+    public final com.hexvane.titan.ai.TitanRollingBoulders.Volley rollingBoulders = new com.hexvane.titan.ai.TitanRollingBoulders.Volley();
+    private float levelDamageMultiplier = 1;
+    public float levelHealthMultiplier = 1;
+    public boolean levelScalingCaptured;
+    public float getLevelDamageMultiplier() { return levelDamageMultiplier; }
+    public void setLevelDamageMultiplier(float value) { levelDamageMultiplier = value; }
     /**
      * Players previously shown a custom boss bar. Unused after Encounter Manager took over presentation;
      * retained empty so older save/debug paths that touch the list stay safe.

@@ -208,7 +208,11 @@ public final class CryptSpellSystem extends EntityTickingSystem<EntityStore> {
         var flock = store.getComponent(candidate, FlockMembership.getComponentType());
         if (ownFlock != null && flock != null && ownFlock.getFlockId() != null && ownFlock.getFlockId().equals(flock.getFlockId())) return false;
         var npcWorld = store.getComponent(candidate, WorldSupport.getComponentType());
-        return npcWorld != null && npcWorld.getAttitude(candidate, owner, store) == Attitude.HOSTILE;
+        if (npcWorld == null) return false;
+        // Roles without attitude sensors never request this optional cache. External spell queries
+        // must request it too, just as the engine's attitude filters do during their initialization.
+        npcWorld.requireAttitudeCache();
+        return npcWorld.getAttitude(candidate, owner, store) == Attitude.HOSTILE;
     }
 
     static Vector3d center(Store<EntityStore> store, Ref<EntityStore> entity) {

@@ -30,6 +30,12 @@ public final class TitanClimbFallGuardSystem {
     private TitanClimbFallGuardSystem() {
     }
 
+    /** Apply the same rider protection to Titan's direct impulses, leaving ordinary movement alone. */
+    static void softenImpulse(Store<EntityStore> store, Ref<EntityStore> player, Vector3d velocity) {
+        if (store.getComponent(player, Player.getComponentType()) != null
+            && TitanStandingOn.isOnClimbable(store, player)) SoftLand.soften(velocity);
+    }
+
     /** Refuse fall / other non-entity damage while standing on climbable titan geometry. */
     public static final class FallFilter extends DamageEventSystem {
 
@@ -82,9 +88,6 @@ public final class TitanClimbFallGuardSystem {
             TransformComponent.getComponentType());
 
         @Nonnull
-        private final Vector3d zeroHoriz = new Vector3d();
-
-        @Nonnull
         @Override
         public Query<EntityStore> getQuery() {
             return query;
@@ -104,13 +107,17 @@ public final class TitanClimbFallGuardSystem {
             if (knockback == null) return;
 
             final Vector3d v = knockback.getVelocity();
-            if (v.y <= MAX_UPWARD && v.y >= -0.05f) return;
-
-            zeroHoriz.set(v.x * 0.35, Math.min(MAX_UPWARD, Math.max(0.0, v.y * 0.15)), v.z * 0.35);
-            knockback.setVelocity(zeroHoriz);
+            if (!soften(v)) return;
             knockback.setVelocityType(ChangeVelocityType.Set);
             knockback.setDuration(0f);
             knockback.setTimer(0f);
+        }
+
+        private static boolean soften(Vector3d velocity) {
+            if (velocity.y <= MAX_UPWARD && velocity.y >= -0.05f) return false;
+            velocity.set(velocity.x * 0.35,
+                Math.min(MAX_UPWARD, Math.max(0.0, velocity.y * 0.15)), velocity.z * 0.35);
+            return true;
         }
     }
 }

@@ -266,6 +266,10 @@ public final class DunewyrmComponent implements Component<EntityStore> {
         if (smashCooldown > 0f) smashCooldown = Math.max(0f, smashCooldown - dt);
     }
 
+    private int scorpionsThisTunnel;
+    public int getScorpionsThisTunnel() { return scorpionsThisTunnel; }
+    public void startScorpionWave(int count) { scorpionsThisTunnel = count; scorpionBudget = count; }
+
     public float getScorpionBudget() {
         return scorpionBudget;
     }
@@ -423,7 +427,8 @@ public final class DunewyrmComponent implements Component<EntityStore> {
 
     /** Hit-damage multiplier, down to {@link DunewyrmTuning#SHORT_DAMAGE_FLOOR} for the last stub. */
     public float damageScale() {
-        return DunewyrmTuning.SHORT_DAMAGE_FLOOR + (1f - DunewyrmTuning.SHORT_DAMAGE_FLOOR) * lengthFraction();
+        return (DunewyrmTuning.SHORT_DAMAGE_FLOOR + (1f - DunewyrmTuning.SHORT_DAMAGE_FLOOR) * lengthFraction())
+            * DunewyrmEncounter.getOrCreate(encounterId).getLeveling().damage();
     }
 
     public float bodyHealth() {
@@ -473,6 +478,7 @@ public final class DunewyrmComponent implements Component<EntityStore> {
         final var copy = new DunewyrmComponent();
         copy.variant = variant;
         copy.encounterId = encounterId;
+        copy.scorpionsThisTunnel = scorpionsThisTunnel;
         copy.primary = primary;
         copy.state = state;
         for (final DunewyrmSegment segment : segments) {

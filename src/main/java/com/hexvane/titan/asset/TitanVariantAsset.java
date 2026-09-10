@@ -396,6 +396,36 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
             a -> a.plowBeachedSeconds
         ).add()
         .append(
+            new KeyedCodec<>("RollingBoulderChance", Codec.FLOAT),
+            (a, v) -> a.rollingBoulderChance = v,
+            a -> a.rollingBoulderChance
+        ).add()
+        .append(
+            new KeyedCodec<>("RollingBoulderDamage", Codec.FLOAT),
+            (a, v) -> a.rollingBoulderDamage = v,
+            a -> a.rollingBoulderDamage
+        ).add()
+        .append(
+            new KeyedCodec<>("StalactiteChance", Codec.FLOAT),
+            (a, v) -> a.stalactiteChance = v,
+            a -> a.stalactiteChance
+        ).add()
+        .append(
+            new KeyedCodec<>("StalactiteRadius", Codec.FLOAT),
+            (a, v) -> a.stalactiteRadius = v,
+            a -> a.stalactiteRadius
+        ).add()
+        .append(
+            new KeyedCodec<>("StalactiteDamage", Codec.FLOAT),
+            (a, v) -> a.stalactiteDamage = v,
+            a -> a.stalactiteDamage
+        ).add()
+        .append(
+            new KeyedCodec<>("StalactiteWindupSeconds", Codec.FLOAT),
+            (a, v) -> a.stalactiteWindupSeconds = v,
+            a -> a.stalactiteWindupSeconds
+        ).add()
+        .append(
             new KeyedCodec<>("StompChance", Codec.FLOAT),
             (a, v) -> a.stompChance = v,
             a -> a.stompChance
@@ -647,6 +677,12 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     private float plowRadius = 4.5f;
     private float plowRiderKnockback = 26f;
     private float plowBeachedSeconds = 5f;
+    private float rollingBoulderChance;
+    private float rollingBoulderDamage = 40f;
+    private float stalactiteChance = 0f;
+    private float stalactiteRadius = 2.8f;
+    private float stalactiteDamage = 32f;
+    private float stalactiteWindupSeconds = 2.4f;
     private float stompChance;
     private float stompRadius = 8f;
     private float stompDamage = 30f;
@@ -1258,6 +1294,15 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     public float getPlowBeachedSeconds() {
         return plowBeachedSeconds;
     }
+
+    public float getRollingBoulderChance() { return rollingBoulderChance; }
+    public float getRollingBoulderDamage() { return rollingBoulderDamage; }
+
+    /** Falling-stone attack tuning; disabled unless a variant opts in. */
+    public float getStalactiteChance() { return stalactiteChance; }
+    public float getStalactiteRadius() { return stalactiteRadius; }
+    public float getStalactiteDamage() { return stalactiteDamage; }
+    public float getStalactiteWindupSeconds() { return stalactiteWindupSeconds; }
 
     /** Relative weight of the leg stomp among the melee answers, against {@link #getSmashChance()}. */
     public float getStompChance() {

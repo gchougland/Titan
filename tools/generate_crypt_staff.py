@@ -1,13 +1,14 @@
 """Author the Crypt Keeper reward: pixel atlas, skeletal staff, icon and player clips.
 
-Run with Python + Pillow + NumPy. The source game's Staff idle poses define the hand attachment conventions;
-all casting motion, geometry, painted atlas and the inventory render are authored here.
+Run with Python + Pillow + NumPy. The base game's staff poses define hand attachments and the coordinated
+primary charge/release. Existing edited geometry and texture are preserved unless --rebuild-model is set.
 The signature's giant arm is assembled at runtime from the user's supplied Skeleton_Arm,
 Skeleton_Palm, Skeleton_Bracelet and Skeleton_Finger prefabs; this script does not replace them.
 """
 import json
 import math
 import random
+import sys
 from pathlib import Path
 from PIL import Image, ImageDraw
 
@@ -18,6 +19,7 @@ COMMON = RES / 'Common'
 OUT = COMMON / 'Items/Titan/CryptKeeper'
 ANIM = COMMON / 'Characters/Titan/CryptKeeper'
 OUT.mkdir(parents=True, exist_ok=True)
+REBUILD_MODEL = '--rebuild-model' in sys.argv or not (OUT/'Staff.blockymodel').exists()
 random.seed(713)
 
 
@@ -64,7 +66,8 @@ for i,(material,color) in enumerate(PALETTES.items()):
         for k in range(15):
             x,y=tx+random.randint(3,53),ty+random.randint(3,69)
             paint.line((x,y,x+1,y+4), fill=(159,151,119,255))
-atlas.save(OUT/'Staff_Texture.png')
+if REBUILD_MODEL:
+    atlas.save(OUT/'Staff_Texture.png')
 
 uid=0
 
@@ -128,13 +131,17 @@ box('Ribbon_B',(-7,15,1),(3,13,1),'leather',(0,0,-18))
 
 # Preserve the base game's staff hand socket conventions. Art is authored vertically, then aligns
 # to Handle's +X axis exactly like the base staff family.
-art_root=node('Crypt_Staff_Art',rotation=(0,0,-90),children=art)
+art_root=node('Crypt_Staff_Art',pos=(12,0,0),rotation=(0,0,-90),children=art)
 handle=node('Handle',pos=(0,-32,0),children=[art_root])
 handle['orientation']={'x':0.653281,'y':0.653281,'z':-0.270598,'w':-0.270598}
 origin_item=node('Origin_Item',pos=(0,-61,0),children=[handle])
 origin_projectile=node('Origin_Projectile',pos=(0,93,0),children=[origin_item])
 root=node('R-Attachment',pos=(0,37,0),children=[origin_projectile])
-write(OUT/'Staff.blockymodel', {'lod':'auto','nodes':[root]})
+root['shape']['settings']['isPiece']=True  # Bind to the player's animated R-Attachment socket.
+# Preserve subsequent Blockbench edits. Rebuilding the procedural model is explicit.
+if REBUILD_MODEL:
+    write(OUT/'Staff.blockymodel', {'lod':'auto','nodes':[root]})
+
 
 def keys(values):
     return [{'time':frame,'delta':value,'interpolationType':'smooth'} for frame,value in values]
@@ -197,6 +204,16 @@ for name in ['Idle','SoulCharge','SoulVolley','GravePound','Equip']:
         'ThirdPerson':f'Characters/Titan/CryptKeeper/{name}.blockyanim',
         'ThirdPersonMoving':f'Characters/Titan/CryptKeeper/{name}.blockyanim',
         'Speed':1,'Looping':name in ('Idle','SoulCharge'),'BlendingDuration':0.1}
+# Use the coordinated staff casting poses, including attachment tracks and the off hand. Rotating
+# only one arm from Idle separates the hands from the shaft and twists the staff across the torso.
+for name, native in [('SoulCharge','CastSummonCharging'),('SoulVolley','CastSummonCharged')]:
+    native_set=json.loads((ASSETS/'Server/Item/Animations/Staff.json').read_text())['Animations'][native]
+    entry=dict(native_set)
+    for channel,suffix in [('FirstPerson','_FPS'),('ThirdPerson',''),('ThirdPersonMoving','_Moving')]:
+        clip=json.loads((ASSETS/'Common'/native_set[channel]).read_text())
+        write(ANIM/f'{name}{suffix}.blockyanim',clip)
+        entry[channel]=f'Characters/Titan/CryptKeeper/{name}{suffix}.blockyanim'
+    animations['Animations'][name]=entry
 write(RES/'Server/Item/Animations/Titan_Crypt_Staff.json',animations)
 
 # Render the actual newly written blockymodel and texture at the required inventory dimensions.
@@ -234,7 +251,7 @@ for name,stat,cost,clip,duration,cast in [('Grasp','SignatureEnergy',100,'GraveP
 # Short taps cancel without spending; a fully charged release pays once in the server interaction.
 release={'Type':'StatsCondition','Costs':{'Stamina':5},'Failed':'Staff_Cast_Fail',
          'Next':{'Type':'Serial','Interactions':[
-             {'Type':'Simple','RunTime':.22,'Effects':{'ItemAnimationId':'SoulVolley','ClearAnimationOnFinish':False}},
+             {'Type':'Simple','RunTime':.33,'Effects':{'ItemAnimationId':'SoulVolley','ClearAnimationOnFinish':False}},
              {'Type':'CryptMissiles'}, {'Type':'Simple','RunTime':.35}]}}
 charge={'Type':'Charging','AllowIndefiniteHold':True,'DisplayProgress':True,'CancelOnOtherClick':True,
         'Effects':{'ItemAnimationId':'SoulCharge','ClearAnimationOnFinish':True,
@@ -246,4 +263,4 @@ write(RES/'Server/Item/RootInteractions/Titan/Root_Crypt_Missiles.json',{
     'RequireNewClick':True,'Cooldown':{'Cooldown':1.1},'Tags':{'Attack':['Ranged']},
     'Interactions':[{'Type':'StatsCondition','Costs':{'Stamina':5},'Failed':'Staff_Cast_Fail','Next':charge}]})
 
-print('Created Crypt Keeper staff, pixel atlas, icon, eleven custom clips and charged primary interactions.')
+print('Updated Crypt Keeper staff icon, twelve character clips, orb pulse and charged primary interactions.')

@@ -1,5 +1,6 @@
 package com.hexvane.titan.system;
 
+import com.hypixel.hytale.server.core.modules.physics.systems.IVelocityModifyingSystem;
 import com.hexvane.titan.ai.TitanAiScratch;
 import com.hexvane.titan.ai.TitanAiSupport;
 import com.hexvane.titan.ai.TitanBodyDriver;
@@ -9,6 +10,8 @@ import com.hexvane.titan.ai.TitanPlowAttack;
 import com.hexvane.titan.ai.TitanPoundAttack;
 import com.hexvane.titan.ai.TitanSlamAttack;
 import com.hexvane.titan.ai.TitanStompAttack;
+import com.hexvane.titan.ai.TitanStalactiteAttack;
+import com.hexvane.titan.ai.TitanRollingBoulders;
 import com.hexvane.titan.asset.TitanSkeletonAsset;
 import com.hexvane.titan.asset.TitanVariantAsset;
 import com.hexvane.titan.combat.TitanLoot;
@@ -46,7 +49,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * attacks themselves live in {@code com.hexvane.titan.ai}, one class per move; this system decides which
  * one to start and ticks whichever is running.
  */
-public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
+public final class TitanAiSystem extends EntityTickingSystem<EntityStore> implements IVelocityModifyingSystem {
 
     /** Seconds an idle arm takes to hand control back to the clip pose. */
     private static final float HAND_IK_FADE = 0.4f;
@@ -126,10 +129,12 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
         if (variant.isPet()) return;
 
         final Ref<EntityStore> self = archetypeChunk.getReferenceTo(index);
+        if (titan.getState() != TitanState.STALACTITES) TitanStalactiteAttack.clear(titan, commandBuffer);
         titan.addStateTime(dt);
         titan.tickAttackCooldown(dt);
 
         if (titan.getState() == TitanState.DYING) {
+            TitanRollingBoulders.clear(titan, commandBuffer);
             titan.getVelocity().set(0);
             tickDying(dt, commandBuffer, self, titan, variant, transform);
             return;
@@ -140,6 +145,8 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
         switch (titan.auditWeakpoints(store, dt)) {
             case DESTROYED -> {
                 titan.getVelocity().set(0);
+                TitanRollingBoulders.clear(titan, commandBuffer);
+                TitanStalactiteAttack.clear(titan, commandBuffer);
                 titan.setState(TitanState.DYING);
                 TitanBossBarSystem.dismiss(commandBuffer, self, titan);
                 TitanSound.play(commandBuffer, variant.getDeathSound(), transform.getPosition());
@@ -159,6 +166,7 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
             }
         }
 
+        TitanRollingBoulders.tick(store, commandBuffer, self, titan, dt);
         titan.tickProvoked(dt);
         retaliate(commandBuffer, titan, variant, transform);
 
@@ -191,6 +199,8 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
             case PLOW_WINDUP -> TitanPlowAttack.tickWindup(scratch, store, commandBuffer, titan, variant, transform, dt);
             case PLOW -> TitanPlowAttack.tickPlow(scratch, store, commandBuffer, self, titan, variant, skeleton, transform, dt);
             case PLOW_RECOVER -> TitanPlowAttack.tickRecover(titan, variant, transform);
+            case BOULDER_FORMATION -> TitanRollingBoulders.tickFormation(titan);
+            case STALACTITES -> TitanStalactiteAttack.tick(store, commandBuffer, self, titan, variant, dt);
             case STOMP_WINDUP -> TitanStompAttack.tickWindup(scratch, store, commandBuffer, titan, variant, transform, dt);
             case STOMP -> TitanStompAttack.tickStomp(store, commandBuffer, self, titan, variant);
             case STOMP_RECOVER -> TitanStompAttack.tickRecover(titan, variant);
@@ -200,6 +210,8 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
         }
 
         updateHandGoals(titan, skeleton, dt);
+        if (hasTarget && titan.getState() != TitanState.SLEEPING && !titan.levelScalingCaptured)
+            com.hexvane.titan.compat.LevelingCompatibility.engage(store, commandBuffer, self, titan, transform.getPosition());
         TitanBodyDriver.settleBodyHeight(store, transform, dt, 0);
         transform.getRotation().setYaw(titan.getYaw());
     }
@@ -552,7 +564,7 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
 
             if (distance <= variant.getAttackRange()) {
                 TitanAiSupport.turnTowards(titan, position, scratch.targetPosition, variant.getTurnSpeed(), dt);
-                beginMelee(commandBuffer, titan, variant, position);
+                beginMelee(store, commandBuffer, titan, variant, position);
                 titan.getVelocity().set(0);
                 return;
             }
@@ -602,7 +614,7 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
         titan.consumeIntent();
 
         switch (intent) {
-            case MELEE -> beginMelee(commandBuffer, titan, variant, position);
+            case MELEE -> beginMelee(store, commandBuffer, titan, variant, position);
             case SLAM -> {
                 titan.setState(TitanState.SLAM_WINDUP);
                 TitanSound.play(commandBuffer, variant.getTelegraphSound(), position);
@@ -618,6 +630,8 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
             }
             case PLOW -> TitanPlowAttack.tryBegin(scratch, store, commandBuffer, titan, variant, skeleton, transform);
             case STOMP -> {
+                if (TitanRollingBoulders.tryBegin(store, commandBuffer, titan, variant)) break;
+                if (TitanStalactiteAttack.tryBegin(store, commandBuffer, titan, variant)) break;
                 TitanStompAttack.begin(scratch, titan);
                 TitanSound.play(commandBuffer, variant.getTelegraphSound(), position);
             }
@@ -639,11 +653,14 @@ public final class TitanAiSystem extends EntityTickingSystem<EntityStore> {
      * <p>A variant that has zeroed everything still gets the arm smash. That is a misconfiguration, and a
      * titan swinging an arm it does not have is easier to notice than one standing inert.
      */
-    private void beginMelee(@Nonnull final CommandBuffer<EntityStore> commandBuffer,
+    private void beginMelee(@Nonnull final Store<EntityStore> store,
+                            @Nonnull final CommandBuffer<EntityStore> commandBuffer,
                             @Nonnull final TitanComponent titan,
                             @Nonnull final TitanVariantAsset variant,
                             @Nonnull final Vector3d position) {
 
+        if (TitanRollingBoulders.tryBegin(store, commandBuffer, titan, variant)) return;
+        if (TitanStalactiteAttack.tryBegin(store, commandBuffer, titan, variant)) return;
         final float smash = Math.max(0f, variant.getSmashChance());
         final float slam = Math.max(0f, variant.getSlamChance());
         final float pound = Math.max(0f, variant.getPoundChance());

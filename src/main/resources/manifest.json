@@ -13,6 +13,11 @@
   "DisabledByDefault": false,
   "IncludesAssetPack": true,
   "Main": "${plugin_main_entrypoint}",
+  "OptionalDependencies": {
+    "Zuxaw:RPGLeveling": "*",
+    "Airijko:EndlessLevelingCore": "*",
+    "com.airijko:EndlessLeveling": "*"
+  },
   "Dependencies": {
     "Hytale:NPC": "*",
     "Hytale:EncounterManager": "*",

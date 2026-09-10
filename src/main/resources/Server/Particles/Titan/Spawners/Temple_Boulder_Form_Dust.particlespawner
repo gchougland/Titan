@@ -1,0 +1,159 @@
+{
+  "RenderMode": "BlendLinear",
+  "ParticleRotationInfluence": "Billboard",
+  "ParticleRotateWithSpawner": false,
+  "LinearFiltering": true,
+  "LightInfluence": 0.6,
+  "TrailSpawnerPositionMultiplier": 1,
+  "TrailSpawnerRotationMultiplier": 1,
+  "MaxConcurrentParticles": 7,
+  "ParticleLifeSpan": {
+    "Min": 0.5,
+    "Max": 1.1
+  },
+  "TotalParticles": {
+    "Min": 7,
+    "Max": 7
+  },
+  "SpawnBurst": true,
+  "SpawnRate": {
+    "Min": 24,
+    "Max": 24
+  },
+  "Shape": "Sphere",
+  "EmitOffset": {
+    "X": {
+      "Min": -1.5,
+      "Max": 1.5
+    },
+    "Y": {
+      "Min": 0,
+      "Max": 0.3
+    },
+    "Z": {
+      "Min": -1.5,
+      "Max": 1.5
+    }
+  },
+  "InitialVelocity": {
+    "Speed": {
+      "Min": 0.44000000000000006,
+      "Max": 1.1
+    },
+    "Yaw": {
+      "Min": -180,
+      "Max": 180
+    },
+    "Pitch": {
+      "Min": -80,
+      "Max": -25
+    }
+  },
+  "Attractors": [
+    {
+      "Position": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0
+      },
+      "RadialAxis": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0
+      },
+      "Radius": 0,
+      "RadialAcceleration": 0,
+      "RadialTangentAcceleration": 0,
+      "LinearAcceleration": {
+        "X": 0,
+        "Y": -3,
+        "Z": 0
+      }
+    }
+  ],
+  "Particle": {
+    "Texture": "Particles/Textures/Smoke/Smoke_Cartoon.png",
+    "ScaleRatioConstraint": "OneToOne",
+    "UVOption": "RandomFlipUV",
+    "SoftParticles": "Enable",
+    "InitialAnimationFrame": {
+      "Opacity": 1,
+      "FrameIndex": {
+        "Min": 0,
+        "Max": 0
+      },
+      "Scale": {
+        "X": {
+          "Min": 0.275,
+          "Max": 0.55
+        },
+        "Y": {
+          "Min": 0.275,
+          "Max": 0.55
+        }
+      },
+      "Rotation": {
+        "X": {
+          "Min": 0.0,
+          "Max": 0.0
+        },
+        "Y": {
+          "Min": 0.0,
+          "Max": 0.0
+        },
+        "Z": {
+          "Min": -360.0,
+          "Max": 360.0
+        }
+      },
+      "Color": "#777f83"
+    },
+    "Animation": {
+      "0": {
+        "FrameIndex": {
+          "Min": 0,
+          "Max": 0
+        },
+        "Opacity": 0.0,
+        "Color": "#879394",
+        "Scale": {
+          "X": {
+            "Min": 0.4,
+            "Max": 0.4
+          },
+          "Y": {
+            "Min": 0.4,
+            "Max": 0.4
+          }
+        }
+      },
+      "20": {
+        "Opacity": 0.75,
+        "Scale": {
+          "X": {
+            "Min": 1.0,
+            "Max": 1.0
+          },
+          "Y": {
+            "Min": 1.0,
+            "Max": 1.0
+          }
+        }
+      },
+      "100": {
+        "Opacity": 0.0,
+        "Color": "#485665",
+        "Scale": {
+          "X": {
+            "Min": 2.1,
+            "Max": 2.1
+          },
+          "Y": {
+            "Min": 2.1,
+            "Max": 2.1
+          }
+        }
+      }
+    }
+  }
+}

@@ -96,6 +96,14 @@ public final class TitanConfig {
             (c, v) -> c.wandLog = v,
             c -> c.wandLog
         ).add()
+        .append(new KeyedCodec<>("MinionsPerExtraPlayer", Codec.DOUBLE), (c, v) -> c.minionsPerExtraPlayer = v, c -> c.minionsPerExtraPlayer).add()
+        .append(new KeyedCodec<>("RpgLevelingCompatibility", Codec.BOOLEAN), (c, v) -> c.rpgLevelingCompatibility = v, c -> c.rpgLevelingCompatibility).add()
+        .append(new KeyedCodec<>("EndlessLevelingCompatibility", Codec.BOOLEAN), (c, v) -> c.endlessLevelingCompatibility = v, c -> c.endlessLevelingCompatibility).add()
+        .append(new KeyedCodec<>("LevelScalingBaseline", Codec.DOUBLE), (c, v) -> c.levelScalingBaseline = v, c -> c.levelScalingBaseline).add()
+        .append(new KeyedCodec<>("HealthPerLevel", Codec.DOUBLE), (c, v) -> c.healthPerLevel = v, c -> c.healthPerLevel).add()
+        .append(new KeyedCodec<>("DamagePerLevel", Codec.DOUBLE), (c, v) -> c.damagePerLevel = v, c -> c.damagePerLevel).add()
+        .append(new KeyedCodec<>("MaxLevelHealthMultiplier", Codec.DOUBLE), (c, v) -> c.maxLevelHealthMultiplier = v, c -> c.maxLevelHealthMultiplier).add()
+        .append(new KeyedCodec<>("MaxLevelDamageMultiplier", Codec.DOUBLE), (c, v) -> c.maxLevelDamageMultiplier = v, c -> c.maxLevelDamageMultiplier).add()
         .build();
 
     /** Used before the plugin has handed over the loaded file, and if loading fails. */
@@ -108,11 +116,15 @@ public final class TitanConfig {
         return active;
     }
 
-    /** Installs the config loaded from disk. Called once during plugin setup. */
+    /** Installs a fully loaded config during setup or after a successful reload. */
     public static void setActive(@Nonnull final TitanConfig config) {
         active = config;
     }
 
+    private double minionsPerExtraPlayer = .5;
+    private boolean rpgLevelingCompatibility = true, endlessLevelingCompatibility = true;
+    private double levelScalingBaseline = 1, healthPerLevel = .025, damagePerLevel = .01;
+    private double maxLevelHealthMultiplier = 10, maxLevelDamageMultiplier = 4;
     private double weakpointHealthMultiplier = 1.5;
     private double attackDamageMultiplier = 1.5;
     private double attackKnockbackMultiplier = 0.8;
@@ -129,6 +141,15 @@ public final class TitanConfig {
     private double entityLodRatio;
     private boolean parallelPartSync;
     private boolean wandLog = true;
+
+    public double getMinionsPerExtraPlayer() { return Math.min(2, nonNegative(minionsPerExtraPlayer)); }
+    public boolean isRpgLevelingCompatibility() { return rpgLevelingCompatibility; }
+    public boolean isEndlessLevelingCompatibility() { return endlessLevelingCompatibility; }
+    public double getLevelScalingBaseline() { return Math.max(1, nonNegative(levelScalingBaseline)); }
+    public double getHealthPerLevel() { return Math.min(10, nonNegative(healthPerLevel)); }
+    public double getDamagePerLevel() { return Math.min(10, nonNegative(damagePerLevel)); }
+    public double getMaxLevelHealthMultiplier() { return Math.clamp(nonNegative(maxLevelHealthMultiplier), 1, 1000); }
+    public double getMaxLevelDamageMultiplier() { return Math.clamp(nonNegative(maxLevelDamageMultiplier), 1, 100); }
 
     /** Scales how much punishment each ore node takes before it breaks. */
     public float getWeakpointHealthMultiplier() {

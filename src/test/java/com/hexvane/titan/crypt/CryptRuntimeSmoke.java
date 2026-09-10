@@ -80,6 +80,7 @@ public final class CryptRuntimeSmoke {
         waitFor(() -> HytaleServer.get() != null && HytaleServer.get().isBooted()
             && Universe.get() != null && CryptBossComponent.getComponentType() != null, "server boot");
         var universe = Universe.get();
+        com.hexvane.titan.compat.TitanReloadRuntimeSmoke.run();
         String name="crypt-runtime-"+UUID.randomUUID().toString().substring(0,8);
         WorldConfig config=new WorldConfig();
         config.setSpawningNPC(false);
@@ -109,6 +110,10 @@ public final class CryptRuntimeSmoke {
         com.hexvane.titan.npc.TitanCombatRuntimeSmoke.run(world,new Vector3d(-80,160,20));
         CryptStaffInputSmoke.run(world,arena.point(12,0,34));
         CryptMissileRuntimeSmoke.run(world,arena.point(0,5,20));
+        await(on(world, () -> {
+            com.hexvane.titan.compat.TitanMinionRuntimeSmoke.run(store, arena.point(18, 1, 38));
+            return true;
+        }));
         CryptMultiplayerRuntimeSmoke.run(world,site,arena);
         await(on(world,()->{
             check(block(world,COFFIN).contains(CryptSiteSystem.COFFIN_ID),"custom coffin base block");

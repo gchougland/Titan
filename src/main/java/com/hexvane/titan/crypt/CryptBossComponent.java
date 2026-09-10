@@ -14,6 +14,7 @@ public final class CryptBossComponent implements Component<EntityStore> {
     public CryptArena arena;
     public Ref<EntityStore> site;
     public CryptFight fight;
+    public float levelDamageMultiplier = 1;
     public CryptRig rig;
     public final List<Ref<EntityStore>> parts = new ArrayList<>(), minions = new ArrayList<>();
     public final Set<Ref<EntityStore>> viewers = new HashSet<>(), cinematics = new HashSet<>();

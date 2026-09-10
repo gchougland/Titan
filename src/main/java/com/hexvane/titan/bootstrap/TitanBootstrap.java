@@ -135,7 +135,7 @@ public final class TitanBootstrap {
      * it costs every dropped item staying visible further out, so the engine's own default is restored
      * when the config carries no value.
      */
-    private static void applyEngineGlobals() {
+    public static void applyEngineGlobals() {
         final double ratio = TitanConfig.get().getEntityLodRatio();
         EntityTrackerSystems.LODCull.ENTITY_LOD_RATIO = ratio > 0
             ? ratio
@@ -202,6 +202,7 @@ public final class TitanBootstrap {
     private static void registerComponentsAndSystems(@Nonnull final PluginBase plugin) {
         final var registry = plugin.getEntityStoreRegistry();
         TitanRegistry.register(registry);
+        com.hexvane.titan.compat.TitanMinionScaling.register(plugin);
 
         // Cleared sites are the one thing about a titan that cannot be recovered from the world seed, so
         // they ride along in the world's save directory. Registered before the systems: both the AI and the

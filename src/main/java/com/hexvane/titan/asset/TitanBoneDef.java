@@ -107,6 +107,7 @@ public final class TitanBoneDef {
             (o, v) -> o.hollow = v,
             o -> o.hollow
         ).add()
+        .append(new KeyedCodec<>("SolidCore", Codec.BOOLEAN), (o, v) -> o.solidCore = v, o -> o.solidCore).add()
         .append(
             new KeyedCodec<>("SliceMinY", Codec.INTEGER),
             (o, v) -> o.sliceMinY = v,
@@ -147,6 +148,8 @@ public final class TitanBoneDef {
     private boolean colliderAllFaces;
     private int maxParts;
     private boolean hollow;
+    private boolean solidCore;
+    public boolean isSolidCore() { return solidCore; }
     private int sliceMinY = Integer.MIN_VALUE;
     private int sliceMaxY = Integer.MAX_VALUE;
     private boolean detachable = true;

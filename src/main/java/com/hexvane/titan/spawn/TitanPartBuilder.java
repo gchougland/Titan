@@ -426,7 +426,8 @@ public final class TitanPartBuilder {
         final ModelAsset modelAsset = ModelAsset.getAssetMap().getAsset(modelAssetId);
         if (modelAsset == null) return null;
 
-        final Model model = Model.createStaticScaledModel(modelAsset, modelScale);
+        // Hit reactions are requested by the client; static models discard even the neutral Hurt binding.
+        final Model model = Model.createScaledModel(modelAsset, modelScale);
 
         final var holder = EntityStore.REGISTRY.newHolder();
         holder.addComponent(TransformComponent.getComponentType(), new TransformComponent(new Vector3d(worldPosition), new Rotation3f(worldRotation)));

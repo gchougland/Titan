@@ -3,10 +3,12 @@ package com.hexvane.titan.dunewyrm;
 import com.hexvane.titan.ik.GroundSampler;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
+import com.hypixel.hytale.server.core.universe.world.SetBlockSettings;
+import com.hypixel.hytale.server.core.universe.world.chunk.BlockOperations;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.math.util.ChunkUtil;
+import com.hypixel.hytale.server.core.util.FillerBlockUtil;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
@@ -84,12 +86,11 @@ public final class DunewyrmTerrainSmash {
 
     private static void breakAt(@Nonnull final ChunkStore chunks, final int x, final int y, final int z) {
         if (!GroundSampler.isSolid(chunks, x, y, z)) return;
-        final var columnRef = chunks.getChunkReference(ChunkUtil.indexChunkFromBlock(x, z));
-        if (columnRef == null) return;
-        final WorldChunk chunk = chunks.getStore().getComponent(columnRef, WorldChunk.getComponentType());
-        if (chunk == null) return;
+        final var sectionRef = chunks.getChunkSectionReferenceAtBlock(x, y, z);
+        if (sectionRef == null) return;
         final int id = GroundSampler.blockId(chunks, x, y, z);
         if (id == BlockType.EMPTY_ID || id == BlockType.UNKNOWN_ID) return;
-        chunk.breakBlock(x, y, z, 0);
+        BlockOperations.setBlock(chunks, sectionRef, x, y, z, BlockType.EMPTY_ID, BlockType.EMPTY,
+            RotationTuple.NONE_INDEX, FillerBlockUtil.NO_FILLER, SetBlockSettings.NONE);
     }
 }

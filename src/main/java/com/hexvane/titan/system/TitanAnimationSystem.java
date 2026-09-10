@@ -155,10 +155,13 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         animator.advance(advance);
         animator.sampleInto(skeleton, pose);
         applyWobble(titan, skeleton, pose, advance);
+        com.hexvane.titan.ai.TitanStalactiteAttack.pose(titan, skeleton, pose);
+        com.hexvane.titan.ai.TitanRollingBoulders.pose(titan, skeleton, pose);
         poseBones(dt, titan, skeleton, pose, transform, store, commandBuffer);
 
         // Must run on the finished pose, and poseBones has more than one exit.
         pose.captureMotion();
+        com.hexvane.titan.combat.TitanCoreSafety.rescue(titan, commandBuffer);
     }
 
     /**

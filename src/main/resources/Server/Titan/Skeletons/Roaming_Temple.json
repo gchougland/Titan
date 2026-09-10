@@ -36,6 +36,7 @@
     {
       "$Comment": "Front left leg. Anchored 11 out on both axes: far enough for a wide stance while the island still overhangs its own legs, and about as far as they go before the narrow top of the leg stops meeting solid keel. Legs are climbable too, mainly so they are solid to walk into.",
       "Name": "FL-Thigh",
+      "SolidCore": true,
       "Parent": "Pelvis",
       "Offset": { "X": -11.0, "Y": 0, "Z": -11.0 },
       "Prefab": "Titan/Temple/Temple_Leg",
@@ -49,6 +50,7 @@
     },
     {
       "Name": "FL-Calf",
+      "SolidCore": true,
       "Parent": "FL-Thigh",
       "Offset": { "X": 0, "Y": -10.0, "Z": 0 },
       "Prefab": "Titan/Temple/Temple_Leg",
@@ -63,6 +65,7 @@
     {
       "$Comment": "Dropped 15 rather than 10 so the origin lands under the sole instead of at the ankle. That makes the shin-to-foot segment 15 long against the thigh's 10, giving the chain the 25 of reach the leg is actually built out of, and leaves the foot's own 5 blocks stacked above the point the solver plants.",
       "Name": "FL-Foot",
+      "SolidCore": true,
       "Parent": "FL-Calf",
       "Offset": { "X": 0, "Y": -15.0, "Z": 0 },
       "Prefab": "Titan/Temple/Temple_Leg",
@@ -77,6 +80,7 @@
 
     {
       "Name": "FR-Thigh",
+      "SolidCore": true,
       "Parent": "Pelvis",
       "Offset": { "X": 11.0, "Y": 0, "Z": -11.0 },
       "Prefab": "Titan/Temple/Temple_Leg",
@@ -90,6 +94,7 @@
     },
     {
       "Name": "FR-Calf",
+      "SolidCore": true,
       "Parent": "FR-Thigh",
       "Offset": { "X": 0, "Y": -10.0, "Z": 0 },
       "Prefab": "Titan/Temple/Temple_Leg",
@@ -103,6 +108,7 @@
     },
     {
       "Name": "FR-Foot",
+      "SolidCore": true,
       "Parent": "FR-Calf",
       "Offset": { "X": 0, "Y": -15.0, "Z": 0 },
       "Prefab": "Titan/Temple/Temple_Leg",
@@ -117,6 +123,7 @@
 
     {
       "Name": "BL-Thigh",
+      "SolidCore": true,
       "Parent": "Pelvis",
       "Offset": { "X": -11.0, "Y": 0, "Z": 11.0 },
       "Prefab": "Titan/Temple/Temple_Leg",
@@ -130,6 +137,7 @@
     },
     {
       "Name": "BL-Calf",
+      "SolidCore": true,
       "Parent": "BL-Thigh",
       "Offset": { "X": 0, "Y": -10.0, "Z": 0 },
       "Prefab": "Titan/Temple/Temple_Leg",
@@ -143,6 +151,7 @@
     },
     {
       "Name": "BL-Foot",
+      "SolidCore": true,
       "Parent": "BL-Calf",
       "Offset": { "X": 0, "Y": -15.0, "Z": 0 },
       "Prefab": "Titan/Temple/Temple_Leg",
@@ -157,6 +166,7 @@
 
     {
       "Name": "BR-Thigh",
+      "SolidCore": true,
       "Parent": "Pelvis",
       "Offset": { "X": 11.0, "Y": 0, "Z": 11.0 },
       "Prefab": "Titan/Temple/Temple_Leg",
@@ -170,6 +180,7 @@
     },
     {
       "Name": "BR-Calf",
+      "SolidCore": true,
       "Parent": "BR-Thigh",
       "Offset": { "X": 0, "Y": -10.0, "Z": 0 },
       "Prefab": "Titan/Temple/Temple_Leg",
@@ -183,6 +194,7 @@
     },
     {
       "Name": "BR-Foot",
+      "SolidCore": true,
       "Parent": "BR-Calf",
       "Offset": { "X": 0, "Y": -15.0, "Z": 0 },
       "Prefab": "Titan/Temple/Temple_Leg",

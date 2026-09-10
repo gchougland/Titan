@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="180" viewBox="0 0 1400 180" role="img" aria-labelledby="title"><title id="title">CLAIM THE SPOILS</title>
+<rect x="0" y="0" width="1400" height="180" fill="#192127"/>
+<rect x="0" y="0" width="8" height="180" fill="#C1D59B"/>
+<polygon points="1115,0 1400,0 1400,180 1065,180" fill="#263239"/>
+<text x="54" y="53" fill="#C1D59B" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="18">REWARDS</text>
+<text x="50" y="117" fill="#F1EFE5" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="53">CLAIM THE SPOILS</text>
+<polygon points="1219,51 1270,51 1293,78 1245,134 1197,78" fill="#F1EFE5"/>
+<polygon points="1219,51 1236,78 1197,78" fill="#AAB7B4"/>
+<polygon points="1270,51 1254,78 1293,78" fill="#AAB7B4"/>
+<polygon points="1219,51 1270,51 1254,78 1236,78" fill="#C1D59B"/>
+<polygon points="1236,78 1254,78 1245,134" fill="#C1D59B"/>
+</svg>

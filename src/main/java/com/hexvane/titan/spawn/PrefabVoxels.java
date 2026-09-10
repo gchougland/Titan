@@ -4,6 +4,8 @@ import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.TreeMap;
 
 /**
  * The block contents of a prefab, flattened for spawning.
@@ -99,6 +101,34 @@ public final class PrefabVoxels {
 
     public int maxZ() {
         return maxZ;
+    }
+
+    /** Group equal-width horizontal layers so a solid core follows a stepped limb's taper. */
+    public List<PrefabVoxels> horizontalSlices() {
+        var layers = new TreeMap<Integer, List<Voxel>>();
+        for (var voxel : voxels) layers.computeIfAbsent(voxel.y(), ignored -> new ArrayList<>()).add(voxel);
+        var result = new ArrayList<PrefabVoxels>();
+        var band = new ArrayList<Voxel>();
+        int x0 = 0, x1 = 0, z0 = 0, z1 = 0, y0 = 0, y1 = 0;
+        for (var entry : layers.entrySet()) {
+            int nextX0 = Integer.MAX_VALUE, nextX1 = Integer.MIN_VALUE;
+            int nextZ0 = Integer.MAX_VALUE, nextZ1 = Integer.MIN_VALUE;
+            for (var voxel : entry.getValue()) {
+                nextX0 = Math.min(nextX0, voxel.x()); nextX1 = Math.max(nextX1, voxel.x());
+                nextZ0 = Math.min(nextZ0, voxel.z()); nextZ1 = Math.max(nextZ1, voxel.z());
+            }
+            if (!band.isEmpty() && (entry.getKey() != y1 + 1 || nextX0 != x0 || nextX1 != x1
+                || nextZ0 != z0 || nextZ1 != z1)) {
+                result.add(new PrefabVoxels(band, x0, y0, z0, x1, y1, z1));
+                band = new ArrayList<>();
+            }
+            if (band.isEmpty()) {
+                x0 = nextX0; x1 = nextX1; z0 = nextZ0; z1 = nextZ1; y0 = entry.getKey();
+            }
+            y1 = entry.getKey(); band.addAll(entry.getValue());
+        }
+        if (!band.isEmpty()) result.add(new PrefabVoxels(band, x0, y0, z0, x1, y1, z1));
+        return result;
     }
 
     /**

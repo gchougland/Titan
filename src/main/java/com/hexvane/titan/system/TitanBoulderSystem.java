@@ -1,5 +1,6 @@
 package com.hexvane.titan.system;
 
+import com.hypixel.hytale.server.core.modules.physics.systems.IVelocityModifyingSystem;
 import com.hexvane.titan.asset.TitanVariantAsset;
 import com.hexvane.titan.combat.TitanBoulder;
 import com.hexvane.titan.combat.TitanSmashAttack;
@@ -42,7 +43,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * disappear. It instead borrows both halves of the titan rig. The root holds a transform its blocks hang
  * off, and on landing those blocks are handed to the same debris physics that clears a titan's corpse.
  */
-public final class TitanBoulderSystem extends EntityTickingSystem<EntityStore> {
+public final class TitanBoulderSystem extends EntityTickingSystem<EntityStore> implements IVelocityModifyingSystem {
 
     /** Fraction of speed kept each second. Barely any drag: a boulder is not a feather. */
     private static final double AIR_DRAG = 0.92;

@@ -271,20 +271,20 @@
       "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Staff/Attacks/Cast_Summon/Cast_Summon_Moving.blockyanim"
     },
     "SoulCharge": {
-      "FirstPerson": "Characters/Titan/CryptKeeper/SoulCharge_FPS.blockyanim",
       "ThirdPerson": "Characters/Titan/CryptKeeper/SoulCharge.blockyanim",
-      "ThirdPersonMoving": "Characters/Titan/CryptKeeper/SoulCharge.blockyanim",
-      "Speed": 1,
       "Looping": true,
-      "BlendingDuration": 0.1
+      "ThirdPersonMoving": "Characters/Titan/CryptKeeper/SoulCharge_Moving.blockyanim",
+      "FirstPerson": "Characters/Titan/CryptKeeper/SoulCharge_FPS.blockyanim",
+      "ThirdPersonFace": "Characters/Animations/Expressions/Frown.blockyanim",
+      "Speed": 1
     },
     "SoulVolley": {
-      "FirstPerson": "Characters/Titan/CryptKeeper/SoulVolley_FPS.blockyanim",
       "ThirdPerson": "Characters/Titan/CryptKeeper/SoulVolley.blockyanim",
-      "ThirdPersonMoving": "Characters/Titan/CryptKeeper/SoulVolley.blockyanim",
+      "ThirdPersonMoving": "Characters/Titan/CryptKeeper/SoulVolley_Moving.blockyanim",
+      "FirstPerson": "Characters/Titan/CryptKeeper/SoulVolley_FPS.blockyanim",
+      "ThirdPersonFace": "Characters/Animations/Expressions/Rage.blockyanim",
       "Speed": 1,
-      "Looping": false,
-      "BlendingDuration": 0.1
+      "BlendingDuration": 0
     },
     "GravePound": {
       "FirstPerson": "Characters/Titan/CryptKeeper/GravePound_FPS.blockyanim",

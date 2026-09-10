@@ -1,5 +1,6 @@
 package com.hexvane.titan.ledge;
 
+import com.hypixel.hytale.server.core.modules.physics.systems.IVelocityModifyingSystem;
 import com.hexvane.titan.combat.TitanSmashAttack;
 import com.hypixel.hytale.builtin.mounts.MountedComponent;
 import com.hypixel.hytale.builtin.mounts.MountSystems;
@@ -36,7 +37,7 @@ import java.util.Set;
  * <p>Runs after {@link MountSystems.HandleMountInput} so any Minecart free-drive that shoved the cart is
  * overwritten by a snap back onto the rail. Ledge slabs are never the mount target and never move.
  */
-public final class TitanLedgeHangSystem extends EntityTickingSystem<EntityStore> {
+public final class TitanLedgeHangSystem extends EntityTickingSystem<EntityStore> implements IVelocityModifyingSystem {
 
     @Nonnull
     private final Query<EntityStore> query = Query.and(

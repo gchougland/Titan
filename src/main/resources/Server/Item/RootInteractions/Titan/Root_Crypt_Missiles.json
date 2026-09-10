@@ -22,9 +22,9 @@
         "CancelOnOtherClick": true,
         "Effects": {
           "ItemAnimationId": "SoulCharge",
+          "ClearAnimationOnFinish": true,
           "WorldSoundEventId": "SFX_Crypt_Staff_Charge",
           "LocalSoundEventId": "SFX_Crypt_Staff_Charge",
-          "ClearAnimationOnFinish": true,
           "Particles": [
             {
               "SystemId": "Crypt_Staff_Orb",
@@ -49,7 +49,7 @@
               "Interactions": [
                 {
                   "Type": "Simple",
-                  "RunTime": 0.22,
+                  "RunTime": 0.33,
                   "Effects": {
                     "ItemAnimationId": "SoulVolley",
                     "ClearAnimationOnFinish": false

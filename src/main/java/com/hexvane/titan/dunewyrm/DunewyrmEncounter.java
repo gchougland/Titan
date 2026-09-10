@@ -22,6 +22,10 @@ public final class DunewyrmEncounter {
     private boolean tunnelLowUsed;
     private boolean lootDropped;
     private int livingSnakes;
+    public boolean levelScalingCaptured;
+    private com.hexvane.titan.compat.LevelingCompatibility.Scaling leveling = com.hexvane.titan.compat.LevelingCompatibility.Scaling.NONE;
+    public com.hexvane.titan.compat.LevelingCompatibility.Scaling getLeveling() { return leveling; }
+    public void setLeveling(com.hexvane.titan.compat.LevelingCompatibility.Scaling value) { leveling = value; }
 
     private DunewyrmEncounter(@Nonnull final UUID id) {
         this.id = id;

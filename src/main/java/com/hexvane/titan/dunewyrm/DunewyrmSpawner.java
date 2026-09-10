@@ -119,7 +119,10 @@ public final class DunewyrmSpawner {
         worm.setEncounterId(eid);
         worm.setPrimary(encounterId == null);
 
-        final float healthScale = TitanEncounterScale.healthScaleNear(
+        final var encounter = DunewyrmEncounter.getOrCreate(eid);
+        if (encounterId == null) encounter.setLeveling(com.hexvane.titan.compat.LevelingCompatibility.near(
+            store, position, Math.max(32.0, variant.getWakeRadius())));
+        final float healthScale = encounter.getLeveling().health() * TitanEncounterScale.healthScaleNear(
             store, position, Math.max(32.0, variant.getWakeRadius()));
         final float segmentHealth = DunewyrmTuning.SEGMENT_HEALTH * healthScale;
 
@@ -148,7 +151,6 @@ public final class DunewyrmSpawner {
         final float bodyHealth = worm.bodyHealth();
         worm.setInitialBodyHealth(bodyHealth);
 
-        final DunewyrmEncounter encounter = DunewyrmEncounter.getOrCreate(eid);
         if (encounterId == null) {
             encounter.setInitialBodyHealth(bodyHealth);
         }

@@ -1,13 +1,11 @@
 package com.hexvane.titan.crypt;
 
+import com.hexvane.titan.combat.TitanImpulse;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.protocol.ChangeVelocityType;
-import com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
-import com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import java.util.List;
@@ -17,6 +15,7 @@ import org.joml.Vector3d;
 final class CryptGrab {
     record Pressure(double first, double last, int hits, int side) { }
     static final double CATCH_TIME=.3, THROW_TIME=1.5;
+    static final double THROW_SPEED=30, THROW_LIFT=9;
     private CryptGrab() { }
 
     static boolean ready(Pressure p,double now) {
@@ -83,16 +82,13 @@ final class CryptGrab {
         } else if(!b.grabThrown) {
             b.grabThrown=true;
             var victim=b.grabbed; b.grabbed=null;
-            Vector3d at=grip(b), destination=b.arena.point(0,0,37);
+            // Throw down an open side aisle, past the podium into the far half of the room.
+            Vector3d at=grip(b), destination=b.arena.point(b.grabSide==0 ? -14 : 14,0,44);
             Vector3d velocity=new Vector3d(destination).sub(at); velocity.y=0;
             if(velocity.lengthSquared()<1) velocity.set(b.arena.point(0,0,1)).sub(b.arena.point(0,0,0));
-            velocity.normalize(11); velocity.y=5;
-            float scale=DamageSystems.HackKnockbackValues.PLAYER_KNOCKBACK_SCALE;
-            if(scale>0) { velocity.x/=scale; velocity.z/=scale; }
+            velocity.normalize(THROW_SPEED); velocity.y=THROW_LIFT;
             cb.tryRemoveComponent(victim,Teleport.getComponentType());
-            var knockback=cb.ensureAndGetComponent(victim,KnockbackComponent.getComponentType());
-            knockback.setVelocity(velocity); knockback.setVelocityType(ChangeVelocityType.Set);
-            knockback.setDuration(0); knockback.setTimer(0);
+            TitanImpulse.set(cb,victim,velocity);
             CryptEncounter.hit(cb,root,victim,20,"Physical");
             CryptFx.directed(cb,CryptFx.GRAB_TOSS,at,destination,1);
             CryptFx.sound(cb,"SFX_Crypt_Sweep",at);

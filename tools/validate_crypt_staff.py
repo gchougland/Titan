@@ -66,6 +66,22 @@ for clip in (COMMON/'Characters/Titan/CryptKeeper').glob('*.blockyanim'):
                     assert abs(sum(v*v for v in values.values())-1)<.0001, f'Nonunit quaternion {clip}:{node}'
 
 model=read(COMMON/item['Model'])
+# The attachment flag, not the node name alone, binds an item to the animated player socket.
+# Keep this contract across exports: a detached item can appear aligned in Idle and drift when casting.
+assert len(model['nodes'])==1 and model['nodes'][0]['name']=='R-Attachment'
+assert model['nodes'][0]['shape']['settings'].get('isPiece') is True, 'Staff root must attach to the player hand'
+# Primary animations must move the player rig as one coordinated pose in all three views. The staff's
+# independent idle animation may pulse the orb, but must not drive its attachment or grip again.
+native_animations=read(BASE/'Server/Item/Animations/Staff.json')['Animations']
+for custom,native in [('SoulCharge','CastSummonCharging'),('SoulVolley','CastSummonCharged')]:
+    for view in ('FirstPerson','ThirdPerson','ThirdPersonMoving'):
+        clip=read(COMMON/animations[custom][view])
+        reference=read(BASE/'Common'/native_animations[native][view])
+        assert clip==reference, f'{custom} {view} no longer uses the coordinated native staff pose'
+orb_animation=read(COMMON/item['Animation'])['nodeAnimations']
+assert set(orb_animation)<= {'Orb','Orb_Facet_A','Orb_Facet_B','Soul_Core','Soul_Glint'}
+assert all(set(channels)<= {'shapeStretch','shapeVisible','shapeUvOffset'} for channels in orb_animation.values()), \
+    'Orb animation must not move the held staff independently of the hand'
 texture=(COMMON/item['Texture']).read_bytes()
 assert texture[:8] == b'\x89PNG\r\n\x1a\n', 'Invalid staff texture PNG'
 texture_width,texture_height=struct.unpack('>II', texture[16:24])
@@ -94,4 +110,5 @@ assert len(bones)==130 and all(b['name']=='Deco_Bone_Full' for b in bones)
 assert {axis:(min(b[axis] for b in bones),max(b[axis] for b in bones)) for axis in 'xyz'} == {
     'x':(-2,3),'y':(0,2),'z':(-7,7)}
 assert max(b['z']+1 for b in bones)-10.5 == -2.5, 'Arm wrist no longer meets the palm rear edge'
-print(f'PASS: {len(nodes)} model nodes, authored 130-block arm, pixel atlas UV bounds, 10 character clips, charged Primary release/cancel/stamina path, interaction/FX/common references and translations.')
+clip_count=len(list((COMMON/'Characters/Titan/CryptKeeper').glob('*.blockyanim')))
+print(f'PASS: {len(nodes)} model nodes, authored 130-block arm, pixel atlas UV bounds, {clip_count} character clips, charged Primary release/cancel/stamina path, interaction/FX/common references and translations.')

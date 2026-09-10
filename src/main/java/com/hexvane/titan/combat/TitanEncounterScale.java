@@ -25,7 +25,8 @@ public final class TitanEncounterScale {
                                    final double radius) {
         int n = 0;
         for (final var candidate : TargetUtil.getAllEntitiesInCylinder(centre, radius, radius, store)) {
-            if (store.getComponent(candidate, Player.getComponentType()) != null) n++;
+            if (store.getComponent(candidate, Player.getComponentType()) != null
+                && store.getComponent(candidate, com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent.getComponentType()) == null) n++;
         }
         return Math.max(1, n);
     }
@@ -38,6 +39,13 @@ public final class TitanEncounterScale {
     public static float healthScale(final int playerCount) {
         final int extra = Math.max(0, playerCount - 1);
         return 1f + extra * TitanConfig.get().getPlayerHealthScalePerExtra();
+    }
+
+    /** Bounded per-wave and alive-cap scaling; solo counts retain their authored values. */
+    public static int minionCount(final int soloCount, final int playerCount) {
+        if (soloCount <= 0) return 0;
+        return (int) Math.min(64, Math.ceil(soloCount * (1d + Math.max(0, playerCount - 1)
+            * TitanConfig.get().getMinionsPerExtraPlayer())));
     }
 
     public static float healthScaleNear(@Nonnull final Store<EntityStore> store,

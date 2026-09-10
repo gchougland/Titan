@@ -64,6 +64,7 @@ public final class TitanPlugin extends JavaPlugin {
         }
 
         TitanConfig.setActive(config.get());
+        com.hexvane.titan.compat.TitanMinionScaling.configureRpgDefaults();
         syncConfigFile();
 
         TitanBootstrap.install(this);
@@ -91,8 +92,19 @@ public final class TitanPlugin extends JavaPlugin {
         });
     }
 
+    /** Publish only a completely decoded file; a failed reload leaves the active settings intact. */
+    public java.util.concurrent.CompletableFuture<Void> reloadConfig() {
+        // A fresh reader also permits retry after Config.load() caches an exceptional future.
+        return new Config<>(getDataDirectory(), "config", TitanConfig.CODEC).load()
+            .thenAccept(loaded -> {
+                TitanConfig.setActive(loaded);
+                TitanBootstrap.applyEngineGlobals();
+            });
+    }
+
     @Override
     protected void start() {
+        com.hexvane.titan.compat.TitanMinionScaling.configureEndless();
         if (!this.getManifest().includesAssetPack()) {
             return;
         }

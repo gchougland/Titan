@@ -1,0 +1,17 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Temple_Boulder_Shatter_Dust"
+    },
+    {
+      "SpawnerId": "Temple_Boulder_Chips"
+    },
+    {
+      "SpawnerId": "Temple_Boulder_Blue_Sparks"
+    }
+  ],
+  "LifeSpan": 1.4,
+  "BoundingRadius": 8,
+  "CullDistance": 112,
+  "IsImportant": true
+}

@@ -1,0 +1,2705 @@
+{
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Heart",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 5.918666666666666,
+          "y": 5.918666666666666,
+          "z": 5.918666666666666
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "fullbright",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "2",
+      "name": "Plate_0_-1",
+      "position": {
+        "x": -67.712,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.944,
+          "y": 4.14,
+          "z": 4.14
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "3",
+      "name": "Plate_0_1",
+      "position": {
+        "x": 67.712,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.944,
+          "y": 4.14,
+          "z": 4.14
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "4",
+      "name": "Plate_1_-1",
+      "position": {
+        "x": 0.0,
+        "y": -67.712,
+        "z": 0.0
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 4.14,
+          "y": 2.944,
+          "z": 4.14
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "5",
+      "name": "Plate_1_1",
+      "position": {
+        "x": 0.0,
+        "y": 67.712,
+        "z": 0.0
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 4.14,
+          "y": 2.944,
+          "z": 4.14
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "6",
+      "name": "Plate_2_-1",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": -67.712
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 4.14,
+          "y": 4.14,
+          "z": 2.944
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "7",
+      "name": "Plate_2_1",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 67.712
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 4.14,
+          "y": 4.14,
+          "z": 2.944
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "8",
+      "name": "Edge_0",
+      "position": {
+        "x": -56.672,
+        "y": -56.672,
+        "z": 0.0
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.8213333333333335,
+          "y": 2.8213333333333335,
+          "z": 2.8213333333333335
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "9",
+      "name": "Edge_1",
+      "position": {
+        "x": -56.672,
+        "y": 56.672,
+        "z": 0.0
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.8213333333333335,
+          "y": 2.8213333333333335,
+          "z": 2.8213333333333335
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "10",
+      "name": "Edge_2",
+      "position": {
+        "x": 56.672,
+        "y": -56.672,
+        "z": 0.0
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.8213333333333335,
+          "y": 2.8213333333333335,
+          "z": 2.8213333333333335
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "11",
+      "name": "Edge_3",
+      "position": {
+        "x": 56.672,
+        "y": 56.672,
+        "z": 0.0
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.8213333333333335,
+          "y": 2.8213333333333335,
+          "z": 2.8213333333333335
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "12",
+      "name": "Edge_4",
+      "position": {
+        "x": -56.672,
+        "y": 0.0,
+        "z": -56.672
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.8213333333333335,
+          "y": 2.8213333333333335,
+          "z": 2.8213333333333335
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "13",
+      "name": "Edge_5",
+      "position": {
+        "x": -56.672,
+        "y": 0.0,
+        "z": 56.672
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.8213333333333335,
+          "y": 2.8213333333333335,
+          "z": 2.8213333333333335
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "14",
+      "name": "Edge_6",
+      "position": {
+        "x": 56.672,
+        "y": 0.0,
+        "z": -56.672
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.8213333333333335,
+          "y": 2.8213333333333335,
+          "z": 2.8213333333333335
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "15",
+      "name": "Edge_7",
+      "position": {
+        "x": 56.672,
+        "y": 0.0,
+        "z": 56.672
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.8213333333333335,
+          "y": 2.8213333333333335,
+          "z": 2.8213333333333335
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 32,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "16",
+      "name": "Edge_8",
+      "position": {
+        "x": 0.0,
+        "y": -56.672,
+        "z": -56.672
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.8213333333333335,
+          "y": 2.8213333333333335,
+          "z": 2.8213333333333335
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 64,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "17",
+      "name": "Edge_9",
+      "position": {
+        "x": 0.0,
+        "y": -56.672,
+        "z": 56.672
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.8213333333333335,
+          "y": 2.8213333333333335,
+          "z": 2.8213333333333335
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 96,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "18",
+      "name": "Edge_10",
+      "position": {
+        "x": 0.0,
+        "y": 56.672,
+        "z": -56.672
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.8213333333333335,
+          "y": 2.8213333333333335,
+          "z": 2.8213333333333335
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 128,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "19",
+      "name": "Edge_11",
+      "position": {
+        "x": 0.0,
+        "y": 56.672,
+        "z": 56.672
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 2.8213333333333335,
+          "y": 2.8213333333333335,
+          "z": 2.8213333333333335
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "flat",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 160,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "20",
+      "name": "Vein_0_-1",
+      "position": {
+        "x": -103.9968,
+        "y": -17.663999999999998,
+        "z": 19.136
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 0.10733333333333334,
+          "y": 1.5946666666666667,
+          "z": 0.24533333333333332
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "fullbright",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "21",
+      "name": "Vein_0_1",
+      "position": {
+        "x": 103.9968,
+        "y": -17.663999999999998,
+        "z": 19.136
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 0.10733333333333334,
+          "y": 1.5946666666666667,
+          "z": 0.24533333333333332
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "fullbright",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "22",
+      "name": "Vein_1_-1",
+      "position": {
+        "x": 23.552,
+        "y": -103.9968,
+        "z": 19.136
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 1.7479999999999996,
+          "y": 0.10733333333333334,
+          "z": 0.21466666666666667
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "fullbright",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "23",
+      "name": "Vein_1_1",
+      "position": {
+        "x": 23.552,
+        "y": 103.9968,
+        "z": 19.136
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 1.7479999999999996,
+          "y": 0.10733333333333334,
+          "z": 0.21466666666666667
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "fullbright",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "24",
+      "name": "Vein_2_-1",
+      "position": {
+        "x": 23.552,
+        "y": -17.663999999999998,
+        "z": -103.9968
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 0.22999999999999995,
+          "y": 1.5946666666666667,
+          "z": 0.10733333333333334
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "fullbright",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "25",
+      "name": "Vein_2_1",
+      "position": {
+        "x": 23.552,
+        "y": -17.663999999999998,
+        "z": 103.9968
+      },
+      "orientation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "children": [],
+      "shape": {
+        "type": "box",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stretch": {
+          "x": 0.22999999999999995,
+          "y": 1.5946666666666667,
+          "z": 0.10733333333333334
+        },
+        "settings": {
+          "size": {
+            "x": 24,
+            "y": 24,
+            "z": 24
+          }
+        },
+        "visible": true,
+        "doubleSided": false,
+        "shadingMode": "fullbright",
+        "unwrapMode": "custom",
+        "textureLayout": {
+          "front": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "back": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "left": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "right": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "top": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          },
+          "bottom": {
+            "offset": {
+              "x": 192,
+              "y": 0
+            },
+            "mirror": {
+              "x": false,
+              "y": false
+            },
+            "angle": 0
+          }
+        }
+      }
+    }
+  ],
+  "formatVersion": 1
+}

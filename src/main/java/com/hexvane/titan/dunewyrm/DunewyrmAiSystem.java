@@ -70,6 +70,8 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
         tickPoisonCloud(worm, store, commandBuffer, dt);
 
         acquireTarget(worm, store, variant);
+        if (worm.getTarget() != null)
+            com.hexvane.titan.compat.LevelingCompatibility.engageWorm(store, worm);
         maybeStartTunnel(worm, store, commandBuffer);
         maybeUnstickFromCave(worm, store);
 
@@ -668,17 +670,20 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
             }
         }
 
-        final float spawnEvery = DunewyrmTuning.TUNNEL_DURATION / Math.max(1, DunewyrmTuning.SCORPIONS_PER_TUNNEL);
+        final float spawnEvery = DunewyrmTuning.TUNNEL_DURATION / Math.max(1, worm.getScorpionsThisTunnel());
         if (worm.getScorpionBudget() > 0f && worm.getStateTimer() >=
-            (DunewyrmTuning.SCORPIONS_PER_TUNNEL - worm.getScorpionBudget() + 1) * spawnEvery) {
+            (worm.getScorpionsThisTunnel() - worm.getScorpionBudget() + 1) * spawnEvery) {
             worm.setScorpionBudget(worm.getScorpionBudget() - 1f);
             final Vector3d spawnPos = new Vector3d(worm.getHeadPosition().x,
                 worm.getHeadPosition().y + worm.getTunnelDepth() + 0.5,
                 worm.getHeadPosition().z);
             final var world = store.getExternalData().getWorld();
             final float spawnYaw = worm.getYaw();
-            world.execute(() -> NPCPlugin.get().spawnNPC(
-                store, "Scorpion", null, spawnPos, new Rotation3f(0, spawnYaw, 0)));
+            world.execute(() -> {
+                final var leveling = com.hexvane.titan.compat.LevelingCompatibility.near(store, spawnPos, 100);
+                var npc = NPCPlugin.get().spawnNPC(store, "Titan_Dunewyrm_Minion", null, spawnPos, new Rotation3f(0, spawnYaw, 0));
+                if (npc != null) com.hexvane.titan.compat.TitanMinionScaling.apply(store, npc.first(), 124, leveling);
+            });
         }
 
         if (worm.getStateTimer() >= DunewyrmTuning.TUNNEL_DURATION) {
@@ -742,7 +747,9 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
         if (!start) return;
         dropRidersBeforeDig(worm, store, commandBuffer);
         worm.setState(DunewyrmState.TUNNEL);
-        worm.setScorpionBudget(DunewyrmTuning.SCORPIONS_PER_TUNNEL);
+        worm.startScorpionWave(com.hexvane.titan.combat.TitanEncounterScale.minionCount(
+            DunewyrmTuning.SCORPIONS_PER_TUNNEL,
+            com.hexvane.titan.combat.TitanEncounterScale.countPlayers(store, worm.getHeadPosition(), 100)));
         worm.setDigParticleTimer(0f);
         TitanSound.play(commandBuffer, DunewyrmTuning.DIG_SOUND, worm.getHeadPosition());
     }

@@ -13,7 +13,7 @@ import com.hypixel.hytale.protocol.ChangeVelocityType;
 import com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.BoundingBox;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
-import com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems;
+import com.hypixel.hytale.server.core.modules.physics.component.Velocity;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
@@ -88,17 +88,20 @@ public final class CryptGrabRuntimeSmoke {
             pose(probe,probe.fight.windup()+1.51);
             grabTick(store,root,probe,players);
             check(probe.grabbed==null && probe.grabThrown,"throw releases the victim reference");
-            var knockback=store.getComponent(attacker,KnockbackComponent.getComponentType());
-            check(knockback!=null && knockback.getVelocityType()==ChangeVelocityType.Set && knockback.getVelocity().isFinite(),"throw creates an explicit velocity impulse");
+            var instructions=store.getComponent(attacker,Velocity.getComponentType()).getInstructions();
+            check(instructions.size()==1,"throw queues exactly one impulse");
+            var knockback=instructions.getFirst();
+            check(knockback!=null && knockback.getType()==ChangeVelocityType.Set && knockback.getVelocity().isFinite(),"throw creates an explicit velocity impulse");
             double horizontal=Math.hypot(knockback.getVelocity().x,knockback.getVelocity().z);
-            close(11/Math.max(1,DamageSystems.HackKnockbackValues.PLAYER_KNOCKBACK_SCALE),horizontal,"throw horizontal speed accounts for player engine scaling");
-            close(5,knockback.getVelocity().y,"throw lifts the victim into an arc");
+            close(30,horizontal,"long throw reaches the velocity queue at 30 blocks per second");
+            close(9,knockback.getVelocity().y,"throw lifts the victim into a longer arc");
             close(100-32*multiplier,health(store,attacker),"throw deals one additional damage hit");
             pose(probe,probe.fight.windup()+1.8);grabTick(store,root,probe,players);
+            check(instructions.size()==1,"later ticks do not queue another throw");
             close(100-32*multiplier,health(store,attacker),"throw cannot fire twice");
             check(store.getComponent(attacker,Teleport.getComponentType())==null,"throw leaves no teleport pin");
             check(health(store,bystander)==100 && bystanderTx.getPosition().equals(bystanderPosition) &&
-                store.getComponent(bystander,KnockbackComponent.getComponentType())==null,"nearby unselected player is neither hurt nor pushed");
+                noImpulse(store,bystander),"nearby unselected player is neither hurt nor pushed");
 
             probe.fight=readyFight();probe.rig.sample(probe);
             actorTx.getPosition().set(probe.rig.palm(0));
@@ -111,7 +114,7 @@ public final class CryptGrabRuntimeSmoke {
             actorTx.getPosition().set(probe.arena.point(-24,1,40));
             pose(probe,probe.fight.windup()+.31);grabTick(store,root,probe,List.of(attacker));
             check(probe.grabAttempted && probe.grabbed==null && health(store,attacker)==100,"moving beyond the catch area dodges without damage");
-            check(store.getComponent(attacker,KnockbackComponent.getComponentType())==null,"a dodged grab does not throw the target");
+            check(noImpulse(store,attacker),"a dodged grab does not throw the target");
 
             prepare(store,probe,attacker,0);
             check(probe.fight.requestGrab(),"stun-interruption scenario starts grab");
@@ -127,7 +130,7 @@ public final class CryptGrabRuntimeSmoke {
             });
             check(probe.grabbed==null && !probe.grabThrown,"stun releases victim without a throw");
             check(actorTx.getPosition().distance(safeReturn)<.001 && probe.arena.contains(safeReturn),"stun returns victim to safe room floor");
-            check(store.getComponent(attacker,KnockbackComponent.getComponentType())==null,"stun interruption adds no throw impulse");
+            check(noImpulse(store,attacker),"stun interruption adds no throw impulse");
             close(100-12*multiplier,health(store,attacker),"stun interruption adds no throw damage");
         } finally {
             store.putComponent(root,CryptBossComponent.getComponentType(),original);
@@ -135,10 +138,18 @@ public final class CryptGrabRuntimeSmoke {
             if(attacker.isValid()) {
                 store.tryRemoveComponent(attacker,Teleport.getComponentType());
                 store.tryRemoveComponent(attacker,KnockbackComponent.getComponentType());
+                var velocity=store.getComponent(attacker,Velocity.getComponentType());
+                if(velocity!=null) velocity.getInstructions().clear();
                 actorTx.getPosition().set(actorPosition);setHealth(store,attacker,100);
             }
             if(bystander.isValid()) store.removeEntity(bystander,RemoveReason.REMOVE);
         }
+    }
+
+    private static boolean noImpulse(Store<EntityStore> store,Ref<EntityStore> ref) {
+        var velocity=store.getComponent(ref,Velocity.getComponentType());
+        return (velocity==null || velocity.getInstructions().isEmpty())
+            && store.getComponent(ref,KnockbackComponent.getComponentType())==null;
     }
 
     private static CryptFight readyFight() {
@@ -155,6 +166,8 @@ public final class CryptGrabRuntimeSmoke {
         tx.getPosition().set(b.rig.palm(side));b.target.set(tx.getPosition());
         store.tryRemoveComponent(attacker,Teleport.getComponentType());
         store.tryRemoveComponent(attacker,KnockbackComponent.getComponentType());
+        var velocity=store.getComponent(attacker,Velocity.getComponentType());
+        if(velocity!=null) velocity.getInstructions().clear();
         setHealth(store,attacker,100);
     }
     private static void pose(CryptBossComponent b,double time) {

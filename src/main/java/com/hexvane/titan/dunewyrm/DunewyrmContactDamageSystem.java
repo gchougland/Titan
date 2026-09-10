@@ -1,7 +1,9 @@
 package com.hexvane.titan.dunewyrm;
 
+import com.hypixel.hytale.server.core.modules.physics.systems.IVelocityModifyingSystem;
 import com.hexvane.titan.asset.TitanVariantAsset;
 import com.hexvane.titan.combat.TitanSound;
+import com.hexvane.titan.combat.TitanImpulse;
 import com.hexvane.titan.combat.TitanStandingOn;
 import com.hexvane.titan.config.TitanConfig;
 import com.hexvane.titan.ik.GroundSampler;
@@ -12,8 +14,6 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
-import com.hypixel.hytale.protocol.ChangeVelocityType;
-import com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageCause;
@@ -29,7 +29,7 @@ import javax.annotation.Nullable;
 /**
  * Periodic damage to players overlapping the Dunewyrm's body while it is above ground.
  */
-public final class DunewyrmContactDamageSystem extends EntityTickingSystem<EntityStore> {
+public final class DunewyrmContactDamageSystem extends EntityTickingSystem<EntityStore> implements IVelocityModifyingSystem {
 
     /**
      * Players that already had knockback applied this world tick. Shared across every snake so a split
@@ -251,11 +251,6 @@ public final class DunewyrmContactDamageSystem extends EntityTickingSystem<Entit
         final float strength = DunewyrmTuning.RAM_KNOCKBACK * TitanConfig.get().getAttackKnockbackMultiplier();
         push.mul(strength);
         push.y = DunewyrmTuning.RAM_LIFT;
-        final float hack = DamageSystems.HackKnockbackValues.PLAYER_KNOCKBACK_SCALE;
-        if (hack > 1f) {
-            push.x /= hack;
-            push.z /= hack;
-        }
         writeKnockback(commandBuffer, victim);
     }
 
@@ -307,11 +302,6 @@ public final class DunewyrmContactDamageSystem extends EntityTickingSystem<Entit
             * TitanConfig.get().getAttackKnockbackMultiplier();
         push.mul(strength);
         push.y = Math.min(0.12f, strength * 0.35f);
-        final float hack = DamageSystems.HackKnockbackValues.PLAYER_KNOCKBACK_SCALE;
-        if (hack > 1f) {
-            push.x /= hack;
-            push.z /= hack;
-        }
         writeKnockback(commandBuffer, victim);
     }
 
@@ -337,19 +327,9 @@ public final class DunewyrmContactDamageSystem extends EntityTickingSystem<Entit
             new Teleport(eject, victimTransform.getRotation()).withoutVelocityReset());
     }
 
-    /** Writes {@link #push} onto the victim's knockback component. */
+    /** Queues a copy of {@link #push}; the scratch vector is reused for the next victim. */
     private void writeKnockback(@Nonnull final CommandBuffer<EntityStore> commandBuffer,
                                 @Nonnull final Ref<EntityStore> victim) {
-        // Never ensureAndGetComponent — a second queued add in the same flush crashes. Prefer an existing
-        // component; otherwise put a fresh one once (guarded by KNOCKBACK_THIS_TICK above).
-        KnockbackComponent knockback = commandBuffer.getComponent(victim, KnockbackComponent.getComponentType());
-        if (knockback == null) {
-            knockback = new KnockbackComponent();
-            commandBuffer.putComponent(victim, KnockbackComponent.getComponentType(), knockback);
-        }
-        knockback.setVelocity(push);
-        knockback.setVelocityType(ChangeVelocityType.Set);
-        knockback.setDuration(0f);
-        knockback.setTimer(0f);
+        TitanImpulse.set(commandBuffer, victim, push);
     }
 }

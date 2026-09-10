@@ -1,5 +1,6 @@
 package com.hexvane.titan.crypt;
 
+import com.hypixel.hytale.server.core.modules.physics.systems.IVelocityModifyingSystem;
 import com.hexvane.titan.config.TitanConfig;
 import com.hexvane.titan.spawn.PrefabVoxelReader;
 import com.hexvane.titan.spawn.PrefabVoxels;
@@ -62,9 +63,12 @@ public final class CryptEncounter {
         if (occupied[0]) return false;
         var boss = new CryptBossComponent();
         boss.site = site; boss.arena = arena;
-        int players = living(store, arena).size();
+        var participants = living(store, arena);
+        int players = participants.size();
+        var leveling = com.hexvane.titan.compat.LevelingCompatibility.forPlayers(store, participants);
+        boss.levelDamageMultiplier = leveling.damage();
         boss.fight = new CryptFight(Double.doubleToLongBits(arena.point(0, 0, 0).x) ^ System.nanoTime(),
-            TitanConfig.get().getWeakpointHealthMultiplier(), players);
+            TitanConfig.get().getWeakpointHealthMultiplier() * leveling.health(), players);
         boss.rig = new CryptRig(arena);
         // Fail before publishing the boss if a required prefab is absent.
         for (var b : boss.rig.bones) if (PrefabVoxelReader.read(b.prefab).isEmpty()) return false;
@@ -201,7 +205,7 @@ public final class CryptEncounter {
         CryptMusic.stop(a, ref);
         if (p != null) CryptBossBars.hide(p, b.networkId);
     }
-    public static final class Tick extends EntityTickingSystem<EntityStore> {
+    public static final class Tick extends EntityTickingSystem<EntityStore> implements IVelocityModifyingSystem {
         private final Query<EntityStore> query = CryptBossComponent.getComponentType();
         @Override public Query<EntityStore> getQuery() { return query; }
         @Override public void tick(float dt, int index, ArchetypeChunk<EntityStore> chunk, Store<EntityStore> store, CommandBuffer<EntityStore> cb) {
@@ -318,7 +322,13 @@ public final class CryptEncounter {
                         for (int i = 0; i < spots.size(); i++) if ((i + b.revision) % 3 == 0) b.castPoints.add(spots.get(i));
                     } else if (b.fight.move() == CryptFight.Move.MINIONS) {
                         var spots = b.arena.minions();
-                        for (int i = 0; i < Math.min(spots.size(), b.fight.phase() + 1); i++) b.castPoints.add(spots.get((i + b.revision) % spots.size()));
+                        int count = com.hexvane.titan.combat.TitanEncounterScale.minionCount(b.fight.phase() + 1, players.size());
+                        // Reuse the authored bone piles for large groups; offset repeated summons slightly.
+                        for (int i = 0; !spots.isEmpty() && i < count; i++) {
+                            var point = new Vector3d(spots.get((i + b.revision) % spots.size()));
+                            if (i >= spots.size()) point.add(Math.sin(i * 2.4) * 1.2, 0, Math.cos(i * 2.4) * 1.2);
+                            b.castPoints.add(point);
+                        }
                     }
                 }
                 case FALLING -> {
@@ -467,10 +477,14 @@ public final class CryptEncounter {
             cb.run(store -> {
                 if (!root.isValid() || b.finishing || b.fight.state() == CryptFight.State.DYING) return;
                 b.minions.removeIf(r -> !r.isValid() || store.getComponent(r, DeathComponent.getComponentType()) != null);
+                var leveling = com.hexvane.titan.compat.LevelingCompatibility.forPlayers(store, living(store, b.arena));
                 for (var point : points) {
-                    if (b.minions.size() >= 8) break;
+                    if (b.minions.size() >= com.hexvane.titan.combat.TitanEncounterScale.minionCount(8, living(store, b.arena).size())) break;
                     var npc = NPCPlugin.get().spawnNPC(store, "Titan_Crypt_Minion", null, point, new Rotation3f());
-                    if (npc != null) b.minions.add(npc.first());
+                    if (npc != null) {
+                        b.minions.add(npc.first());
+                        com.hexvane.titan.compat.TitanMinionScaling.apply(store, npc.first(), 95, leveling);
+                    }
                     CryptFx.burst(store, "Crypt_Minion_Summon", point, 1);
                 }
             });
@@ -535,8 +549,9 @@ public final class CryptEncounter {
     static void hit(CommandBuffer<EntityStore> cb, Ref<EntityStore> root, Ref<EntityStore> victim, float amount, String cause) {
         int index = DamageCause.getAssetMap().getIndex(cause);
         if (index < 0) index = DamageCause.getAssetMap().getIndex("Physical");
+        var boss = cb.getComponent(root, CryptBossComponent.getComponentType());
         DamageSystems.executeDamage(victim, cb, new Damage(new Damage.EntitySource(root), index,
-            amount * TitanConfig.get().getAttackDamageMultiplier()));
+            amount * TitanConfig.get().getAttackDamageMultiplier() * (boss == null ? 1 : boss.levelDamageMultiplier)));
     }
     static boolean near(Vector3d p, Vector3d q, double radius, double height) {
         return Math.abs(p.y - q.y) <= height && (p.x - q.x) * (p.x - q.x) + (p.z - q.z) * (p.z - q.z) <= radius * radius;

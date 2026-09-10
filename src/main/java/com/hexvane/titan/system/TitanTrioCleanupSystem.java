@@ -36,7 +36,10 @@ public final class TitanTrioCleanupSystem extends HolderSystem<EntityStore> {
                                 @Nonnull final RemoveReason reason,
                                 @Nonnull final Store<EntityStore> store) {
         final var titan = holder.getComponent(TitanComponent.getComponentType());
-        if (titan == null || !titan.isBrainDriven()) return;
+        if (titan == null) return;
+        com.hexvane.titan.ai.TitanStalactiteAttack.clear(titan, store);
+        com.hexvane.titan.ai.TitanRollingBoulders.clear(titan, store);
+        if (!titan.isBrainDriven()) return;
         TitanTrio.detach(store, titan);
     }
 }

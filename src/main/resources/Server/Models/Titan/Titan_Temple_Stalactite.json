@@ -1,0 +1,18 @@
+{
+  "Model": "VFX/Titan/Temple_Stalactite.blockymodel",
+  "Texture": "VFX/Titan/Temple_Stalactite.png",
+  "MinScale": 1,
+  "MaxScale": 1,
+  "HitBox": {
+    "Min": {
+      "X": -1.5,
+      "Y": 0,
+      "Z": -1.5
+    },
+    "Max": {
+      "X": 1.5,
+      "Y": 3.5,
+      "Z": 1.5
+    }
+  }
+}
