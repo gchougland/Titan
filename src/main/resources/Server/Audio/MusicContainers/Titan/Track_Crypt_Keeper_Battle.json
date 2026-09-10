@@ -1,0 +1,9 @@
+{
+  "Type": "SingleTrack",
+  "Track": "Music/Titan/Crypt_Keeper_Battle.ogg",
+  "AudioCategory": "AudioCat_Music_In_Game",
+  "Volume": 3,
+  "LoopCount": 0,
+  "FadeInDuration": 1.8,
+  "FadeOutDuration": 3
+}

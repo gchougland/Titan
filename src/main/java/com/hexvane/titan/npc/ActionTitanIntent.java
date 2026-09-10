@@ -35,7 +35,7 @@ public final class ActionTitanIntent extends ActionBase {
         final var titan = TitanNpcSupport.titanOf(ref, store);
         if (titan == null || !titan.isBrainDriven()) return false;
         if (requireReady && !TitanNpcSupport.canStartAttack(titan)) return false;
-        return true;
+        return TitanNpcSupport.canRequest(titan, intent);
     }
 
     @Override

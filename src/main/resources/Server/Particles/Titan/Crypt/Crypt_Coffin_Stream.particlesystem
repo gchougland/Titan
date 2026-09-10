@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Soul_Stream_Body"
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Stream_Core"
+    }
+  ],
+  "LifeSpan": 1.1,
+  "BoundingRadius": 15,
+  "CullDistance": 112,
+  "IsImportant": true
+}

@@ -1,0 +1,139 @@
+{
+  "RenderMode": "BlendLinear",
+  "LinearFiltering": false,
+  "LightInfluence": 0,
+  "ParticleRotationInfluence": "Billboard",
+  "ParticleRotateWithSpawner": false,
+  "TrailSpawnerPositionMultiplier": 1,
+  "TrailSpawnerRotationMultiplier": 1,
+  "Shape": "Sphere",
+  "EmitOffset": {
+    "X": {
+      "Min": -0.25,
+      "Max": 0.25
+    },
+    "Y": {
+      "Min": -0.2,
+      "Max": 0.2
+    },
+    "Z": {
+      "Min": -0.25,
+      "Max": 0.25
+    }
+  },
+  "TotalParticles": {
+    "Min": 3,
+    "Max": 3
+  },
+  "MaxConcurrentParticles": 3,
+  "ParticleLifeSpan": {
+    "Min": 0.24,
+    "Max": 0.42
+  },
+  "LifeSpan": 0.62,
+  "SpawnBurst": true,
+  "SpawnRate": {
+    "Min": 3,
+    "Max": 3
+  },
+  "InitialVelocity": {
+    "Speed": {
+      "Min": 0.1,
+      "Max": 0.2
+    },
+    "Yaw": {
+      "Min": 0,
+      "Max": 360
+    },
+    "Pitch": {
+      "Min": -70,
+      "Max": 70
+    }
+  },
+  "Attractors": [
+    {
+      "LinearAcceleration": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0
+      },
+      "RadialAxis": {
+        "X": 0,
+        "Y": 1,
+        "Z": 0
+      },
+      "RadialImpulse": 0,
+      "RadialTangentImpulse": 0
+    }
+  ],
+  "Particle": {
+    "Texture": "Particles/Textures/Titan/Crypt/Crypt_Smoke.png",
+    "ScaleRatioConstraint": "OneToOne",
+    "UVOption": "RandomFlipU",
+    "SoftParticles": "Enable",
+    "InitialAnimationFrame": {
+      "Opacity": 1,
+      "Color": "#ae69ff",
+      "Scale": {
+        "X": {
+          "Min": 2.1,
+          "Max": 2.6
+        },
+        "Y": {
+          "Min": 2.1,
+          "Max": 2.6
+        }
+      },
+      "Rotation": {
+        "Z": {
+          "Min": -180,
+          "Max": 180
+        }
+      },
+      "FrameIndex": {
+        "Min": 0,
+        "Max": 0
+      }
+    },
+    "Animation": {
+      "0": {
+        "Opacity": 0.13999999999999999
+      },
+      "12": {
+        "Opacity": 0.4
+      },
+      "65": {
+        "Opacity": 0.32000000000000006,
+        "Scale": {
+          "X": {
+            "Min": 0.8250000000000001,
+            "Max": 0.8250000000000001
+          },
+          "Y": {
+            "Min": 0.8250000000000001,
+            "Max": 0.8250000000000001
+          }
+        }
+      },
+      "100": {
+        "Opacity": 0,
+        "Scale": {
+          "X": {
+            "Min": 1.1,
+            "Max": 1.1
+          },
+          "Y": {
+            "Min": 1.1,
+            "Max": 1.1
+          }
+        },
+        "Rotation": {
+          "Z": {
+            "Min": -35,
+            "Max": 35
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Bone_Dust"
+    },
+    {
+      "SpawnerId": "Crypt_Bone_Chips"
+    },
+    {
+      "SpawnerId": "Crypt_Violet_Mist"
+    }
+  ],
+  "LifeSpan": 2.3,
+  "BoundingRadius": 12,
+  "CullDistance": 112,
+  "IsImportant": false
+}

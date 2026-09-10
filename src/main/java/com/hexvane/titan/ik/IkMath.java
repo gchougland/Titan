@@ -83,8 +83,7 @@ public final class IkMath {
      * <p>One discontinuity remains at dead vertical and cannot be removed. Projected up is the uphill
      * direction across the bone, and uphill reverses as a bone tips through vertical, so any rule that
      * keeps a face uphill has to roll half a turn on the way through. It is the sign of an undefined
-     * quantity in a pose where the roll it decides is unobservable. {@code tools/_twist_continuity.py}
-     * sweeps the range and reports the worst jump.
+     * quantity in a pose where the roll it decides is unobservable.
      *
      * @param pole stands in for up as a bone approaches vertical, where up carries no roll information and
      *             normalising the little that is left of it would make the bone spin on the spot

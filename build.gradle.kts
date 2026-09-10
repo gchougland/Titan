@@ -31,7 +31,7 @@ tasks.named<Jar>("jar") {
 
 tasks.register("verifyReleaseJar") {
     group = "verification"
-    description = "Fails if the release jar accidentally bundles HytaleServer or other blocked packages."
+    description = "Fails if the release jar bundles server dependencies or generated prefab caches."
     dependsOn(tasks.jar)
     val releaseJar = tasks.named<Jar>("jar").flatMap { it.archiveFile }
     inputs.file(releaseJar)
@@ -45,6 +45,7 @@ tasks.register("verifyReleaseJar") {
                 "com/hypixel/hytale/Main.class",
                 "org/bouncycastle/",
                 "native/win-x64/quiche.dll",
+                ".prefab.json.lpf",
             )
         val jarExe =
             File(System.getProperty("java.home"), "bin/jar.exe").takeIf { it.isFile }
@@ -63,12 +64,12 @@ tasks.register("verifyReleaseJar") {
         for (pattern in blocked) {
             if (listing.contains(pattern)) {
                 error(
-                    "Release jar ${jarFile.name} contains $pattern; do not embed HytaleServer on runtimeClasspath merge"
+                    "Release jar ${jarFile.name} contains $pattern; exclude server dependencies and generated prefab caches"
                 )
             }
         }
         val sizeMb = jarFile.length() / (1024.0 * 1024.0)
-        logger.lifecycle("verifyReleaseJar: ${jarFile.name} OK (${"%.1f".format(sizeMb)} MB, no HytaleServer)")
+        logger.lifecycle("verifyReleaseJar: ${jarFile.name} OK (${"%.1f".format(sizeMb)} MB, no HytaleServer or generated prefab caches)")
     }
 }
 
@@ -153,6 +154,9 @@ tasks.test {
 }
 
 tasks.named<ProcessResources>("processResources") {
+    // Hytale generates these beside JSON. Copying them gives both files the same
+    // timestamp, and a bundled cache overrides its JSON unconditionally.
+    exclude("**/*.prefab.json.lpf")
     var replaceProperties = mapOf(
         "plugin_group" to findProperty("plugin_group"),
         "plugin_maven_group" to project.group,
@@ -175,6 +179,7 @@ tasks.named<ProcessResources>("processResources") {
 }
 
 tasks.withType<Jar> {
+    exclude("**/*.prefab.json.lpf")
     manifest {
         attributes["Specification-Title"] = rootProject.name
         attributes["Specification-Version"] = version
@@ -212,6 +217,7 @@ val syncAssets = tasks.register<Copy>("syncAssets") {
     from(layout.buildDirectory.dir("resources/main"))
     into("src/main/resources")
     exclude("manifest.json")
+    exclude("**/*.prefab.json.lpf")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
     doLast {

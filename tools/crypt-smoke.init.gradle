@@ -1,0 +1,20 @@
+// Run a disposable, offline loopback server to validate codecs, assets and system registration.
+// Usage: gradlew -I tools/crypt-smoke.init.gradle cryptAssetSmoke --offline --console=plain
+gradle.projectsEvaluated {
+    allprojects {
+        def original = tasks.findByName('runServerNoSync')
+        if (original != null) {
+            tasks.register('cryptAssetSmoke', JavaExec) {
+                dependsOn tasks.named('testClasses')
+                classpath = original.classpath + sourceSets.test.runtimeClasspath
+                mainClass = 'com.hexvane.titan.crypt.CryptRuntimeSmoke'
+                jvmArgs = original.jvmArgs.findAll { it && !it.startsWith('-XX:AOTCache=') }
+                javaLauncher = original.javaLauncher
+                workingDir = layout.buildDirectory.dir('crypt-smoke').get().asFile
+                args = original.args.findAll { !it.startsWith('--auth-mode') && !it.startsWith('--bind') && it != '--disable-sentry' } + ['--auth-mode=offline', '--bind=127.0.0.1:25579', '--disable-sentry']
+                standardInput = System.in
+                doFirst { workingDir.mkdirs(); println('Crypt smoke args: ' + args) }
+            }
+        }
+    }
+}

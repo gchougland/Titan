@@ -1,0 +1,23 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Bone_Dust"
+    },
+    {
+      "SpawnerId": "Crypt_Bone_Chips"
+    },
+    {
+      "SpawnerId": "Crypt_Bone_Shockwave"
+    },
+    {
+      "SpawnerId": "Crypt_Jade_Cracks"
+    },
+    {
+      "SpawnerId": "Crypt_Jade_Embers"
+    }
+  ],
+  "LifeSpan": 2,
+  "BoundingRadius": 12,
+  "CullDistance": 112,
+  "IsImportant": false
+}

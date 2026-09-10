@@ -15,6 +15,7 @@
   "Main": "${plugin_main_entrypoint}",
   "Dependencies": {
     "Hytale:NPC": "*",
-    "Hytale:EncounterManager": "*"
+    "Hytale:EncounterManager": "*",
+    "Hytale:WorldGen": "*"
   }
 }

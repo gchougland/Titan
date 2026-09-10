@@ -1,0 +1,68 @@
+{
+  "TranslationProperties": {
+    "Name": "titan_crypt_staff.staff.name",
+    "Description": "titan_crypt_staff.staff.description"
+  },
+  "Categories": [
+    "Items.Weapons"
+  ],
+  "Quality": "Legendary",
+  "ItemLevel": 60,
+  "MaxStack": 1,
+  "Model": "Items/Titan/CryptKeeper/Staff.blockymodel",
+  "Texture": "Items/Titan/CryptKeeper/Staff_Texture.png",
+  "Icon": "Icons/ItemsGenerated/Titan_Staff_Crypt_Keeper.png",
+  "PlayerAnimationsId": "Titan_Crypt_Staff",
+  "Animation": "Items/Titan/CryptKeeper/Animations/Orb_Pulse.blockyanim",
+  "DroppedItemAnimation": "Items/Animations/Dropped/Dropped_Diagonal_Left.blockyanim",
+  "IconProperties": {
+    "Scale": 0.3,
+    "Translation": [
+      -20,
+      -30
+    ],
+    "Rotation": [
+      45,
+      90,
+      0
+    ]
+  },
+  "Light": {
+    "Color": "#6e9",
+    "Radius": 3
+  },
+  "Particles": [
+    {
+      "SystemId": "Crypt_Staff_Orb",
+      "TargetNodeName": "Orb",
+      "Scale": 0.35
+    }
+  ],
+  "Interactions": {
+    "Primary": "Root_Crypt_Missiles",
+    "Secondary": "Root_Crypt_Grasp",
+    "Ability1": "Root_Crypt_Grasp"
+  },
+  "Weapon": {
+    "EntityStatsToClear": [
+      "SignatureEnergy"
+    ],
+    "StatModifiers": {
+      "SignatureEnergy": [
+        {
+          "Amount": 100,
+          "CalculationType": "Additive"
+        }
+      ]
+    }
+  },
+  "ItemSoundSetId": "ISS_Weapons_Wand",
+  "Tags": {
+    "Type": [
+      "Weapon"
+    ],
+    "Family": [
+      "Staff"
+    ]
+  }
+}

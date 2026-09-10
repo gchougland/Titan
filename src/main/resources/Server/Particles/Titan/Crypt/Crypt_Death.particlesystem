@@ -1,0 +1,17 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Death_Souls"
+    },
+    {
+      "SpawnerId": "Crypt_Bone_Chips"
+    },
+    {
+      "SpawnerId": "Crypt_Bone_Shockwave"
+    }
+  ],
+  "LifeSpan": 2,
+  "BoundingRadius": 15,
+  "CullDistance": 112,
+  "IsImportant": false
+}

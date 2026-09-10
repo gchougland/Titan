@@ -1,0 +1,26 @@
+{
+  "TranslationProperties": {"Name": "titan_crypt_dungeon.coffin.name", "Description": "titan_crypt_dungeon.coffin.description"},
+  "PlayerAnimationsId": "Block",
+  "Icon": "Icons/ItemsGenerated/Furniture_Human_Ruins_Coffin.png",
+  "Quality": "Legendary",
+  "MaxStack": 1,
+  "ItemSoundSetId": "ISS_Blocks_Stone",
+  "BlockType": {
+    "BlockParticleSetId": "Stone", "BlockSoundSetId": "Stone", "PhysicalMaterialId": "Stone",
+    "DrawType": "Model", "Material": "Solid", "Opacity": "Transparent",
+    "CustomModel": "Blocks/Decorative_Sets/Human_Ruins/Coffin.blockymodel",
+    "CustomModelTexture": [{"Texture": "Blocks/Decorative_Sets/Human_Ruins/Coffin_Texture.png", "Weight": 1}],
+    "HitboxType": "Coffin", "VariantRotation": "Wall",
+    "Gathering": {"Breaking": {"GatherType": "Unbreakable"}},
+    "InteractionHint": "titan_crypt_dungeon.coffin.hint",
+    "Interactions": {"Use": {"Interactions": [{"Type": "CryptCoffin"}]}},
+    "Light": {"Color": "#415"},
+    "State": {"Definitions": {
+      "Open": {"CustomModelAnimation": "Blocks/Animations/Coffin/Coffin_Open.blockyanim", "Light": {"Color": "#719"}},
+      "Closed": {"CustomModelAnimation": "Blocks/Animations/Coffin/Coffin_Close.blockyanim", "Light": {"Color": "#415"}},
+      "Reward": {"CustomModelAnimation": "Blocks/Animations/Coffin/Coffin_Close.blockyanim", "Light": {"Color": "#3c7"}}
+    }},
+    "ParticleColor": "#785c99", "TextureComputedColor": "#302E20"
+  },
+  "Tags": {"Type": ["Furniture"], "Family": ["Temple"]}
+}

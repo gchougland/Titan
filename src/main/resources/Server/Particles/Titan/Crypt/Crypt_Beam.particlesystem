@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Beam_Core"
+    },
+    {
+      "SpawnerId": "Crypt_Beam_Halo"
+    }
+  ],
+  "LifeSpan": 0.5,
+  "BoundingRadius": 5,
+  "CullDistance": 112,
+  "IsImportant": true
+}

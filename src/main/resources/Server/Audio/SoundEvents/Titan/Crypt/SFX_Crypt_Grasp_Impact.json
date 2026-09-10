@@ -1,0 +1,23 @@
+{
+  "Volume": -2,
+  "StartAttenuationDistance": 8,
+  "MaxDistance": 56,
+  "SpatialBlend": 1,
+  "MaxInstance": 8,
+  "AudioCategory": "AudioCat_Weapons",
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Titan/Crypt/Crypt_Grasp_Impact_01.ogg",
+        "Sounds/Titan/Crypt/Crypt_Grasp_Impact_02.ogg"
+      ],
+      "RandomSettings": {
+        "MinPitch": -0.55,
+        "MaxPitch": 0.12,
+        "MinVolume": -1,
+        "MaxVolume": 0
+      },
+      "RoundRobinHistorySize": 1
+    }
+  ]
+}

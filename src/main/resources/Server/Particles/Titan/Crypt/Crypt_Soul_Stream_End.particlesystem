@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Soul_Stream_Arrival"
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Stream_Gather_Glow"
+    }
+  ],
+  "LifeSpan": 1.2,
+  "BoundingRadius": 6,
+  "CullDistance": 112,
+  "IsImportant": true
+}

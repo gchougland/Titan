@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Loot_Coalescing_Mist"
+    },
+    {
+      "SpawnerId": "Crypt_Loot_Converging_Souls"
+    }
+  ],
+  "LifeSpan": 1.5,
+  "BoundingRadius": 5,
+  "CullDistance": 112,
+  "IsImportant": true
+}

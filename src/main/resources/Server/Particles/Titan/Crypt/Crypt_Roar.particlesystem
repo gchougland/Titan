@@ -1,0 +1,17 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Violet_Shockwave"
+    },
+    {
+      "SpawnerId": "Crypt_Roar_Wave"
+    },
+    {
+      "SpawnerId": "Crypt_Violet_Embers"
+    }
+  ],
+  "LifeSpan": 2,
+  "BoundingRadius": 20,
+  "CullDistance": 112,
+  "IsImportant": false
+}

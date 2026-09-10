@@ -104,6 +104,10 @@ public final class TitanBootstrap {
         registerInteractions();
         registerAssets(plugin);
         registerComponentsAndSystems(plugin);
+        com.hexvane.titan.crypt.CryptEncounter.register(plugin);
+        com.hexvane.titan.crypt.CryptStaff.register(plugin);
+        com.hexvane.titan.crypt.CryptSiteSystem.register(plugin);
+        com.hexvane.titan.crypt.CryptSiteSystem.setEncounterStarter(com.hexvane.titan.crypt.CryptEncounter::start);
         applyEngineGlobals();
         plugin.getCommandRegistry().registerCommand(new TitanCommand());
     }

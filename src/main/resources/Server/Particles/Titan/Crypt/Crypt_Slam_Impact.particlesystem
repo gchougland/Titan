@@ -1,0 +1,172 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Slam_Impact_Field"
+    },
+    {
+      "SpawnerId": "Crypt_Bone_Chips"
+    },
+    {
+      "SpawnerId": "Crypt_Bone_Shockwave"
+    },
+    {
+      "SpawnerId": "Crypt_Azure_Embers"
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": 0.0,
+        "Y": 0.3,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": 2.52,
+        "Y": 0.3,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": 1.26,
+        "Y": 0.3,
+        "Z": 2.18238
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": -1.26,
+        "Y": 0.3,
+        "Z": 2.18238
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": -2.52,
+        "Y": 0.3,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": -1.26,
+        "Y": 0.3,
+        "Z": -2.18238
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": 1.26,
+        "Y": 0.3,
+        "Z": -2.18238
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": 5.04,
+        "Y": 0.3,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": 4.36477,
+        "Y": 0.3,
+        "Z": 2.52
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": 2.52,
+        "Y": 0.3,
+        "Z": 4.36477
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": 0.0,
+        "Y": 0.3,
+        "Z": 5.04
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": -2.52,
+        "Y": 0.3,
+        "Z": 4.36477
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": -4.36477,
+        "Y": 0.3,
+        "Z": 2.52
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": -5.04,
+        "Y": 0.3,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": -4.36477,
+        "Y": 0.3,
+        "Z": -2.52
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": -2.52,
+        "Y": 0.3,
+        "Z": -4.36477
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": -0.0,
+        "Y": 0.3,
+        "Z": -5.04
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": 2.52,
+        "Y": 0.3,
+        "Z": -4.36477
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Slam_Dust_Tile",
+      "PositionOffset": {
+        "X": 4.36477,
+        "Y": 0.3,
+        "Z": -2.52
+      }
+    }
+  ],
+  "LifeSpan": 1.45,
+  "BoundingRadius": 11,
+  "CullDistance": 112,
+  "IsImportant": true
+}

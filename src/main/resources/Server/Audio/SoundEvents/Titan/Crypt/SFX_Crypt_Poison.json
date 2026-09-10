@@ -1,0 +1,23 @@
+{
+  "Volume": -5,
+  "StartAttenuationDistance": 8,
+  "MaxDistance": 96,
+  "SpatialBlend": 1,
+  "MaxInstance": 8,
+  "AudioCategory": "AudioCat_NPC",
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Titan/Crypt/Crypt_Poison_01.ogg",
+        "Sounds/Titan/Crypt/Crypt_Poison_02.ogg"
+      ],
+      "RandomSettings": {
+        "MinPitch": -0.55,
+        "MaxPitch": 0.12,
+        "MinVolume": -1,
+        "MaxVolume": 0
+      },
+      "RoundRobinHistorySize": 1
+    }
+  ]
+}

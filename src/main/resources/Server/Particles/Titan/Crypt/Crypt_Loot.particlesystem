@@ -1,0 +1,20 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Loot_Sigil"
+    },
+    {
+      "SpawnerId": "Crypt_Loot_Halo"
+    },
+    {
+      "SpawnerId": "Crypt_Loot_Reveal_Flash"
+    },
+    {
+      "SpawnerId": "Crypt_Jade_Embers"
+    }
+  ],
+  "LifeSpan": 2.2,
+  "BoundingRadius": 5,
+  "CullDistance": 112,
+  "IsImportant": true
+}

@@ -1,0 +1,1823 @@
+{
+  "version": 8,
+  "blockIdVersion": 11,
+  "anchorX": 0,
+  "anchorY": 0,
+  "anchorZ": 0,
+  "blocks": [
+    {
+      "x": -6,
+      "y": 0,
+      "z": -3,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 6
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": -3,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "z": -3,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 6
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": -2,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": -2,
+      "name": "Rock_Crystal_Red_Block",
+      "rotation": 5
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "z": -2,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -6,
+      "y": 3,
+      "z": -2,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 1
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": -1,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": -1,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "z": -1,
+      "name": "Rock_Gold_Brick_Stairs"
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": 0,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": 0,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": 1,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": 1,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": 2,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": 2,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "z": 2,
+      "name": "Rock_Gold_Brick_Stairs",
+      "rotation": 2
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": 3,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": 3,
+      "name": "Rock_Crystal_Red_Block",
+      "rotation": 5
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "z": 3,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -6,
+      "y": 3,
+      "z": 3,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 1
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": 4,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 4
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": 4,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "z": 4,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 4
+    },
+    {
+      "x": -5,
+      "y": 0,
+      "z": -5,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -5,
+      "y": 1,
+      "z": -5,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -5,
+      "y": 0,
+      "z": -4,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -5,
+      "y": 1,
+      "z": -4,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -5,
+      "y": 0,
+      "z": -3,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -5,
+      "y": 1,
+      "z": -3,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -5,
+      "y": 2,
+      "z": -3,
+      "name": "Rock_Gold_Brick_Stairs",
+      "rotation": 2
+    },
+    {
+      "x": -5,
+      "y": 0,
+      "z": 4,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -5,
+      "y": 1,
+      "z": 4,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -5,
+      "y": 2,
+      "z": 4,
+      "name": "Rock_Gold_Brick_Stairs"
+    },
+    {
+      "x": -5,
+      "y": 0,
+      "z": 5,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -5,
+      "y": 1,
+      "z": 5,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -4,
+      "y": 0,
+      "z": -6,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -4,
+      "y": 1,
+      "z": -6,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -4,
+      "y": 0,
+      "z": 6,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -4,
+      "y": 1,
+      "z": 6,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -3,
+      "y": 0,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 7
+    },
+    {
+      "x": -3,
+      "y": 1,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -3,
+      "y": 2,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 7
+    },
+    {
+      "x": -3,
+      "y": 0,
+      "z": -7,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -3,
+      "y": 1,
+      "z": -7,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -3,
+      "y": 2,
+      "z": -7,
+      "name": "Rock_Gold_Brick_Stairs",
+      "rotation": 3
+    },
+    {
+      "x": -3,
+      "y": 0,
+      "z": 7,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -3,
+      "y": 1,
+      "z": 7,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -3,
+      "y": 2,
+      "z": 7,
+      "name": "Rock_Gold_Brick_Stairs",
+      "rotation": 3
+    },
+    {
+      "x": -3,
+      "y": 0,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 7
+    },
+    {
+      "x": -3,
+      "y": 1,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -3,
+      "y": 2,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 7
+    },
+    {
+      "x": -2,
+      "y": 0,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -2,
+      "y": 1,
+      "z": -8,
+      "name": "Rock_Crystal_Red_Block",
+      "rotation": 6
+    },
+    {
+      "x": -2,
+      "y": 2,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -2,
+      "y": 3,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 1
+    },
+    {
+      "x": -2,
+      "y": 0,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -2,
+      "y": 1,
+      "z": 8,
+      "name": "Rock_Crystal_Red_Block",
+      "rotation": 6
+    },
+    {
+      "x": -2,
+      "y": 2,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -2,
+      "y": 3,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 1
+    },
+    {
+      "x": -1,
+      "y": 0,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -1,
+      "y": 1,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -1,
+      "y": 2,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Stairs",
+      "rotation": 1
+    },
+    {
+      "x": -1,
+      "y": 0,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": -1,
+      "y": 1,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": -1,
+      "y": 2,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Stairs",
+      "rotation": 1
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 0,
+      "y": 1,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 0,
+      "y": 1,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 1,
+      "y": 0,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 1,
+      "y": 1,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 1,
+      "y": 2,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Stairs",
+      "rotation": 3
+    },
+    {
+      "x": 1,
+      "y": 0,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 1,
+      "y": 1,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 1,
+      "y": 2,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Stairs",
+      "rotation": 3
+    },
+    {
+      "x": 2,
+      "y": 0,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 2,
+      "y": 1,
+      "z": -8,
+      "name": "Rock_Crystal_Red_Block",
+      "rotation": 6
+    },
+    {
+      "x": 2,
+      "y": 2,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 2,
+      "y": 3,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 1
+    },
+    {
+      "x": 2,
+      "y": 0,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 2,
+      "y": 1,
+      "z": 8,
+      "name": "Rock_Crystal_Red_Block",
+      "rotation": 6
+    },
+    {
+      "x": 2,
+      "y": 2,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 2,
+      "y": 3,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 1
+    },
+    {
+      "x": 3,
+      "y": 0,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 5
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 3,
+      "y": 2,
+      "z": -8,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 5
+    },
+    {
+      "x": 3,
+      "y": 0,
+      "z": -7,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "z": -7,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 3,
+      "y": 2,
+      "z": -7,
+      "name": "Rock_Gold_Brick_Stairs",
+      "rotation": 1
+    },
+    {
+      "x": 3,
+      "y": 0,
+      "z": 7,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "z": 7,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 3,
+      "y": 2,
+      "z": 7,
+      "name": "Rock_Gold_Brick_Stairs",
+      "rotation": 1
+    },
+    {
+      "x": 3,
+      "y": 0,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 5
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 3,
+      "y": 2,
+      "z": 8,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 5
+    },
+    {
+      "x": 4,
+      "y": 0,
+      "z": -6,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 4,
+      "y": 1,
+      "z": -6,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 4,
+      "y": 0,
+      "z": 6,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 4,
+      "y": 1,
+      "z": 6,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "z": -5,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "z": -5,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "z": -4,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "z": -4,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "z": -3,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "z": -3,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 5,
+      "y": 2,
+      "z": -3,
+      "name": "Rock_Gold_Brick_Stairs",
+      "rotation": 2
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "z": 4,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "z": 4,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 5,
+      "y": 2,
+      "z": 4,
+      "name": "Rock_Gold_Brick_Stairs"
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "z": 5,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "z": 5,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": -3,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 6
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": -3,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "z": -3,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 6
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": -2,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": -2,
+      "name": "Rock_Crystal_Red_Block",
+      "rotation": 5
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "z": -2,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 6,
+      "y": 3,
+      "z": -2,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 1
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": -1,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": -1,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "z": -1,
+      "name": "Rock_Gold_Brick_Stairs"
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": 0,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": 0,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": 1,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": 1,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": 2,
+      "name": "Rock_Gold_Brick_Smooth"
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": 2,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "z": 2,
+      "name": "Rock_Gold_Brick_Stairs",
+      "rotation": 2
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": 3,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": 3,
+      "name": "Rock_Crystal_Red_Block",
+      "rotation": 5
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "z": 3,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 6,
+      "y": 3,
+      "z": 3,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 1
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": 4,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 4
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": 4,
+      "name": "Rock_Gold_Brick_Decorative"
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "z": 4,
+      "name": "Rock_Gold_Brick_Smooth_Half",
+      "rotation": 4
+    }
+  ],
+  "fluids": [
+    {
+      "x": -6,
+      "y": 0,
+      "z": -3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": -3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "z": -3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": -2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": -2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "z": -2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 3,
+      "z": -2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": -1,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": -1,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "z": -1,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": 0,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": 0,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": 1,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": 1,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": 2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": 2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "z": 2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": 3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": 3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "z": 3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 3,
+      "z": 3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 0,
+      "z": 4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "z": 4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "z": 4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -5,
+      "y": 0,
+      "z": -5,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -5,
+      "y": 1,
+      "z": -5,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -5,
+      "y": 0,
+      "z": -4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -5,
+      "y": 1,
+      "z": -4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -5,
+      "y": 0,
+      "z": -3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -5,
+      "y": 1,
+      "z": -3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -5,
+      "y": 2,
+      "z": -3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -5,
+      "y": 0,
+      "z": 4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -5,
+      "y": 1,
+      "z": 4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -5,
+      "y": 2,
+      "z": 4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -5,
+      "y": 0,
+      "z": 5,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -5,
+      "y": 1,
+      "z": 5,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -4,
+      "y": 0,
+      "z": -6,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -4,
+      "y": 1,
+      "z": -6,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -4,
+      "y": 0,
+      "z": 6,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -4,
+      "y": 1,
+      "z": 6,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -3,
+      "y": 0,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -3,
+      "y": 1,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -3,
+      "y": 2,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -3,
+      "y": 0,
+      "z": -7,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -3,
+      "y": 1,
+      "z": -7,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -3,
+      "y": 2,
+      "z": -7,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -3,
+      "y": 0,
+      "z": 7,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -3,
+      "y": 1,
+      "z": 7,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -3,
+      "y": 2,
+      "z": 7,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -3,
+      "y": 0,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -3,
+      "y": 1,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -3,
+      "y": 2,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -2,
+      "y": 0,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -2,
+      "y": 1,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -2,
+      "y": 2,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -2,
+      "y": 3,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -2,
+      "y": 0,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -2,
+      "y": 1,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -2,
+      "y": 2,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -2,
+      "y": 3,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -1,
+      "y": 0,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -1,
+      "y": 1,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -1,
+      "y": 2,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -1,
+      "y": 0,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -1,
+      "y": 1,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": -1,
+      "y": 2,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 0,
+      "y": 1,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 0,
+      "y": 1,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 1,
+      "y": 0,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 1,
+      "y": 1,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 1,
+      "y": 2,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 1,
+      "y": 0,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 1,
+      "y": 1,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 1,
+      "y": 2,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 2,
+      "y": 0,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 2,
+      "y": 1,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 2,
+      "y": 2,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 2,
+      "y": 3,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 2,
+      "y": 0,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 2,
+      "y": 1,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 2,
+      "y": 2,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 2,
+      "y": 3,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 3,
+      "y": 0,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 3,
+      "y": 2,
+      "z": -8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 3,
+      "y": 0,
+      "z": -7,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "z": -7,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 3,
+      "y": 2,
+      "z": -7,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 3,
+      "y": 0,
+      "z": 7,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "z": 7,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 3,
+      "y": 2,
+      "z": 7,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 3,
+      "y": 0,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 3,
+      "y": 2,
+      "z": 8,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 4,
+      "y": 0,
+      "z": -6,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 4,
+      "y": 1,
+      "z": -6,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 4,
+      "y": 0,
+      "z": 6,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 4,
+      "y": 1,
+      "z": 6,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "z": -5,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "z": -5,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "z": -4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "z": -4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "z": -3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "z": -3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 5,
+      "y": 2,
+      "z": -3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "z": 4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "z": 4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 5,
+      "y": 2,
+      "z": 4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "z": 5,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "z": 5,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": -3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": -3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "z": -3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": -2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": -2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "z": -2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 3,
+      "z": -2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": -1,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": -1,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "z": -1,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": 0,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": 0,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": 1,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": 1,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": 2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": 2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "z": 2,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": 3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": 3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "z": 3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 3,
+      "z": 3,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "z": 4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "z": 4,
+      "name": "Empty",
+      "level": 0
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "z": 4,
+      "name": "Empty",
+      "level": 0
+    }
+  ]
+}

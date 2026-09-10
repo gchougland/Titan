@@ -1,0 +1,92 @@
+{
+  "RenderMode": "BlendAdd",
+  "LinearFiltering": false,
+  "LightInfluence": 0,
+  "ParticleRotationInfluence": "None",
+  "ParticleRotateWithSpawner": true,
+  "TrailSpawnerPositionMultiplier": 1,
+  "TrailSpawnerRotationMultiplier": 1,
+  "MaxConcurrentParticles": 1,
+  "TotalParticles": {
+    "Min": 1,
+    "Max": 1
+  },
+  "SpawnRate": {
+    "Min": 1,
+    "Max": 1
+  },
+  "SpawnBurst": true,
+  "LifeSpan": 1.9000000000000001,
+  "ParticleLifeSpan": {
+    "Min": 1.8,
+    "Max": 1.8
+  },
+  "Particle": {
+    "Texture": "Particles/Textures/Titan/Crypt/Crypt_Rune.png",
+    "ScaleRatioConstraint": "OneToOne",
+    "UVOption": "None",
+    "SoftParticles": "Disable",
+    "InitialAnimationFrame": {
+      "Opacity": 1,
+      "Color": "#86ff9b",
+      "Scale": {
+        "X": {
+          "Min": 0.8290155440414508,
+          "Max": 0.8290155440414508
+        },
+        "Y": {
+          "Min": 0.8290155440414508,
+          "Max": 0.8290155440414508
+        }
+      },
+      "FrameIndex": {
+        "Min": 0,
+        "Max": 0
+      },
+      "Rotation": {
+        "X": {
+          "Min": 90,
+          "Max": 90
+        },
+        "Y": {
+          "Min": 0,
+          "Max": 0
+        },
+        "Z": {
+          "Min": 0,
+          "Max": 0
+        }
+      }
+    },
+    "Animation": {
+      "0": {
+        "Opacity": 0
+      },
+      "15": {
+        "Opacity": 0.9
+      },
+      "65": {
+        "Opacity": 0.7200000000000001
+      },
+      "100": {
+        "Opacity": 0,
+        "Scale": {
+          "X": {
+            "Min": 1,
+            "Max": 1
+          },
+          "Y": {
+            "Min": 1,
+            "Max": 1
+          }
+        },
+        "Rotation": {
+          "Z": {
+            "Min": -45,
+            "Max": -45
+          }
+        }
+      }
+    }
+  }
+}

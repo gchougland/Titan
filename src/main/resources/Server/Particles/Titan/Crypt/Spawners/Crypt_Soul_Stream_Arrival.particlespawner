@@ -1,0 +1,173 @@
+{
+  "RenderMode": "BlendLinear",
+  "LinearFiltering": false,
+  "LightInfluence": 0,
+  "ParticleRotationInfluence": "Billboard",
+  "ParticleRotateWithSpawner": false,
+  "TrailSpawnerPositionMultiplier": 1,
+  "TrailSpawnerRotationMultiplier": 1,
+  "Shape": "Sphere",
+  "EmitOffset": {
+    "X": {
+      "Min": -2.4,
+      "Max": 2.4
+    },
+    "Y": {
+      "Min": -1.8,
+      "Max": 1.8
+    },
+    "Z": {
+      "Min": -2.4,
+      "Max": 2.4
+    }
+  },
+  "TotalParticles": {
+    "Min": 5,
+    "Max": 5
+  },
+  "MaxConcurrentParticles": 5,
+  "ParticleLifeSpan": {
+    "Min": 0.65,
+    "Max": 0.95
+  },
+  "LifeSpan": 1.15,
+  "SpawnBurst": true,
+  "SpawnRate": {
+    "Min": 5,
+    "Max": 5
+  },
+  "InitialVelocity": {
+    "Speed": {
+      "Min": 0,
+      "Max": 0
+    },
+    "Yaw": {
+      "Min": 0,
+      "Max": 360
+    },
+    "Pitch": {
+      "Min": -70,
+      "Max": 70
+    }
+  },
+  "Attractors": [
+    {
+      "Position": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0
+      },
+      "TrailPositionMultiplier": 1,
+      "RadialImpulse": -3.6
+    }
+  ],
+  "Particle": {
+    "Texture": "Particles/Textures/Titan/Crypt/Crypt_Soul_Smoke.png",
+    "ScaleRatioConstraint": "OneToOne",
+    "UVOption": "RandomFlipU",
+    "SoftParticles": "Enable",
+    "InitialAnimationFrame": {
+      "Opacity": 1,
+      "Color": "#9254c6",
+      "Scale": {
+        "X": {
+          "Min": 1.1,
+          "Max": 1.7
+        },
+        "Y": {
+          "Min": 1.1,
+          "Max": 1.7
+        }
+      },
+      "Rotation": {
+        "Z": {
+          "Min": -180,
+          "Max": 180
+        }
+      },
+      "FrameIndex": {
+        "Min": 0,
+        "Max": 0
+      }
+    },
+    "Animation": {
+      "0": {
+        "Opacity": 0,
+        "Scale": {
+          "X": {
+            "Min": 0.65,
+            "Max": 0.65
+          },
+          "Y": {
+            "Min": 0.65,
+            "Max": 0.65
+          }
+        }
+      },
+      "12": {
+        "Opacity": 0.52,
+        "Scale": {
+          "X": {
+            "Min": 0.9,
+            "Max": 0.9
+          },
+          "Y": {
+            "Min": 0.9,
+            "Max": 0.9
+          }
+        }
+      },
+      "40": {
+        "Opacity": 0.8,
+        "Scale": {
+          "X": {
+            "Min": 0.85,
+            "Max": 0.85
+          },
+          "Y": {
+            "Min": 0.85,
+            "Max": 0.85
+          }
+        }
+      },
+      "70": {
+        "Opacity": 0.5599999999999999,
+        "Scale": {
+          "X": {
+            "Min": 0.4,
+            "Max": 0.4
+          },
+          "Y": {
+            "Min": 0.4,
+            "Max": 0.4
+          }
+        },
+        "Rotation": {
+          "Z": {
+            "Min": -25,
+            "Max": 25
+          }
+        }
+      },
+      "100": {
+        "Opacity": 0,
+        "Scale": {
+          "X": {
+            "Min": 0.06,
+            "Max": 0.06
+          },
+          "Y": {
+            "Min": 0.06,
+            "Max": 0.06
+          }
+        },
+        "Rotation": {
+          "Z": {
+            "Min": -50,
+            "Max": 50
+          }
+        }
+      }
+    }
+  }
+}

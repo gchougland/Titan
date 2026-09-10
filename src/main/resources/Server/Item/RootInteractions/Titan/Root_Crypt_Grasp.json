@@ -1,0 +1,35 @@
+{
+  "RequireNewClick": true,
+  "Cooldown": {
+    "Cooldown": 2.0
+  },
+  "Interactions": [
+    {
+      "Type": "StatsCondition",
+      "Costs": {
+        "SignatureEnergy": 100
+      },
+      "Next": {
+        "Type": "Serial",
+        "Interactions": [
+          {
+            "Type": "Simple",
+            "RunTime": 0.6,
+            "Effects": {
+              "ItemAnimationId": "GravePound",
+              "ClearAnimationOnFinish": false
+            }
+          },
+          {
+            "Type": "CryptGrasp"
+          },
+          {
+            "Type": "Simple",
+            "RunTime": 0.35
+          }
+        ]
+      },
+      "ValueType": "Percent"
+    }
+  ]
+}

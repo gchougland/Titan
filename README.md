@@ -79,6 +79,21 @@ another if you lose yours.
 
 It will not fight for you and nothing will fight it. It has no health bar because there is nothing to show.
 
+## The Crypt Keeper
+
+Newly generated Zone 1 terrain can contain an entrance to an underground crypt. Open its central
+sarcophagus to awaken a giant floating skeleton. Break both bracelets to bring its head down beside the
+podium, then strike the crown through three phases of telegraphed attacks. The arms and palms are
+climbable, and an encounter with no living players remaining resets its coffin.
+
+Victory gathers purple smoke into the Staff of the Crypt Keeper on top of the coffin: a skeletal hand gripping a green orb, with
+homing soul missiles and a signature that summons the boss's arm for a giant fist pound. The encounter
+is intended for later-game gear and still needs in-game balance and presentation testing.
+
+See [CRYPT_KEEPER.md](docs/CRYPT_KEEPER.md) for mechanics, placement, testing commands, tuning and build notes.
+Administrators can use `/titan crypt dungeon` to create an isolated test crypt and `/titan crypt return`
+to return afterward.
+
 ## Commands
 
 `/titan spawn <variant>` places one in front of you, `/titan list` shows what is nearby, and `/titan kill`

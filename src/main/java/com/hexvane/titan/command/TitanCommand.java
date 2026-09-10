@@ -21,5 +21,6 @@ public final class TitanCommand extends AbstractCommandCollection {
         addSubCommand(new TitanPreviewCommand());
         addSubCommand(new TitanYagaCommand());
         addSubCommand(new TitanLedgeCommand());
+        addSubCommand(new com.hexvane.titan.crypt.CryptCommand());
     }
 }

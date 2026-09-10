@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Gilded_Reforge"
+    },
+    {
+      "SpawnerId": "Crypt_Violet_Embers"
+    }
+  ],
+  "LifeSpan": 1.5,
+  "BoundingRadius": 12,
+  "CullDistance": 112,
+  "IsImportant": false
+}

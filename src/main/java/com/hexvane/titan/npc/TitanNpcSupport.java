@@ -28,8 +28,26 @@ public final class TitanNpcSupport {
     public static boolean canStartAttack(@Nonnull final TitanComponent titan) {
         if (titan.getAttackCooldown() > 0f) return false;
         final TitanState state = titan.getState();
-        return state == TitanState.IDLE || state == TitanState.CHASE || state == TitanState.SLEEPING
-            || state == TitanState.WAKING;
+        return state == TitanState.IDLE || state == TitanState.CHASE;
+    }
+
+    /** Shared role branches may propose a move that this variant has deliberately disabled. */
+    public static boolean canRequest(@Nonnull final TitanComponent titan, @Nonnull final TitanIntent intent) {
+        if (intent == TitanIntent.WAKE) return titan.getState() == TitanState.SLEEPING;
+        if (intent == TitanIntent.CHASE) return titan.getState() != TitanState.DYING;
+        if (!canStartAttack(titan)) return false;
+        final var variant = titan.getVariant();
+        if (variant == null || variant.isPet() || variant.isPassive() && !titan.isProvoked()) return false;
+        final boolean stomp = variant.getStompChance() > 0 && titan.getFeet().length > 0;
+        return switch (intent) {
+            case MELEE -> variant.getSmashChance() > 0 || variant.getSlamChance() > 0 || variant.getPoundChance() > 0 || stomp;
+            case SLAM -> variant.getSlamChance() > 0;
+            case POUND -> variant.getPoundChance() > 0;
+            case HURL -> variant.getHurlChance() > 0;
+            case PLOW -> variant.getPlowChance() > 0;
+            case STOMP -> stomp;
+            default -> false;
+        };
     }
 
     public static void applyTarget(@Nonnull final TitanComponent titan,

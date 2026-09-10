@@ -1,0 +1,163 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Blue_Fire_Flames_Field"
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": 0.0,
+        "Y": 1.3,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": 2.016,
+        "Y": 1.3,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": 1.008,
+        "Y": 1.3,
+        "Z": 1.74591
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": -1.008,
+        "Y": 1.3,
+        "Z": 1.74591
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": -2.016,
+        "Y": 1.3,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": -1.008,
+        "Y": 1.3,
+        "Z": -1.74591
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": 1.008,
+        "Y": 1.3,
+        "Z": -1.74591
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": 4.032,
+        "Y": 1.3,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": 3.49181,
+        "Y": 1.3,
+        "Z": 2.016
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": 2.016,
+        "Y": 1.3,
+        "Z": 3.49181
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": 0.0,
+        "Y": 1.3,
+        "Z": 4.032
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": -2.016,
+        "Y": 1.3,
+        "Z": 3.49181
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": -3.49181,
+        "Y": 1.3,
+        "Z": 2.016
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": -4.032,
+        "Y": 1.3,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": -3.49181,
+        "Y": 1.3,
+        "Z": -2.016
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": -2.016,
+        "Y": 1.3,
+        "Z": -3.49181
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": -0.0,
+        "Y": 1.3,
+        "Z": -4.032
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": 2.016,
+        "Y": 1.3,
+        "Z": -3.49181
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Soul_Flame",
+      "PositionOffset": {
+        "X": 3.49181,
+        "Y": 1.3,
+        "Z": -2.016
+      }
+    }
+  ],
+  "LifeSpan": 1.35,
+  "BoundingRadius": 9.8,
+  "CullDistance": 112,
+  "IsImportant": true
+}

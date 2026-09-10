@@ -1,0 +1,76 @@
+{
+  "RequireNewClick": true,
+  "Cooldown": {
+    "Cooldown": 1.1
+  },
+  "Tags": {
+    "Attack": [
+      "Ranged"
+    ]
+  },
+  "Interactions": [
+    {
+      "Type": "StatsCondition",
+      "Costs": {
+        "Stamina": 5
+      },
+      "Failed": "Staff_Cast_Fail",
+      "Next": {
+        "Type": "Charging",
+        "AllowIndefiniteHold": true,
+        "DisplayProgress": true,
+        "CancelOnOtherClick": true,
+        "Effects": {
+          "ItemAnimationId": "SoulCharge",
+          "WorldSoundEventId": "SFX_Crypt_Staff_Charge",
+          "LocalSoundEventId": "SFX_Crypt_Staff_Charge",
+          "ClearAnimationOnFinish": true,
+          "Particles": [
+            {
+              "SystemId": "Crypt_Staff_Orb",
+              "TargetNodeName": "Orb",
+              "Scale": 0.8
+            }
+          ]
+        },
+        "Next": {
+          "0.0": {
+            "Type": "Simple",
+            "RunTime": 0.1
+          },
+          "0.65": {
+            "Type": "StatsCondition",
+            "Costs": {
+              "Stamina": 5
+            },
+            "Failed": "Staff_Cast_Fail",
+            "Next": {
+              "Type": "Serial",
+              "Interactions": [
+                {
+                  "Type": "Simple",
+                  "RunTime": 0.22,
+                  "Effects": {
+                    "ItemAnimationId": "SoulVolley",
+                    "ClearAnimationOnFinish": false
+                  }
+                },
+                {
+                  "Type": "CryptMissiles"
+                },
+                {
+                  "Type": "Simple",
+                  "RunTime": 0.35
+                }
+              ]
+            }
+          }
+        },
+        "Failed": {
+          "Type": "Simple",
+          "RunTime": 0.1
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Sweep_Impact_Field"
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": 0.0,
+        "Y": 0.8,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": 2.436,
+        "Y": 0.8,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": 1.218,
+        "Y": 0.8,
+        "Z": 2.10964
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": -1.218,
+        "Y": 0.8,
+        "Z": 2.10964
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": -2.436,
+        "Y": 0.8,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": -1.218,
+        "Y": 0.8,
+        "Z": -2.10964
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": 1.218,
+        "Y": 0.8,
+        "Z": -2.10964
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": 4.872,
+        "Y": 0.8,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": 4.21928,
+        "Y": 0.8,
+        "Z": 2.436
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": 2.436,
+        "Y": 0.8,
+        "Z": 4.21928
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": 0.0,
+        "Y": 0.8,
+        "Z": 4.872
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": -2.436,
+        "Y": 0.8,
+        "Z": 4.21928
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": -4.21928,
+        "Y": 0.8,
+        "Z": 2.436
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": -4.872,
+        "Y": 0.8,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": -4.21928,
+        "Y": 0.8,
+        "Z": -2.436
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": -2.436,
+        "Y": 0.8,
+        "Z": -4.21928
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": -0.0,
+        "Y": 0.8,
+        "Z": -4.872
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": 2.436,
+        "Y": 0.8,
+        "Z": -4.21928
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Sweep_Wisp",
+      "PositionOffset": {
+        "X": 4.21928,
+        "Y": 0.8,
+        "Z": -2.436
+      }
+    }
+  ],
+  "LifeSpan": 0.8,
+  "BoundingRadius": 10.8,
+  "CullDistance": 112,
+  "IsImportant": true
+}

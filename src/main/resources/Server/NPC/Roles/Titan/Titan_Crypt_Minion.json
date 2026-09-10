@@ -1,0 +1,28 @@
+{
+  "Type": "Variant",
+  "Reference": "Template_Intelligent",
+  "Modify": {
+    "MaxHealth": 95,
+    "ViewRange": 60,
+    "HearingRange": 60,
+    "AlertedRange": 65,
+    "LeashDistance": 70,
+    "HardLeashDistance": 90,
+    "MaxSpeed": 6,
+    "ChaseRelativeSpeed": 1,
+    "ViewSector": 270,
+    "WakingPeriod": [0, 24],
+    "Appearance": "Skeleton_Fighter",
+    "Weapons": ["Weapon_Sword_Iron"],
+    "Attack": "Root_NPC_Skeleton_Fighter_Attack",
+    "AttackDistance": 2.5,
+    "AttackPauseRange": [1, 2.5],
+    "CombatBehaviorDistance": 4,
+    "CombatBackOffAfterAttack": false,
+    "CombatAlwaysMovingWeight": 1000,
+    "DeathParticles": "Effect_Death_Bones",
+    "DropList": "Empty",
+    "IsMemory": false,
+    "NameTranslationKey": "titan_crypt_boss.minion.name"
+  }
+}

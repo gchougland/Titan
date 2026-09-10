@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Jade_Embers"
+    },
+    {
+      "SpawnerId": "Crypt_Missile_Burst"
+    }
+  ],
+  "LifeSpan": 1.2,
+  "BoundingRadius": 5,
+  "CullDistance": 112,
+  "IsImportant": false
+}

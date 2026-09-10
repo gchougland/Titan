@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Grab_Binding_Ring"
+    },
+    {
+      "SpawnerId": "Crypt_Violet_Embers"
+    }
+  ],
+  "LifeSpan": 1.4,
+  "BoundingRadius": 4,
+  "CullDistance": 112,
+  "IsImportant": true
+}

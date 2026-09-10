@@ -1,0 +1,17 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Gilded_Shards"
+    },
+    {
+      "SpawnerId": "Crypt_Violet_Shockwave"
+    },
+    {
+      "SpawnerId": "Crypt_Violet_Embers"
+    }
+  ],
+  "LifeSpan": 2,
+  "BoundingRadius": 12,
+  "CullDistance": 112,
+  "IsImportant": false
+}

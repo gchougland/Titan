@@ -1,0 +1,307 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Poison_Cloud_Field"
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 0.0,
+        "Y": 0.8,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 2.38,
+        "Y": 0.8,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 1.19,
+        "Y": 0.8,
+        "Z": 2.06114
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -1.19,
+        "Y": 0.8,
+        "Z": 2.06114
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -2.38,
+        "Y": 0.8,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -1.19,
+        "Y": 0.8,
+        "Z": -2.06114
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 1.19,
+        "Y": 0.8,
+        "Z": -2.06114
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 4.76,
+        "Y": 0.8,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 4.12228,
+        "Y": 0.8,
+        "Z": 2.38
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 2.38,
+        "Y": 0.8,
+        "Z": 4.12228
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 0.0,
+        "Y": 0.8,
+        "Z": 4.76
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -2.38,
+        "Y": 0.8,
+        "Z": 4.12228
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -4.12228,
+        "Y": 0.8,
+        "Z": 2.38
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -4.76,
+        "Y": 0.8,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -4.12228,
+        "Y": 0.8,
+        "Z": -2.38
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -2.38,
+        "Y": 0.8,
+        "Z": -4.12228
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -0.0,
+        "Y": 0.8,
+        "Z": -4.76
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 2.38,
+        "Y": 0.8,
+        "Z": -4.12228
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 4.12228,
+        "Y": 0.8,
+        "Z": -2.38
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 7.14,
+        "Y": 0.8,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 6.70941,
+        "Y": 0.8,
+        "Z": 2.44202
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 5.46956,
+        "Y": 0.8,
+        "Z": 4.5895
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 3.57,
+        "Y": 0.8,
+        "Z": 6.18342
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 1.23985,
+        "Y": 0.8,
+        "Z": 7.03153
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -1.23985,
+        "Y": 0.8,
+        "Z": 7.03153
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -3.57,
+        "Y": 0.8,
+        "Z": 6.18342
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -5.46956,
+        "Y": 0.8,
+        "Z": 4.5895
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -6.70941,
+        "Y": 0.8,
+        "Z": 2.44202
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -7.14,
+        "Y": 0.8,
+        "Z": 0.0
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -6.70941,
+        "Y": 0.8,
+        "Z": -2.44202
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -5.46956,
+        "Y": 0.8,
+        "Z": -4.5895
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -3.57,
+        "Y": 0.8,
+        "Z": -6.18342
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": -1.23985,
+        "Y": 0.8,
+        "Z": -7.03153
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 1.23985,
+        "Y": 0.8,
+        "Z": -7.03153
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 3.57,
+        "Y": 0.8,
+        "Z": -6.18342
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 5.46956,
+        "Y": 0.8,
+        "Z": -4.5895
+      }
+    },
+    {
+      "SpawnerId": "Crypt_Poison_Fog",
+      "PositionOffset": {
+        "X": 6.70941,
+        "Y": 0.8,
+        "Z": -2.44202
+      }
+    }
+  ],
+  "LifeSpan": 1.65,
+  "BoundingRadius": 13.5,
+  "CullDistance": 112,
+  "IsImportant": true
+}

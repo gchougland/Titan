@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Missile_Core"
+    },
+    {
+      "SpawnerId": "Crypt_Missile_Wisps"
+    }
+  ],
+  "LifeSpan": 0.65,
+  "BoundingRadius": 3,
+  "CullDistance": 112,
+  "IsImportant": false
+}

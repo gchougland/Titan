@@ -1,0 +1,11 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Crown_Flash"
+    }
+  ],
+  "LifeSpan": 0.7,
+  "BoundingRadius": 12,
+  "CullDistance": 112,
+  "IsImportant": false
+}

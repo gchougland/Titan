@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Jade_Embers"
+    },
+    {
+      "SpawnerId": "Crypt_Staff_Flash"
+    }
+  ],
+  "LifeSpan": 1.2,
+  "BoundingRadius": 4,
+  "CullDistance": 112,
+  "IsImportant": false
+}

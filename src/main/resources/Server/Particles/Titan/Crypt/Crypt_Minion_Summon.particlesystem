@@ -1,0 +1,17 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Summon_Rune"
+    },
+    {
+      "SpawnerId": "Crypt_Minion_Soul_Coil"
+    },
+    {
+      "SpawnerId": "Crypt_Minion_Bones"
+    }
+  ],
+  "LifeSpan": 2.2,
+  "BoundingRadius": 6,
+  "CullDistance": 112,
+  "IsImportant": false
+}

@@ -1,0 +1,23 @@
+{
+  "Volume": -7,
+  "StartAttenuationDistance": 5,
+  "MaxDistance": 56,
+  "SpatialBlend": 1,
+  "MaxInstance": 5,
+  "AudioCategory": "AudioCat_Weapons",
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Titan/Crypt/Crypt_Missile_Impact_01.ogg",
+        "Sounds/Titan/Crypt/Crypt_Missile_Impact_02.ogg"
+      ],
+      "RandomSettings": {
+        "MinPitch": -0.55,
+        "MaxPitch": 0.12,
+        "MinVolume": -1,
+        "MaxVolume": 0
+      },
+      "RoundRobinHistorySize": 1
+    }
+  ]
+}

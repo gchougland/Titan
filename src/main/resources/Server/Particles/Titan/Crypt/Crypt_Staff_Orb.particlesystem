@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Staff_Orb_Glow"
+    },
+    {
+      "SpawnerId": "Crypt_Staff_Orb_Sparks"
+    }
+  ],
+  "LifeSpan": 1.2,
+  "BoundingRadius": 2,
+  "CullDistance": 112,
+  "IsImportant": false
+}

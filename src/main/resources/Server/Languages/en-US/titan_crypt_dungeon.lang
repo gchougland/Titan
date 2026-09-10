@@ -1,0 +1,9 @@
+coffin.name=Crypt Keeper's Sarcophagus
+coffin.description=A restless king lies beneath this seal. Only a prepared party should disturb his slumber.
+coffin.hint=Press [{key}] to open the sarcophagus
+command.root=Create and inspect Crypt Keeper test encounters
+command.dungeon=Create a fresh test world with an underground crypt, then visit its entrance
+command.staff=Give yourself a Staff of the Crypt Keeper for testing
+command.status=Show the nearest loaded crypt's state and boss health
+command.reset=Despawn the nearest active encounter and reset its coffin without rewards
+command.return=Return from the test dungeon to your previous world and position

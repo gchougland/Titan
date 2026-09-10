@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crypt_Beam_Vortex"
+    },
+    {
+      "SpawnerId": "Crypt_Beam_Core_Charge"
+    }
+  ],
+  "LifeSpan": 1.2,
+  "BoundingRadius": 12,
+  "CullDistance": 112,
+  "IsImportant": false
+}

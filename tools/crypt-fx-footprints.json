@@ -1,0 +1,30 @@
+{
+  "Crypt_Sweep_Impact": {
+    "radius": 5.8,
+    "tileCount": 19,
+    "bands": 2,
+    "floorSpawner": "Crypt_Sweep_Impact_Field",
+    "tileSpawner": "Crypt_Sweep_Wisp"
+  },
+  "Crypt_Slam_Impact": {
+    "radius": 6,
+    "tileCount": 19,
+    "bands": 2,
+    "floorSpawner": "Crypt_Slam_Impact_Field",
+    "tileSpawner": "Crypt_Slam_Dust_Tile"
+  },
+  "Crypt_Blue_Fire_Flames": {
+    "radius": 4.8,
+    "tileCount": 19,
+    "bands": 2,
+    "floorSpawner": "Crypt_Blue_Fire_Flames_Field",
+    "tileSpawner": "Crypt_Soul_Flame"
+  },
+  "Crypt_Poison_Cloud": {
+    "radius": 8.5,
+    "tileCount": 37,
+    "bands": 3,
+    "floorSpawner": "Crypt_Poison_Cloud_Field",
+    "tileSpawner": "Crypt_Poison_Fog"
+  }
+}

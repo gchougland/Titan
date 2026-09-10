@@ -1,0 +1,33 @@
+{
+  "$Comment": [
+    "Entrance-floor anchor is source (64,74,-2); normalized prefab entrance floor is y=0, room floor y=-57.",
+    "Keep FitHeightmap false: true bends each building column to terrain. Normal prefab placement samples the entrance surface height.",
+    "Normal prefabs paste AFTER caves with priority9 over cave6/prefab-cave8. Explicit air clears the whole authored interior; Submerge=false prevents flooding.",
+    "Negative height tolerance provides a coarse terrain check; the TitanCryptPrefab supplier additionally checks every underground roof column before pasting."
+  ],
+  "Priority": "Normal",
+  "Target": {"Root": "Default", "Rules": [
+    "Zones.Zone1_Tier1.Tile.Plains_Smooth",
+    "Zones.Zone1_Tier1.Tile.Forest_Birch",
+    "Zones.Zone1_Tier1.Tile.Plains_Birch",
+    "Zones.Zone1_Tier2.Tile.Plains_Tallgrass",
+    "Zones.Zone1_Tier2.Tile.Forest_Aspen"
+  ]},
+  "Operations": [{"Type": "Add", "Content": {
+    "Type": "TitanCryptPrefab",
+    "Prefabs": [{"Path": "Titan.Crypt.SkeletonDungeon_Site", "Weight": 1.0}],
+    "PointGrid": {"Seed": "TitanCryptKeeperSite", "Scale": 384.0, "Jitter": 0.25,
+      "Density": {"Min": 0.0, "Max": 0.32}},
+    "FitHeightmap": false,
+    "Submerge": false,
+    "HeightMask": {"Min": 100, "Max": 300},
+    "Rotations": ["Rotation0"],
+    "BaseChecks": [{"PrefabSize": 1, "BaseScale": 1.0, "HeightTolerance": -54}],
+    "BlockMask": {"Include": {"Any": true, "Empty": true}, "Exclude": {"Any": false, "Empty": false}},
+    "ParentMask": {
+      "Include": {"Any": false, "Empty": false, "Blocks": ["Soil_Grass", "Soil_Grass_Full", "Soil_Grass_Sunny", "Soil_Grass_Deep", "Soil_Dirt", "Soil_Leaves", "Soil_Pathway", "Soil_Gravel"], "Fluids": []},
+      "Exclude": {"Any": false, "Empty": true, "Blocks": [], "Fluids": []}
+    }
+  }}]
+}
+
