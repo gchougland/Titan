@@ -60,7 +60,7 @@ public final class DunewyrmComponent implements Component<EntityStore> {
     private float cobraRise;
     private float tunnelDepth;
     private float digParticleTimer;
-    private float smashCooldown;
+    private float obstacleTurnCooldown;
     private float scorpionBudget;
     private float sinePhase;
     private float orbitAngle;
@@ -254,16 +254,16 @@ public final class DunewyrmComponent implements Component<EntityStore> {
         this.digParticleTimer = digParticleTimer;
     }
 
-    public float getSmashCooldown() {
-        return smashCooldown;
+    public float getObstacleTurnCooldown() {
+        return obstacleTurnCooldown;
     }
 
-    public void setSmashCooldown(final float smashCooldown) {
-        this.smashCooldown = smashCooldown;
+    public void setObstacleTurnCooldown(final float obstacleTurnCooldown) {
+        this.obstacleTurnCooldown = obstacleTurnCooldown;
     }
 
-    public void tickSmashCooldown(final float dt) {
-        if (smashCooldown > 0f) smashCooldown = Math.max(0f, smashCooldown - dt);
+    public void tickObstacleTurnCooldown(final float dt) {
+        if (obstacleTurnCooldown > 0f) obstacleTurnCooldown = Math.max(0f, obstacleTurnCooldown - dt);
     }
 
     private int scorpionsThisTunnel;

@@ -66,6 +66,9 @@ def texture(name, n, fn):
             v, a = fn((x + .5 - n / 2) / (n / 2), (y + .5 - n / 2) / (n / 2), x, y)
             v, a = int(np.clip(v, 0, 255)), int(np.clip(a, 0, 255))
             pixels[x, y] = (v, v, v, a)
+    # Client textures require multiples of 32. Preserve the authored pixel shapes.
+    if n < 32:
+        image = image.resize((32, 32), Image.Resampling.NEAREST)
     buffer = io.BytesIO()
     image.save(buffer, format="PNG")
     path = TEX / f"{name}.png"
@@ -210,10 +213,10 @@ def system(name, spawners, *, life=3, radius=12, important=False):
     SYSTEMS[f"Crypt_{name}"] = data
 
 
-def area_system(name, tile, color, radius, bands, life, centre=(), tile_y=.8):
+def area_system(name, tile, color, radius, bands, life, centre=(), tile_y=.8, include_floor=True):
     """Native metre/block offsets, with one network effect for the entire filled disc."""
-    floor = ground(name + "_Field", color, tex="Crypt_Field", size=radius, life=life, opacity=.34)
-    groups = [{"SpawnerId":floor}, *({"SpawnerId":item} for item in centre)]
+    floor = ground(name + "_Field", color, tex="Crypt_Field", size=radius, life=life, opacity=.34) if include_floor else None
+    groups = ([{"SpawnerId":floor}] if floor else []) + [{"SpawnerId":item} for item in centre]
     for band in range(bands + 1):
         count = 1 if band == 0 else 6 * band
         r = radius * .84 * band / bands
@@ -275,8 +278,14 @@ system("Minion_Summon",[ground("Summon_Rune",PURPLE,size=2.5,life=1.7,spin=70),
          extent=(1.8,.25,1.8),speed=(0,.2),lift=1.2,radial=-.6,spin=1.8,mode="BlendAdd",rotation="BillboardVelocity",tilt=0),
     puff("Minion_Bones",WHITE,tex="Crypt_Bone",count=14,life=(.5,.9),size=(.15,.23),extent=(1.5,.1,1.5),speed=(.4,1),lift=1.5,spin=1.4)],life=2.2,radius=6)
 system("Poison_Breath",[puff("Poison_Cone",GREEN,count=22,life=(.5,1),size=(.3,.6),grow=2.5,extent=(.2,.2,.2),speed=(5,8),lift=.2,direction=True,opacity=.65)],life=1.4)
-area_system("Poison_Cloud",puff("Poison_Fog", "#82b855",count=3,life=(.8,1.2),size=(2.25,2.6),height=(1.5,2),grow=1.1,
-    extent=(.25,.35,.25),speed=(.02,.08),lift=.08,opacity=.46,rotation="BillboardY",tilt=6,steady=True),GREEN,8.5,3,1.4)
+# Ground poison is a small rising wisp, shared with the Dunewyrm's finite emitter.
+poison_wisp=json.loads((ROOT/"src/main/resources/Server/Particles/Titan/Spawners/Dunewyrm_Poison_Cloud.particlespawner").read_text())
+poison_wisp["Particle"]["Texture"]="Particles/Textures/Titan/Crypt/Crypt_Smoke.png"
+poison_wisp["Particle"].pop("FrameSize",None)
+poison_wisp["Particle"]["InitialAnimationFrame"]["FrameIndex"]=rng(0)
+write_json(SPAWN/"Crypt_Poison_Fog.particlespawner",poison_wisp)
+area_system("Poison_Cloud","Crypt_Poison_Fog",GREEN,8.5,3,2.55,tile_y=.05,include_floor=False)
+
 system("Beam_Charge",[puff("Beam_Vortex",BLUE,tex="Crypt_Spark",count=30,life=(.4,.8),size=(.1,.18),grow=.4,extent=(1.2,1.2,1.2),speed=(0,0),lift=0,radial=-1.5,spin=2,mode="BlendAdd"),
     puff("Beam_Core_Charge",WHITE,tex="Crypt_Beam_Disc",count=1,life=(.4,.5),size=(2.5,2.8),grow=1.15,extent=(0,0,0),speed=(0,0),lift=0,mode="BlendAdd")],life=1.2)
 system("Beam",[puff("Beam_Core", "#ecffff",tex="Crypt_Beam_Disc",count=1,life=(.2,.25),size=(2.65,2.85),grow=1,extent=(0,0,0),speed=(0,0),lift=0,mode="BlendAdd",opacity=.93,soft=False,steady=True),

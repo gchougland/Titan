@@ -165,6 +165,36 @@ public final class CryptMissileRuntimeSmoke {
         check(store.getComponent(f.owner,EntityStatMap.getComponentType()).get(DefaultEntityStatTypes.getHealth()).get()==1000,"owner remains unharmed by overlapping souls");
     }
 
+    public static void dunewyrm(Store<EntityStore> store,Ref<EntityStore> root,
+            com.hexvane.titan.dunewyrm.DunewyrmComponent worm) {
+        var segment=worm.getSegments().stream().filter(s->s.getRole().hasHealth()).findFirst().orElseThrow();
+        var target=segment.getVoxels().stream().filter(r->store.getComponent(r,com.hexvane.titan.dunewyrm.DunewyrmHitComponent.getComponentType())!=null)
+            .max(java.util.Comparator.comparingDouble(r->store.getComponent(r,TransformComponent.getComponentType()).getPosition().x)).orElseThrow();
+        var center=CryptSpellSystem.center(store,target);
+        var holder=EntityStore.REGISTRY.newHolder();
+        holder.addComponent(TransformComponent.getComponentType(),new TransformComponent(new Vector3d(center).add(3,0,0),new Rotation3f()));
+        var stats=holder.ensureAndGetComponent(EntityStatMap.getComponentType());stats.update();TitanPartBuilder.applyHealth(stats,100);
+        var owner=store.addEntity(holder,AddReason.SPAWN);
+        try {
+            check(CryptSpellSystem.enemy(store,owner,target),"Dunewyrm body is a valid staff target");
+            check(!CryptSpellSystem.enemy(store,owner,root),"invisible Dunewyrm root is never a staff target");
+            var resource=store.getResource(com.hypixel.hytale.server.core.modules.entity.EntityModule.get().getEntitySpatialResourceType());
+            var data=resource.getSpatialData();data.clear();
+            store.forEachChunk(com.hypixel.hytale.server.core.modules.entity.system.EntitySpatialSystem.QUERY,(chunk,cb)->{
+                data.addCapacity(chunk.size());for(int i=0;i<chunk.size();i++)
+                    data.append(chunk.getComponent(i,TransformComponent.getComponentType()).getPosition(),chunk.getReferenceTo(i));
+            });resource.getSpatialStructure().rebuild(data);
+            float before=segment.getHealth();
+            CryptStaff.launchMissiles(store,owner,new Vector3d(center).add(3,0,0),new Vector3d(-1,0,0));
+            for(int step=0;step<80;step++)store.forEachChunk(CryptStaff.spellType,(chunk,cb)->{
+                for(int i=0;i<chunk.size();i++)if(owner.equals(chunk.getComponent(i,CryptStaff.spellType).owner))
+                    new CryptSpellSystem().tick(.05f,i,chunk,store,cb);
+            });
+            check(segment.getHealth()<before,"released staff missiles damage the Dunewyrm segment pool");
+            System.out.println("[DUNE STAFF] Real homing volley damages pooled segment health PASS");
+        } finally {clear(store,owner);if(owner.isValid())store.removeEntity(owner,RemoveReason.REMOVE);}
+    }
+
     private static List<Ref<EntityStore>> missiles(Store<EntityStore> store,Ref<EntityStore> owner) {
         var result=new ArrayList<Ref<EntityStore>>();
         store.forEachChunk(CryptStaff.spellType,(chunk,cb)->{

@@ -1,117 +1,98 @@
 {
   "RenderMode": "BlendLinear",
-  "LinearFiltering": false,
-  "LightInfluence": 0,
-  "ParticleRotationInfluence": "BillboardY",
+  "LinearFiltering": true,
+  "LightInfluence": 0.35,
+  "ParticleRotationInfluence": "Billboard",
   "ParticleRotateWithSpawner": false,
-  "TrailSpawnerPositionMultiplier": 1,
-  "TrailSpawnerRotationMultiplier": 1,
-  "Shape": "Sphere",
   "EmitOffset": {
     "X": {
       "Min": -0.25,
       "Max": 0.25
     },
     "Y": {
-      "Min": -0.35,
-      "Max": 0.35
+      "Min": 0,
+      "Max": 0.08
     },
     "Z": {
       "Min": -0.25,
       "Max": 0.25
     }
   },
+  "MaxConcurrentParticles": 3,
   "TotalParticles": {
     "Min": 3,
     "Max": 3
   },
-  "MaxConcurrentParticles": 3,
-  "ParticleLifeSpan": {
-    "Min": 0.8,
-    "Max": 1.2
-  },
-  "LifeSpan": 1.4,
-  "SpawnBurst": true,
   "SpawnRate": {
-    "Min": 3,
-    "Max": 3
+    "Min": 5,
+    "Max": 5
+  },
+  "SpawnBurst": false,
+  "LifeSpan": 2.8,
+  "ParticleLifeSpan": {
+    "Min": 1.6,
+    "Max": 2.2
   },
   "InitialVelocity": {
     "Speed": {
-      "Min": 0.02,
-      "Max": 0.08
+      "Min": 0.03,
+      "Max": 0.06
     },
     "Yaw": {
       "Min": 0,
       "Max": 360
     },
     "Pitch": {
-      "Min": -70,
-      "Max": 70
+      "Min": 0,
+      "Max": 0
     }
   },
-  "Attractors": [
-    {
-      "LinearAcceleration": {
-        "X": 0,
-        "Y": 0.08,
-        "Z": 0
-      },
-      "RadialAxis": {
-        "X": 0,
-        "Y": 1,
-        "Z": 0
-      },
-      "RadialImpulse": 0,
-      "RadialTangentImpulse": 0
-    }
-  ],
   "Particle": {
     "Texture": "Particles/Textures/Titan/Crypt/Crypt_Smoke.png",
-    "ScaleRatioConstraint": "None",
+    "ScaleRatioConstraint": "OneToOne",
     "UVOption": "RandomFlipU",
     "SoftParticles": "Enable",
     "InitialAnimationFrame": {
       "Opacity": 1,
-      "Color": "#82b855",
+      "Color": "#73af4b",
+      "FrameIndex": {
+        "Min": 0,
+        "Max": 0
+      },
       "Scale": {
         "X": {
-          "Min": 2.25,
-          "Max": 2.6
+          "Min": 0.55,
+          "Max": 0.85
         },
         "Y": {
-          "Min": 1.5,
-          "Max": 2
+          "Min": 0.55,
+          "Max": 0.85
         }
       },
       "Rotation": {
         "Z": {
-          "Min": -6,
-          "Max": 6
+          "Min": -30,
+          "Max": 30
         }
-      },
-      "FrameIndex": {
-        "Min": 0,
-        "Max": 0
       }
     },
     "Animation": {
       "0": {
-        "Opacity": 0.161
+        "Opacity": 0
       },
-      "12": {
-        "Opacity": 0.46
+      "20": {
+        "Opacity": 0.38
       },
       "65": {
-        "Opacity": 0.36800000000000005,
+        "Opacity": 0.28,
         "Scale": {
           "X": {
-            "Min": 1,
-            "Max": 1
+            "Min": 1.2,
+            "Max": 1.2
           },
           "Y": {
-            "Min": 1,
-            "Max": 1
+            "Min": 1.2,
+            "Max": 1.2
           }
         }
       },
@@ -119,21 +100,24 @@
         "Opacity": 0,
         "Scale": {
           "X": {
-            "Min": 1,
-            "Max": 1
+            "Min": 1.5,
+            "Max": 1.5
           },
           "Y": {
-            "Min": 1,
-            "Max": 1
-          }
-        },
-        "Rotation": {
-          "Z": {
-            "Min": -35,
-            "Max": 35
+            "Min": 1.5,
+            "Max": 1.5
           }
         }
       }
     }
-  }
+  },
+  "Attractors": [
+    {
+      "LinearAcceleration": {
+        "X": 0,
+        "Y": 0.35,
+        "Z": 0
+      }
+    }
+  ]
 }

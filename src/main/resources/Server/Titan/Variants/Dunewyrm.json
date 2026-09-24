@@ -46,7 +46,7 @@
   "DropCountMin": 8,
   "DropCountMax": 16,
 
-  "ImpactParticle": "Block_Land_Hard_Sand",
+  "ImpactParticle": "Block_Land_Sand_Hard",
   "ImpactSound": "SFX_Golem_Earth_Slam_Impact",
   "DeathSound": "SFX_Stone_Break",
   "WakeSound": "SFX_Snake_Alerted",

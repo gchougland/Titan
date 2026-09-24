@@ -47,27 +47,22 @@ public final class TitanTerrainProbe {
     /**
      * How many of the highest samples a footprint discards before measuring its relief.
      *
-     * <p>The heightmap counts anything that is not {@link com.hypixel.hytale.protocol.Opacity#Transparent},
-     * trunks and leaves included, so a wooded column reads as ground fifteen-odd blocks above the dirt.
-     * Vegetation can only raise a reading, never lower it, so discarding the top few samples costs nothing
-     * on bare terrain and stops scattered trees from making flat ground look like a cliff. A slope leans on
-     * every sample at once and survives the trim.
+     * <p>Ignore a few isolated high points such as small rocks; broad slopes still affect most samples.
      */
     private static final int TRIM_HIGH = 3;
 
     /**
-     * Y of the highest solid block in a column, read straight off the chunk's heightmap rather than by
-     * scanning blocks. A titan's feet stand one above this.
-     *
-     * <p>Includes vegetation, so this is the top of the canopy in a wooded column rather than the ground.
-     * Use {@link Ground#groundY} from {@link #probe} for anything that needs the terrain itself.
+     * Y of the highest supporting block, scanning down from the heightmap past tree material.
+     * A titan's feet stand one above this. Only already loaded sections are read.
      */
     public static int surfaceY(@Nonnull final ChunkStore chunkStore, final int x, final int z) {
         final WorldChunk chunk = columnAt(chunkStore, x, z);
         if (chunk == null) return NO_SURFACE;
 
         final short height = chunk.getHeight(x, z);
-        return height < ChunkUtil.MIN_Y ? NO_SURFACE : height;
+        if (height < ChunkUtil.MIN_Y) return NO_SURFACE;
+        final double ground = GroundSampler.sample(chunkStore, x, height, z, 0, height - ChunkUtil.MIN_Y);
+        return GroundSampler.isValid(ground) ? (int) ground - 1 : NO_SURFACE;
     }
 
     /**
@@ -159,9 +154,7 @@ public final class TitanTerrainProbe {
 
         Arrays.sort(samples, 0, count);
 
-        // The median survives up to four wooded columns, so it is the ground even where the centre reading
-        // was a treetop. Siting off the raw surface instead would stand a titan on top of a tree, which the
-        // headroom check cannot catch because there is open air above a canopy.
+        // The median avoids perching the body on an isolated high spot within a large footprint.
         final int groundY = samples[count / 2];
         final int lowestY = samples[0];
         final int relief = samples[count - 1 - TRIM_HIGH] - lowestY;

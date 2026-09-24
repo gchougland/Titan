@@ -1,0 +1,5 @@
+.deps/
+work/
+review/
+__pycache__/
+*.mp4

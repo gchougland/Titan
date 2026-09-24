@@ -32,6 +32,15 @@ public final class DunewyrmPartComponent implements Component<EntityStore> {
     private int blockRotation;
     private float scale = 1f;
     private boolean climbable;
+    private boolean combinedVisual;
+    private String originalBlock;
+    public boolean isCombinedVisual() { return combinedVisual; }
+    public void setCombinedVisual(boolean value) { combinedVisual=value; }
+    public String getOriginalBlock() { return originalBlock; }
+    public void setOriginalBlock(String value) { originalBlock=value; }
+    private com.hypixel.hytale.server.core.modules.entity.component.BoundingBox savedCollisionBounds;
+    public void preserveCollisionBounds(com.hypixel.hytale.server.core.modules.entity.component.BoundingBox bounds) { savedCollisionBounds=(com.hypixel.hytale.server.core.modules.entity.component.BoundingBox)bounds.clone(); }
+    public com.hypixel.hytale.server.core.modules.entity.component.BoundingBox takeCollisionBounds() { var result=savedCollisionBounds; savedCollisionBounds=null; return result; }
     private float scaleRefreshTimer = SCALE_REFRESH_SECONDS;
     private boolean spawnScalePassPending = true;
     private float spawnScalePassTimer = -1f;
@@ -157,6 +166,10 @@ public final class DunewyrmPartComponent implements Component<EntityStore> {
         copy.localOffset.set(localOffset);
         copy.blockRotation = blockRotation;
         copy.scale = scale;
+        copy.climbable = climbable;
+        copy.combinedVisual = combinedVisual;
+        copy.originalBlock = originalBlock;
+        copy.savedCollisionBounds = savedCollisionBounds==null?null:(com.hypixel.hytale.server.core.modules.entity.component.BoundingBox)savedCollisionBounds.clone();
         copy.scaleRefreshTimer = scaleRefreshTimer;
         copy.spawnScalePassPending = spawnScalePassPending;
         copy.spawnScalePassTimer = spawnScalePassTimer;

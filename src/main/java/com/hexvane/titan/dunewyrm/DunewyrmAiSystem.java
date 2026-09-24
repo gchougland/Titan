@@ -63,7 +63,7 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
 
         worm.tickAttackCooldown(dt);
         worm.tickFleeTimer(dt);
-        worm.tickSmashCooldown(dt);
+        worm.tickObstacleTurnCooldown(dt);
         worm.addStateTimer(dt);
         worm.addSinePhase(dt);
         tickTongue(worm, dt, commandBuffer);
@@ -172,7 +172,7 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
             oy,
             oz + forwardZ(yaw) * speed * dt,
             true)) {
-            smashIfBlocked(worm, store, yaw);
+            turnFromObstacle(worm, store, yaw);
             head.set(ox, oy, oz);
         }
         worm.setCobraRise(approach(worm.getCobraRise(), 0f, 8f * dt));
@@ -196,7 +196,7 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
             oy,
             oz + forwardZ(yaw) * speed * dt,
             true)) {
-            smashIfBlocked(worm, store, yaw);
+            turnFromObstacle(worm, store, yaw);
             head.set(ox, oy, oz);
         }
         worm.setCobraRise(0f);
@@ -282,7 +282,8 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
 
         float desired = yawToward(worm.getHeadPosition(), orbitGoal);
         desired = steerClear(worm, desired);
-        worm.setYaw(turnToward(worm.getYaw(), desired, turnStep(variant, speed, dt)));
+        if (worm.getObstacleTurnCooldown()<=0f)
+            worm.setYaw(turnToward(worm.getYaw(), desired, turnStep(variant, speed, dt)));
 
         final float sine = (float) Math.sin(worm.getSinePhase() * DunewyrmTuning.SLITHER_SINE_FREQ)
             * DunewyrmTuning.SLITHER_SINE_AMP;
@@ -364,7 +365,7 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
             oy,
             oz + forwardZ(yaw) * speed * dt,
             true)) {
-            smashIfBlocked(worm, store, yaw);
+            turnFromObstacle(worm, store, yaw);
             head.set(ox, oy, oz);
         }
         worm.setCobraRise(approach(worm.getCobraRise(), 0f, 8f * dt));
@@ -714,16 +715,15 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
                               @Nonnull final Store<EntityStore> store) {
         final ChunkStore chunks = store.getExternalData().getWorld().getChunkStore();
         final Vector3d head = worm.getHeadPosition();
-        final double ground = GroundSampler.sample(
-            chunks, head.x, head.y + 6.0, head.z, 16, 12);
+        final double ground = DunewyrmTerrain.surface(chunks,head.x,head.z);
         if (GroundSampler.isValid(ground)) {
             head.y = ground;
         }
         worm.setTunnelDepth(0f);
         worm.setState(DunewyrmState.SLITHER);
         worm.addOrbitAngle((float) (Math.PI * 0.35));
-        // Brief grace so soft unstick does not immediately start breaking blocks after a dig.
-        worm.setSmashCooldown(1.25f);
+        // Brief steering grace after emerging.
+        worm.setObstacleTurnCooldown(1.25f);
     }
 
     private void maybeStartTunnel(@Nonnull final DunewyrmComponent worm,
@@ -823,12 +823,11 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
             final double rad = ThreadLocalRandom.current().nextDouble() * DunewyrmTuning.POISON_RADIUS;
             scratch.set(
                 worm.getPoisonCloud().x + Math.cos(ang) * rad,
-                worm.getPoisonCloud().y + 0.5,
+                worm.getPoisonCloud().y + 0.05,
                 worm.getPoisonCloud().z + Math.sin(ang) * rad);
             ParticleUtil.spawnParticleEffect(
                 DunewyrmTuning.POISON_CLOUD_PARTICLE, scratch, (float) ang, 0f, 0f,
-                1.8f, 2.0f, commandBuffer);
-            spawnPoisonParticle(commandBuffer, scratch, (float) ang);
+                1.0f, 1.0f, commandBuffer);
         }
 
         final EntityEffect poison = EntityEffect.getAssetMap().getAsset(DunewyrmTuning.POISON_EFFECT);
@@ -948,62 +947,51 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
         final double nz = oz + (forwardZ * speed + sideZ * sine * 0.15) * dt;
 
         if (!tryPlaceHead(worm, store, nx, oy, nz, true)) {
-            smashIfBlocked(worm, store, worm.getYaw());
-            if (!tryPlaceHead(worm, store, nx, oy, nz, true)) {
-                // Slide along the obstacle instead of freezing forever.
-                if (!tryPlaceHead(worm, store, ox + sideX * speed * dt, oy, oz + sideZ * speed * dt, true)) {
-                    head.set(ox, oy, oz);
-                }
+            turnFromObstacle(worm, store, worm.getYaw());
+            float yaw=worm.getYaw();
+            if (!tryPlaceHead(worm,store,ox+forwardX(yaw)*speed*dt,oy,oz+forwardZ(yaw)*speed*dt,true)) {
+                if (!tryPlaceHead(worm,store,ox+sideX*speed*dt,oy,oz+sideZ*speed*dt,true))
+                    tryPlaceHead(worm,store,ox-sideX*speed*dt,oy,oz-sideZ*speed*dt,true);
             }
         }
     }
 
-    private void smashIfBlocked(@Nonnull final DunewyrmComponent worm,
-                                @Nonnull final Store<EntityStore> store,
-                                final float yaw) {
-        if (worm.getSmashCooldown() > 0f) return;
-        worm.setSmashCooldown(DunewyrmTuning.SMASH_COOLDOWN);
-        DunewyrmTerrainSmash.smashAhead(store, worm.getHeadPosition(), yaw);
+    private void turnFromObstacle(@Nonnull final DunewyrmComponent worm,
+                                  @Nonnull final Store<EntityStore> store, final float yaw) {
+        if (worm.getObstacleTurnCooldown() > 0f) return;
+        worm.setObstacleTurnCooldown(0.75f);
+        var head=worm.getHeadPosition();
+        var chunks=store.getExternalData().getWorld().getChunkStore();
+        // Check the entire route, including the first step out of an existing overlap.
+        // A clear endpoint alone can select a route straight through the same tree.
+        for (float angle : new float[]{0.55f,-0.55f,1.1f,-1.1f,1.65f,-1.65f,(float)Math.PI}) {
+            float next=yaw+angle;
+            double surface=DunewyrmTerrain.movementHeight(chunks,head.x,head.y,head.z,
+                head.x+forwardX(next)*4,head.z+forwardZ(next)*4,true);
+            if (GroundSampler.isValid(surface)) {
+                worm.setYaw(next);
+                worm.setChargeYaw(next);
+                return;
+            }
+        }
+        // Dense trees may not leave a full four block route. Take a safe short
+        // retreat instead of staying trapped until a complete route opens.
+        for (int i=1;i<=16;i++) {
+            float next=yaw+(float)(i*Math.PI/8);
+            if (GroundSampler.isValid(DunewyrmTerrain.movementHeight(chunks,head.x,head.y,head.z,
+                    head.x+forwardX(next)*.5,head.z+forwardZ(next)*.5,true))) {
+                worm.setYaw(next);worm.setChargeYaw(next);return;
+            }
+        }
     }
 
     private void maybeUnstickFromCave(@Nonnull final DunewyrmComponent worm,
                                       @Nonnull final Store<EntityStore> store) {
-        if (worm.getState() == DunewyrmState.TUNNEL || worm.getState() == DunewyrmState.DYING) return;
-
-        final ChunkStore chunks = store.getExternalData().getWorld().getChunkStore();
-        final Vector3d head = worm.getHeadPosition();
-        final double floor = GroundSampler.sampleLowestInRadius(
-            chunks, head.x, head.y + 8.0, head.z,
-            DunewyrmTuning.FLOOR_SAMPLE_RADIUS, 16, 24);
-        final double local = GroundSampler.sample(chunks, head.x, head.y + 8.0, head.z, 16, 24);
-
-        // Stuck on a pillar / structure roof: pull down toward the neighbourhood floor.
-        if (GroundSampler.isValid(floor) && head.y > floor + DunewyrmTuning.PILLAR_CLEARANCE) {
-            head.y = Math.max(floor, head.y - DunewyrmTuning.MAX_DROP);
-            if (worm.getSmashCooldown() <= 0f) {
-                worm.setSmashCooldown(DunewyrmTuning.SMASH_COOLDOWN);
-                DunewyrmTerrainSmash.smashAhead(store, head, worm.getYaw());
-            }
-            return;
-        }
-
-        // Climb out of trenches only when local ground is continuous (not a lone column).
-        if (GroundSampler.isValid(local) && GroundSampler.isValid(floor)
-            && local <= floor + DunewyrmTuning.PILLAR_CLEARANCE
-            && local > head.y + 1.15) {
-            head.y = Math.min(local, head.y + DunewyrmTuning.MAX_CLIMB);
-        }
-
-        if (worm.getSmashCooldown() > 0f) return;
-
-        // Only clear blocks currently intersecting the head (walls), never a downward dig.
-        if (DunewyrmTerrainSmash.isBuried(chunks, head)) {
-            worm.setSmashCooldown(DunewyrmTuning.SMASH_COOLDOWN);
-            DunewyrmTerrainSmash.clearHeadPocket(store, head);
-            if (GroundSampler.isValid(floor)) {
-                head.y = Math.max(head.y, floor);
-            }
-        }
+        if (worm.getState()==DunewyrmState.TUNNEL || worm.getState()==DunewyrmState.DYING) return;
+        var head=worm.getHeadPosition();
+        double surface=DunewyrmTerrain.headSurface(store.getExternalData().getWorld().getChunkStore(),head.x,head.z);
+        // Spawned underground or covered by a new roof: recover above it instead of digging a shaft.
+        if (GroundSampler.isValid(surface) && head.y<surface) head.y=surface;
     }
 
     private void spawnSlitherDust(@Nonnull final DunewyrmComponent worm,
@@ -1071,8 +1059,7 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Places the head on walkable ground. Refuses tall climbs and isolated pillar tops; always prefers
-     * the neighbourhood floor so the snake comes back down after structure contact.
+     * Places the head on the outdoor surface. Tall climbs and obstructed headroom require a detour.
      */
     private boolean tryPlaceHead(@Nonnull final DunewyrmComponent worm,
                                  @Nonnull final Store<EntityStore> store,
@@ -1081,49 +1068,10 @@ public final class DunewyrmAiSystem extends EntityTickingSystem<EntityStore> {
                                  final double z,
                                  final boolean blockTallClimbs) {
         final ChunkStore chunks = store.getExternalData().getWorld().getChunkStore();
-        final double local = GroundSampler.sample(chunks, x, y, z, 3, 10);
-        final double floor = GroundSampler.sampleLowestInRadius(
-            chunks, x, y, z, DunewyrmTuning.FLOOR_SAMPLE_RADIUS, 3, 12);
-
-        if (!GroundSampler.isValid(local) && !GroundSampler.isValid(floor)) {
-            worm.getHeadPosition().set(x, y, z);
-            return true;
-        }
-
-        final boolean pillar = GroundSampler.isValid(local) && GroundSampler.isValid(floor)
-            && local > floor + DunewyrmTuning.PILLAR_CLEARANCE;
-
-        double target;
-        if (pillar) {
-            // Never mount the pillar — walk the surrounding floor / smash through.
-            if (blockTallClimbs && local > y + 0.35) {
-                return false;
-            }
-            target = floor;
-        } else if (GroundSampler.isValid(local)) {
-            target = local;
-        } else {
-            target = floor;
-        }
-
-        // Already high above the area floor: bias hard downward every step.
-        if (GroundSampler.isValid(floor) && y > floor + DunewyrmTuning.PILLAR_CLEARANCE * 0.75) {
-            target = Math.min(target, floor);
-        }
-
-        if (blockTallClimbs && target > y + DunewyrmTuning.MAX_CLIMB) {
-            return false;
-        }
-        // Allow a large drop when leaving pillars; refuse only absurd trenches.
-        if (target < y - DunewyrmTuning.MAX_DROP * 2.5 && !pillar
-            && !(GroundSampler.isValid(floor) && y > floor + 1.0)) {
-            return false;
-        }
-
-        final double climbCap = y + DunewyrmTuning.MAX_CLIMB;
-        final double dropFloor = y - DunewyrmTuning.MAX_DROP;
-        final double newY = Math.max(dropFloor, Math.min(climbCap, target));
-        worm.getHeadPosition().set(x, newY, z);
+        var head=worm.getHeadPosition();
+        double newY=DunewyrmTerrain.movementHeight(chunks,head.x,y,head.z,x,z,blockTallClimbs);
+        if (!GroundSampler.isValid(newY)) return false;
+        worm.getHeadPosition().set(x,newY,z);
         return true;
     }
 

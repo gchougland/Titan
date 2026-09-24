@@ -1,0 +1,86 @@
+[
+  {
+    "name": "STONE TALUS",
+    "file": "title_stone_talus.png",
+    "size": [
+      1920,
+      1080
+    ],
+    "bounds": [
+      80,
+      784,
+      610,
+      916
+    ]
+  },
+  {
+    "name": "BABY YAGA",
+    "file": "title_baby_yaga.png",
+    "size": [
+      1920,
+      1080
+    ],
+    "bounds": [
+      80,
+      784,
+      610,
+      916
+    ]
+  },
+  {
+    "name": "BABA YAGA",
+    "file": "title_baba_yaga.png",
+    "size": [
+      1920,
+      1080
+    ],
+    "bounds": [
+      80,
+      784,
+      610,
+      916
+    ]
+  },
+  {
+    "name": "DUNEWYRM",
+    "file": "title_dunewyrm.png",
+    "size": [
+      1920,
+      1080
+    ],
+    "bounds": [
+      80,
+      784,
+      610,
+      916
+    ]
+  },
+  {
+    "name": "ROAMING TEMPLE",
+    "file": "title_roaming_temple.png",
+    "size": [
+      1920,
+      1080
+    ],
+    "bounds": [
+      80,
+      784,
+      688,
+      916
+    ]
+  },
+  {
+    "name": "CRYPT KEEPER",
+    "file": "title_crypt_keeper.png",
+    "size": [
+      1920,
+      1080
+    ],
+    "bounds": [
+      80,
+      784,
+      610,
+      916
+    ]
+  }
+]

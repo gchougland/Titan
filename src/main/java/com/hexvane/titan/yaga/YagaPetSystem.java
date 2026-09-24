@@ -107,10 +107,6 @@ public final class YagaPetSystem extends EntityTickingSystem<EntityStore> {
      */
     private static final double GRAVITY = 42.0;
 
-    /** Vertical search window for the ground a leap is coming down onto, in blocks. */
-    private static final int LEAP_GROUND_ABOVE = 2;
-    private static final int LEAP_GROUND_BELOW = 48;
-
     /**
      * The fastest a leap is allowed to be falling before it ends wherever it is, in blocks per second.
      *
@@ -229,6 +225,7 @@ public final class YagaPetSystem extends EntityTickingSystem<EntityStore> {
         }
 
         if (yaga.isLeaping()) {
+            titan.setSwimming(false);
             // Airborne, so the ground is not where the body goes and the owner is not where it is headed.
             // The heading was fixed at take-off and the arc runs itself out from there.
             fly(store, yaga, titan, transform, dt);
@@ -246,7 +243,7 @@ public final class YagaPetSystem extends EntityTickingSystem<EntityStore> {
         }
 
         transform.getRotation().setYaw(titan.getYaw());
-        TitanBodyDriver.settleBodyHeight(store, transform, dt, sink);
+        YagaBuoyancy.settle(store.getExternalData().getWorld().getChunkStore(), titan, transform, dt, sink);
     }
 
     /**
@@ -364,8 +361,9 @@ public final class YagaPetSystem extends EntityTickingSystem<EntityStore> {
         if (lift > 0) return;
 
         final var chunkStore = store.getExternalData().getWorld().getChunkStore();
-        final double ground = GroundSampler.sample(
-            chunkStore, position.x, position.y, position.z, LEAP_GROUND_ABOVE, LEAP_GROUND_BELOW);
+        final var support = YagaBuoyancy.support(chunkStore, position,
+            variant.getFloatPlatformHeight() * titan.getScale(), 0);
+        final double ground = support.rootY();
 
         if (!GroundSampler.isValid(ground)) {
             if (lift < -LEAP_TERMINAL) yaga.land();
@@ -375,6 +373,7 @@ public final class YagaPetSystem extends EntityTickingSystem<EntityStore> {
         if (position.y > ground) return;
 
         position.y = ground;
+        titan.setSwimming(support.swimming());
         yaga.land();
         TitanSound.play(store, variant.getImpactSound(), position);
     }

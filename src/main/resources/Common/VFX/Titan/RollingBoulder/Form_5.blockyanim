@@ -41,7 +41,11 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "position": [],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Plate_0_-1": {
       "position": [
@@ -101,7 +105,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Plate_0_1": {
       "position": [
@@ -161,7 +168,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Plate_1_-1": {
       "position": [
@@ -221,7 +231,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Plate_1_1": {
       "position": [
@@ -281,7 +294,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Plate_2_-1": {
       "position": [
@@ -341,7 +357,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Plate_2_1": {
       "position": [
@@ -401,7 +420,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Edge_0": {
       "position": [
@@ -461,7 +483,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Edge_1": {
       "position": [
@@ -521,7 +546,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Edge_2": {
       "position": [
@@ -581,7 +609,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Edge_3": {
       "position": [
@@ -641,7 +672,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Edge_4": {
       "position": [
@@ -701,7 +735,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Edge_5": {
       "position": [
@@ -761,7 +798,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Edge_6": {
       "position": [
@@ -821,7 +861,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Edge_7": {
       "position": [
@@ -881,7 +924,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Edge_8": {
       "position": [
@@ -941,7 +987,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Edge_9": {
       "position": [
@@ -1001,7 +1050,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Edge_10": {
       "position": [
@@ -1061,7 +1113,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Edge_11": {
       "position": [
@@ -1121,7 +1176,10 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Vein_0_-1": {
       "shapeStretch": [
@@ -1161,7 +1219,11 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "position": [],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Vein_0_1": {
       "shapeStretch": [
@@ -1201,7 +1263,11 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "position": [],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Vein_1_-1": {
       "shapeStretch": [
@@ -1241,7 +1307,11 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "position": [],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Vein_1_1": {
       "shapeStretch": [
@@ -1281,7 +1351,11 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "position": [],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Vein_2_-1": {
       "shapeStretch": [
@@ -1321,7 +1395,11 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "position": [],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Vein_2_1": {
       "shapeStretch": [
@@ -1361,7 +1439,11 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "position": [],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     }
   }
 }

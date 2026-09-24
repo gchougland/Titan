@@ -53,7 +53,9 @@ commands.titan.debug.colliders={parts, number} parts, {colliders, number} of the
 commands.titan.debug.state={variant}: {state} for {stateTime, number}s, clip {clip}, yaw {yaw, number}, attack cooldown {cooldown, number}s, next arm {side}, {weakpoints, number}/{total, number} ore nodes ({toKill, number} to kill)
 
 commands.titan.perf.desc=Report how much of last tick titan parts spent on network updates
-commands.titan.perf.idle=No titan parts ticked last tick, so there is nothing to report.
+commands.titan.perf.idle=No titan pieces were updated during the last tick.
+commands.titan.perf.memory=Server Java memory: {used, number} MiB in use, {reserved, number} MiB reserved, {limit, number} MiB limit. Includes all worlds and mods.
+commands.titan.perf.entities=This world has {titans, number} titans, {pieces, number} attached pieces, and {debris, number} loose blocks.
 commands.titan.perf.volume=Sent {written, number} of {considered, number} part transforms last tick: {kib, number} KiB per tick, {kibs, number} KiB/s per viewer before compression.
 commands.titan.perf.skipped=Skipped {skipped, number}: {pose, number} titan not posing, {bone, number} bone still, {deadband, number} inside deadband, {phase, number} awaiting their turn.
 commands.titan.perf.tuning=Tolerances: {epsilon, number} blocks, {rotation, number} degrees, {interval, number}s between updates. Run /entity tracker on yourself for what your client is actually being sent.

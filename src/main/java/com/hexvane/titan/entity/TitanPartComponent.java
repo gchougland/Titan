@@ -79,6 +79,21 @@ public final class TitanPartComponent implements Component<EntityStore> {
     private float syncTimer = -1f;
 
     private boolean detached;
+    private boolean collisionOnly;
+    public boolean isCollisionOnly() { return collisionOnly; }
+    public void setCollisionOnly(boolean value) { collisionOnly = value; }
+    private boolean combinedVisual;
+    private String sentInteractionHint;
+    public boolean interactionHintChanged(String hint) {
+        if (java.util.Objects.equals(sentInteractionHint,hint)) return false;
+        sentInteractionHint=hint;
+        return true;
+    }
+    public boolean isCombinedVisual() { return combinedVisual; }
+    public void setCombinedVisual(boolean value) { combinedVisual = value; }
+    private com.hypixel.hytale.server.core.modules.entity.component.BoundingBox savedCollisionBounds;
+    public void preserveCollisionBounds(com.hypixel.hytale.server.core.modules.entity.component.BoundingBox bounds) { savedCollisionBounds=(com.hypixel.hytale.server.core.modules.entity.component.BoundingBox)bounds.clone(); }
+    public com.hypixel.hytale.server.core.modules.entity.component.BoundingBox takeCollisionBounds() { var result=savedCollisionBounds; savedCollisionBounds=null; return result; }
     @Nonnull
     private final Vector3d velocity = new Vector3d();
     @Nonnull
@@ -86,6 +101,31 @@ public final class TitanPartComponent implements Component<EntityStore> {
     private boolean resting;
     private float lifetime;
     private float despawnAfter;
+
+    /** Original visible blocks, retained as compact data until a merged part dies. */
+    public record DebrisVoxel(String block, int rotation, double x, double y, double z, float scale) { }
+    private java.util.List<DebrisVoxel> debrisVoxels = java.util.List.of();
+    private record DebrisSource(java.util.List<com.hexvane.titan.spawn.PrefabVoxels.Voxel> voxels,
+                                double px, double py, double pz, float boneScale, double mirror,
+                                float worldScale, boolean hollow) { }
+    private DebrisSource debrisSource;
+
+    public boolean hasDebrisVoxels() { return debrisSource != null || !debrisVoxels.isEmpty(); }
+    public void clearDebrisSource() { debrisSource=null; debrisVoxels=java.util.List.of(); }
+    public void setDebrisSource(java.util.List<com.hexvane.titan.spawn.PrefabVoxels.Voxel> voxels,
+                               Vector3d pivot, float boneScale, double mirror, float worldScale, boolean hollow) {
+        debrisSource = new DebrisSource(voxels, pivot.x, pivot.y, pivot.z, boneScale, mirror, worldScale, hollow);
+    }
+    public java.util.List<DebrisVoxel> getDebrisVoxels() {
+        if (debrisSource != null) {
+            var s = debrisSource;
+            debrisVoxels = s.voxels.stream().filter(v -> !s.hollow || v.surface())
+                .map(v -> new DebrisVoxel(v.blockKey(), v.rotation(), (v.x()+.5-s.px)*s.boneScale*s.mirror,
+                    (v.y()+.5-s.py)*s.boneScale, (v.z()+.5-s.pz)*s.boneScale, s.worldScale)).toList();
+            debrisSource = null;
+        }
+        return debrisVoxels;
+    }
 
     public TitanPartComponent() {
     }
@@ -296,6 +336,11 @@ public final class TitanPartComponent implements Component<EntityStore> {
         copy.resting = resting;
         copy.lifetime = lifetime;
         copy.despawnAfter = despawnAfter;
+        copy.debrisVoxels = debrisVoxels;
+        copy.debrisSource = debrisSource;
+        copy.collisionOnly = collisionOnly;
+        copy.combinedVisual = combinedVisual;
+        copy.savedCollisionBounds = savedCollisionBounds==null?null:(com.hypixel.hytale.server.core.modules.entity.component.BoundingBox)savedCollisionBounds.clone();
         return copy;
     }
 }

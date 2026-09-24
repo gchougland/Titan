@@ -23,6 +23,11 @@ RNG = np.random.default_rng(241109)
 
 
 def write(path, data):
+    if path.suffix == '.blockyanim':
+        # All five arrays are required by the client, even for unused channels.
+        for channels in data['nodeAnimations'].values():
+            for channel in ('position','orientation','shapeStretch','shapeVisible','shapeUvOffset'):
+                channels.setdefault(channel, [])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8')
 
@@ -105,7 +110,7 @@ def art():
             node['position'][axis] *= 1.15
             node['shape']['stretch'][axis] *= 1.15
     write(ART/'Boulder.blockymodel', {'nodes':nodes,'formatVersion':1})
-    write(ART/'Form.blockyanim', {'duration':84,'holdLastKeyframe':True,'formatVersion':1,'nodeAnimations':tracks})
+    write(ART/'Form.blockyanim', {'duration':84,'holdLastKeyframe':True,'formatVersion':1,'nodeAnimations':copy.deepcopy(tracks)})
     # Joining viewers start near the current frame; existing viewers keep their original clip.
     animation_sets={}
     for index in range(14):
@@ -158,7 +163,8 @@ def particles():
     dr.polygon([(2,4),(10,1),(14,5),(12,13),(5,15),(1,9)],fill=(81,99,111,255))
     dr.polygon([(2,4),(10,1),(12,5),(5,8)],fill=(154,172,178,255))
     dr.line((5,8,11,6,9,11),fill=(51,151,204,255),width=1)
-    tex=RES/'Common/Particles/Textures/Titan/Temple_Chip.png';tex.parent.mkdir(parents=True,exist_ok=True);chip.save(tex)
+    tex=RES/'Common/Particles/Textures/Titan/Temple_Chip.png';tex.parent.mkdir(parents=True,exist_ok=True)
+    chip.resize((32,32),Image.Resampling.NEAREST).save(tex)
     chunks=copy.deepcopy(dust);chunks.pop('$Comment',None)
     chunks['Particle']['Texture']='Particles/Textures/Titan/Temple_Chip.png'
     chunks['Particle']['InitialAnimationFrame']['Color']='#ffffff'

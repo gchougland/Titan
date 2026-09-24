@@ -1,6 +1,8 @@
 package com.hexvane.titan.crypt;
 
 import com.hexvane.titan.ik.GroundSampler;
+import com.hexvane.titan.dunewyrm.*;
+import com.hexvane.titan.entity.TitanPartComponent;
 import com.hypixel.hytale.component.*;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
@@ -68,7 +70,7 @@ public final class CryptSpellSystem extends EntityTickingSystem<EntityStore> {
         double travel = spell.velocity.length() * Math.max(0, dt);
         var nearby = new ArrayList<>(TargetUtil.getAllEntitiesInCylinder(position, 4 + travel, 16 + 2 * travel, store));
         if (spell.target != null && !nearby.contains(spell.target)) nearby.add(spell.target);
-        nearby.removeIf(candidate -> !enemy(store, spell.owner, candidate));
+        nearby.removeIf(candidate -> !enemy(store, spell.owner, candidate) && !blocksMissile(store,candidate));
         // Sweep the actual body boxes, including the start point; substeps also stop at crypt walls.
         int steps = Math.max(1, (int)Math.ceil(travel / .18));
         var previous = new Vector3d(position);
@@ -87,7 +89,7 @@ public final class CryptSpellSystem extends EntityTickingSystem<EntityStore> {
             }
             if (victim != null) {
                 previous.lerp(position, earliest);position.set(previous);
-                hit(store, buffer, spell.owner, self, victim, 15, true);
+                if (enemy(store,spell.owner,victim)) hit(store, buffer, spell.owner, self, victim, 15, true);
                 impact(store, buffer, self, position); return;
             }
         }
@@ -123,6 +125,8 @@ public final class CryptSpellSystem extends EntityTickingSystem<EntityStore> {
                 if (!enemy(store, spell.owner, victim)) continue;
                 var part = CryptPartComponent.TYPE == null ? null : store.getComponent(victim, CryptPartComponent.TYPE);
                 if (part != null && !struckPools.add(part.owner + ":" + part.pool)) continue;
+                var wormHit=store.getComponent(victim,DunewyrmHitComponent.getComponentType());
+                if (wormHit!=null && !struckPools.add(wormHit.getOwner()+":"+wormHit.getSegmentIndex())) continue;
                 var target = center(store, victim);
                 if (!visible(store, new Vector3d(spell.anchor).add(0, 1, 0), target)) continue;
                 hit(store, buffer, spell.owner, self, victim, 110, false);
@@ -140,11 +144,14 @@ public final class CryptSpellSystem extends EntityTickingSystem<EntityStore> {
             store.getComponent(cryptPart.owner, CryptBossComponent.TYPE);
         float previousPool = boss == null || cryptPart.pool < 0 ? 0 :
             cryptPart.pool == 0 ? boss.fight.crown() : boss.fight.bracelet(cryptPart.pool - 1);
+        var wormSegment=wormSegment(store,victim);
+        float previousWormHealth=wormSegment==null?0:wormSegment.getHealth();
         var damage = new Damage(new Damage.ProjectileSource(owner, projectile), cause, amount);
         DamageSystems.executeDamage(victim, buffer, damage);
         float nextPool = boss == null || cryptPart.pool < 0 ? 0 :
             cryptPart.pool == 0 ? boss.fight.crown() : boss.fight.bracelet(cryptPart.pool - 1);
-        if (charge && ((!damage.isCancelled() && damage.getAmount() > 0) || nextPool < previousPool)) {
+        if (charge && ((!damage.isCancelled() && damage.getAmount() > 0) || nextPool < previousPool
+            || (wormSegment!=null && wormSegment.getHealth()<previousWormHealth))) {
             var stats = store.getComponent(owner, EntityStatMap.getComponentType());
             var energy = stats == null ? null : stats.get(DefaultEntityStatTypes.getSignatureEnergy());
             if (energy != null) stats.addStatValue(DefaultEntityStatTypes.getSignatureEnergy(), energy.getMax() * 0.025f);
@@ -195,6 +202,9 @@ public final class CryptSpellSystem extends EntityTickingSystem<EntityStore> {
         }
         // Invisible roots carry the aggregate health bar, but the missiles must select actual hit parts.
         if (CryptBossComponent.TYPE != null && store.getComponent(candidate, CryptBossComponent.TYPE) != null) return false;
+        var wormHit=store.getComponent(candidate,DunewyrmHitComponent.getComponentType());
+        if (wormHit!=null) return wormSegment(store,candidate)!=null;
+        if (store.getComponent(candidate,DunewyrmComponent.getComponentType())!=null) return false;
         var weakpoint = store.getComponent(candidate, TitanWeakpointComponent.getComponentType());
         if (weakpoint != null) {
             var titanRef = weakpoint.getOwner();
@@ -213,6 +223,27 @@ public final class CryptSpellSystem extends EntityTickingSystem<EntityStore> {
         // must request it too, just as the engine's attitude filters do during their initialization.
         npcWorld.requireAttitudeCache();
         return npcWorld.getAttitude(candidate, owner, store) == Attitude.HOSTILE;
+    }
+
+    private static DunewyrmSegment wormSegment(Store<EntityStore> store, Ref<EntityStore> candidate) {
+        var hit=store.getComponent(candidate,DunewyrmHitComponent.getComponentType());
+        if (hit==null || hit.getOwner()==null || !hit.getOwner().isValid()) return null;
+        var worm=store.getComponent(hit.getOwner(),DunewyrmComponent.getComponentType());
+        if (worm==null || worm.getState()==DunewyrmState.DYING || worm.isPendingStructural()
+            || hit.getSegmentIndex()<0 || hit.getSegmentIndex()>=worm.getSegments().size()) return null;
+        var segment=worm.getSegments().get(hit.getSegmentIndex());
+        return segment.getRole().hasHealth() && segment.getHealth()>0?segment:null;
+    }
+
+    private static boolean blocksMissile(Store<EntityStore> store, Ref<EntityStore> candidate) {
+        if(candidate==null || !candidate.isValid()) return false;
+        var part=store.getComponent(candidate,TitanPartComponent.getComponentType());
+        if(part!=null) return !part.isCombinedVisual() && !part.isDetached()
+            && store.getComponent(candidate,com.hypixel.hytale.server.core.modules.entity.component.RespondToHit.getComponentType())!=null;
+        var worm=store.getComponent(candidate,DunewyrmPartComponent.getComponentType());
+        if(worm!=null) return !worm.isCombinedVisual() && worm.getOwner()!=null && worm.getOwner().isValid()
+            && store.getComponent(candidate,com.hypixel.hytale.server.core.modules.entity.component.RespondToHit.getComponentType())!=null;
+        return CryptPartComponent.TYPE!=null && store.getComponent(candidate,CryptPartComponent.TYPE)!=null;
     }
 
     static Vector3d center(Store<EntityStore> store, Ref<EntityStore> entity) {

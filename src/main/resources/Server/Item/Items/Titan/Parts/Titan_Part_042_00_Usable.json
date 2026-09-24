@@ -1,0 +1,1 @@
+{"TranslationProperties":{"Name":"Yaga house"},"BlockType":{"Material":"Solid","DrawType":"Model","Opacity":"Transparent","HitboxType":"Titan_Part_042_00_Usable","CustomModel":"VFX/Titan/Parts/Blocks/Titan_Part_042_00_Usable.blockymodel","CustomModelTexture":[{"Texture":"VFX/Titan/Parts/Atlas_0.png","Weight":1}],"InteractionHint":"titan_yaga.yaga.hint.toggleRest"}}

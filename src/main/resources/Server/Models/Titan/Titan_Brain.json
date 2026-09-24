@@ -16,7 +16,5 @@
   },
   "MinScale": 0.01,
   "MaxScale": 0.01,
-  "DefaultAttachments": [
-    {}
-  ]
+  "DefaultAttachments": []
 }

@@ -99,6 +99,20 @@ public final class TitanComponent implements Component<EntityStore> {
     private final Vector3d stompGoal = new Vector3d();
     /** How far under their planted spots the feet are held; see {@link #getFootSink}. */
     private double footSink;
+    private boolean swimming;
+    private float swimTime;
+    public boolean isSwimming() { return swimming; }
+    public void setSwimming(boolean value) {
+        if (swimming != value) {
+            for (var foot : feet) {
+                foot.initialised = false;
+                foot.stepping = false;
+                foot.justLanded = false;
+            }
+        }
+        swimming = value;
+    }
+    public float advanceSwimTime(float dt) { swimTime = (swimTime + dt) % 60f; return swimTime; }
 
     @Nonnull
     private final Vector3d wanderGoal = new Vector3d();
@@ -128,6 +142,7 @@ public final class TitanComponent implements Component<EntityStore> {
     private float levelDamageMultiplier = 1;
     public float levelHealthMultiplier = 1;
     public boolean levelScalingCaptured;
+    public final com.hexvane.titan.ai.TitanTreeClearing.Cursor treeClearing = new com.hexvane.titan.ai.TitanTreeClearing.Cursor();
     public float getLevelDamageMultiplier() { return levelDamageMultiplier; }
     public void setLevelDamageMultiplier(float value) { levelDamageMultiplier = value; }
     /**

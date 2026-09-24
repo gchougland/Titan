@@ -203,7 +203,9 @@ public final class TitanPose {
      */
     @Nonnull
     public Rotation3f getWorldRotation(final int bone, @Nonnull final Rotation3f dest) {
-        world[bone].getNormalizedRotation(scratchQuat);
+        // World matrices include BodyScale. setFromNormalized (despite its
+        // name) requires an already unit-length basis and skews scaled titans.
+        world[bone].getUnnormalizedRotation(scratchQuat);
         scratchQuat.getEulerAnglesYXZ(scratchVec);
         return dest.set((float) scratchVec.x, (float) scratchVec.y, (float) scratchVec.z);
     }
@@ -211,7 +213,7 @@ public final class TitanPose {
     /** As {@link #getWorldRotation(int, Rotation3f)}, with {@code local} applied on top of the bone. */
     @Nonnull
     public Rotation3f getWorldRotation(final int bone, @Nonnull final Quaterniondc local, @Nonnull final Rotation3f dest) {
-        world[bone].getNormalizedRotation(scratchQuat);
+        world[bone].getUnnormalizedRotation(scratchQuat);
         scratchQuat.mul(local).getEulerAnglesYXZ(scratchVec);
         return dest.set((float) scratchVec.x, (float) scratchVec.y, (float) scratchVec.z);
     }
@@ -228,7 +230,7 @@ public final class TitanPose {
                                        @Nonnull final Rotation3f dest,
                                        @Nonnull final Quaterniond quaternion,
                                        @Nonnull final Vector3d euler) {
-        world[bone].getNormalizedRotation(quaternion);
+        world[bone].getUnnormalizedRotation(quaternion);
         quaternion.getEulerAnglesYXZ(euler);
         return dest.set((float) euler.x, (float) euler.y, (float) euler.z);
     }

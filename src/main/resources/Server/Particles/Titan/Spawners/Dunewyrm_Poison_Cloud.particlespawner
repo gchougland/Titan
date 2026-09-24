@@ -1,0 +1,127 @@
+{
+  "RenderMode": "BlendLinear",
+  "LinearFiltering": true,
+  "LightInfluence": 0.35,
+  "ParticleRotationInfluence": "Billboard",
+  "ParticleRotateWithSpawner": false,
+  "EmitOffset": {
+    "X": {
+      "Min": -0.25,
+      "Max": 0.25
+    },
+    "Y": {
+      "Min": 0,
+      "Max": 0.08
+    },
+    "Z": {
+      "Min": -0.25,
+      "Max": 0.25
+    }
+  },
+  "MaxConcurrentParticles": 3,
+  "TotalParticles": {
+    "Min": 3,
+    "Max": 3
+  },
+  "SpawnRate": {
+    "Min": 5,
+    "Max": 5
+  },
+  "SpawnBurst": false,
+  "LifeSpan": 2.8,
+  "ParticleLifeSpan": {
+    "Min": 1.6,
+    "Max": 2.2
+  },
+  "InitialVelocity": {
+    "Speed": {
+      "Min": 0.03,
+      "Max": 0.06
+    },
+    "Yaw": {
+      "Min": 0,
+      "Max": 360
+    },
+    "Pitch": {
+      "Min": 0,
+      "Max": 0
+    }
+  },
+  "Particle": {
+    "Texture": "Particles/Textures/Smoke/Smoke_Smooth2.png",
+    "FrameSize": {
+      "Width": 64,
+      "Height": 64
+    },
+    "ScaleRatioConstraint": "OneToOne",
+    "UVOption": "RandomFlipU",
+    "SoftParticles": "Enable",
+    "InitialAnimationFrame": {
+      "Opacity": 1,
+      "Color": "#73af4b",
+      "FrameIndex": {
+        "Min": 0,
+        "Max": 3
+      },
+      "Scale": {
+        "X": {
+          "Min": 0.55,
+          "Max": 0.85
+        },
+        "Y": {
+          "Min": 0.55,
+          "Max": 0.85
+        }
+      },
+      "Rotation": {
+        "Z": {
+          "Min": -30,
+          "Max": 30
+        }
+      }
+    },
+    "Animation": {
+      "0": {
+        "Opacity": 0
+      },
+      "20": {
+        "Opacity": 0.38
+      },
+      "65": {
+        "Opacity": 0.28,
+        "Scale": {
+          "X": {
+            "Min": 1.2,
+            "Max": 1.2
+          },
+          "Y": {
+            "Min": 1.2,
+            "Max": 1.2
+          }
+        }
+      },
+      "100": {
+        "Opacity": 0,
+        "Scale": {
+          "X": {
+            "Min": 1.5,
+            "Max": 1.5
+          },
+          "Y": {
+            "Min": 1.5,
+            "Max": 1.5
+          }
+        }
+      }
+    }
+  },
+  "Attractors": [
+    {
+      "LinearAcceleration": {
+        "X": 0,
+        "Y": 0.35,
+        "Z": 0
+      }
+    }
+  ]
+}

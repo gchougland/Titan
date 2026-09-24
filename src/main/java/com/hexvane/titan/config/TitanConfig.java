@@ -104,6 +104,11 @@ public final class TitanConfig {
         .append(new KeyedCodec<>("DamagePerLevel", Codec.DOUBLE), (c, v) -> c.damagePerLevel = v, c -> c.damagePerLevel).add()
         .append(new KeyedCodec<>("MaxLevelHealthMultiplier", Codec.DOUBLE), (c, v) -> c.maxLevelHealthMultiplier = v, c -> c.maxLevelHealthMultiplier).add()
         .append(new KeyedCodec<>("MaxLevelDamageMultiplier", Codec.DOUBLE), (c, v) -> c.maxLevelDamageMultiplier = v, c -> c.maxLevelDamageMultiplier).add()
+        .append(new KeyedCodec<>("EndlessHealthPerLevel", Codec.DOUBLE), (c, v) -> c.endlessHealthPerLevel = v, c -> c.endlessHealthPerLevel).add()
+        .append(new KeyedCodec<>("EndlessMaxHealthMultiplier", Codec.DOUBLE), (c, v) -> c.endlessMaxHealthMultiplier = v, c -> c.endlessMaxHealthMultiplier).add()
+        .append(new KeyedCodec<>("MergeSolidVoxels", Codec.BOOLEAN), (c, v) -> c.mergeSolidVoxels = v, c -> c.mergeSolidVoxels).add()
+        .append(new KeyedCodec<>("CombinePartModels", Codec.BOOLEAN), (c, v) -> c.combinePartModels = v, c -> c.combinePartModels).add()
+        .append(new KeyedCodec<>("RoamingTempleDestroysTrees", Codec.BOOLEAN), (c, v) -> c.roamingTempleDestroysTrees = v, c -> c.roamingTempleDestroysTrees).add()
         .build();
 
     /** Used before the plugin has handed over the loaded file, and if loading fails. */
@@ -125,6 +130,10 @@ public final class TitanConfig {
     private boolean rpgLevelingCompatibility = true, endlessLevelingCompatibility = true;
     private double levelScalingBaseline = 1, healthPerLevel = .025, damagePerLevel = .01;
     private double maxLevelHealthMultiplier = 10, maxLevelDamageMultiplier = 4;
+    private double endlessHealthPerLevel = .005, endlessMaxHealthMultiplier = 2;
+    private boolean mergeSolidVoxels = true;
+    private boolean combinePartModels = true;
+    private boolean roamingTempleDestroysTrees;
     private double weakpointHealthMultiplier = 1.5;
     private double attackDamageMultiplier = 1.5;
     private double attackKnockbackMultiplier = 0.8;
@@ -150,6 +159,11 @@ public final class TitanConfig {
     public double getDamagePerLevel() { return Math.min(10, nonNegative(damagePerLevel)); }
     public double getMaxLevelHealthMultiplier() { return Math.clamp(nonNegative(maxLevelHealthMultiplier), 1, 1000); }
     public double getMaxLevelDamageMultiplier() { return Math.clamp(nonNegative(maxLevelDamageMultiplier), 1, 100); }
+    public double getEndlessHealthPerLevel() { return Math.min(10, nonNegative(endlessHealthPerLevel)); }
+    public double getEndlessMaxHealthMultiplier() { return Math.clamp(nonNegative(endlessMaxHealthMultiplier), 1, 1000); }
+    public boolean isMergeSolidVoxels() { return mergeSolidVoxels; }
+    public boolean isCombinePartModels() { return mergeSolidVoxels && combinePartModels; }
+    public boolean isRoamingTempleDestroysTrees() { return roamingTempleDestroysTrees; }
 
     /** Scales how much punishment each ore node takes before it breaks. */
     public float getWeakpointHealthMultiplier() {
@@ -294,6 +308,7 @@ public final class TitanConfig {
     public double getEntityLodRatio() {
         return nonNegative(entityLodRatio);
     }
+
 
     /**
      * Whether a titan's voxels are re-posed across the tick thread pool rather than on the world thread.

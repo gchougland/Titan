@@ -12,6 +12,15 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LevelingCompatibilityTest {
+    @Test void endlessHealthIsGentlerWithoutChangingRpgOrStackingBothMods() {
+        var config = new TitanConfig();
+        assertEquals(1.25, LevelingCompatibility.fromLevels(1, 51, config).health(), .00001);
+        assertEquals(1.5, LevelingCompatibility.fromLevels(1, 101, config).health(), .00001);
+        assertEquals(2, LevelingCompatibility.fromLevels(1, Integer.MAX_VALUE, config).health());
+        assertEquals(2.25, LevelingCompatibility.fromLevels(51, 101, config).health(), .00001);
+        assertEquals(LevelingCompatibility.Scaling.NONE, LevelingCompatibility.fromLevels(1, Double.NaN, config));
+        assertEquals(LevelingCompatibility.fromLevel(51, config), LevelingCompatibility.fromLevels(51, 1, config));
+    }
     @Test void noLevelDataRetainsOriginalBalance() {
         var config = new TitanConfig();
         for (double level : new double[]{-1, 0, 1, Double.NaN, Double.POSITIVE_INFINITY})

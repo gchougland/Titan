@@ -43,6 +43,9 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
 
     /** Longest IK chain the pre-allocated FABRIK buffers support. */
     private static final int MAX_CHAIN_BONES = 8;
+    private static final org.joml.Vector3dc LOCAL_RIGHT = new Vector3d(1, 0, 0);
+    // ECS systems are shared by worlds. Each world thread needs its own reusable IK scratch state.
+    private static final ThreadLocal<TitanAnimationSystem> WORKERS = ThreadLocal.withInitial(TitanAnimationSystem::new);
 
     /**
      * Seconds between pose rebuilds for a sleeping titan. Its only motion is a twelve-second breathing
@@ -127,6 +130,13 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
                      @Nonnull final ArchetypeChunk<EntityStore> archetypeChunk,
                      @Nonnull final Store<EntityStore> store,
                      @Nonnull final CommandBuffer<EntityStore> commandBuffer) {
+        WORKERS.get().tickPose(dt, index, archetypeChunk, store, commandBuffer);
+    }
+
+    private void tickPose(final float dt, final int index,
+                          @Nonnull final ArchetypeChunk<EntityStore> archetypeChunk,
+                          @Nonnull final Store<EntityStore> store,
+                          @Nonnull final CommandBuffer<EntityStore> commandBuffer) {
 
         final var titan = archetypeChunk.getComponent(index, TitanComponent.getComponentType());
         final var transform = archetypeChunk.getComponent(index, TransformComponent.getComponentType());
@@ -161,6 +171,7 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
 
         // Must run on the finished pose, and poseBones has more than one exit.
         pose.captureMotion();
+        com.hexvane.titan.ai.TitanTreeClearing.tick(titan, store.getExternalData().getWorld().getChunkStore());
         com.hexvane.titan.combat.TitanCoreSafety.rescue(titan, commandBuffer);
     }
 
@@ -266,6 +277,24 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         final FootState[] feet = titan.getFeet();
         if (feet.length == 0) return;
 
+        if (titan.isSwimming()) {
+            final double phase = titan.advanceSwimTime(dt) * Math.PI * 2;
+            final double hip = skeleton.getHipHeight() * scale;
+            final var chains = skeleton.getIkChains();
+            for (int i = 0; i < feet.length; i++) {
+                final var foot = feet[i];
+                TitanFootPlanner.restPosition(chains[titan.getFootChains()[i]], bodyPosition, forward, right, scale, foot.current);
+                final double stroke = phase + foot.gaitGroup * Math.PI;
+                foot.current.fma(Math.cos(stroke) * Math.min(1.5, hip * .2), forward);
+                foot.current.y = bodyPosition.y - hip * .7 + Math.sin(stroke) * Math.min(.8, hip * .12);
+                foot.planted.set(foot.current);
+                foot.initialised = true;
+                foot.stepping = false;
+                foot.justLanded = false;
+            }
+            return;
+        }
+
         final ChunkStore chunkStore = store.getExternalData().getWorld().getChunkStore();
         final int[] chains = titan.getFootChains();
         final var ikChains = skeleton.getIkChains();
@@ -360,7 +389,7 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         final boolean levelEnd = chain.getRole() == TitanIkChainDef.Role.FOOT;
 
         if (chain.getKind() == TitanIkChainDef.Kind.TWO_BONE && bones.length >= 3) {
-            solveTwoBone(skeleton, pose, bones, goal, weight, levelEnd);
+            solveTwoBone(skeleton, pose, bones, goal, weight, levelEnd, chain.isPreserveFacing());
         } else {
             solveFabrik(skeleton, pose, bones, goal, weight);
         }
@@ -371,7 +400,8 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
                               @Nonnull final int[] bones,
                               @Nonnull final Vector3d goal,
                               final float weight,
-                              final boolean levelEnd) {
+                              final boolean levelEnd,
+                              final boolean preserveFacing) {
 
         final int upper = bones[0];
         final int lower = bones[1];
@@ -388,10 +418,18 @@ public final class TitanAnimationSystem extends EntityTickingSystem<EntityStore>
         TwoBoneIkSolver.solve(chainRoot, goal, upperLength, lowerLength, poleWorld, ikResult);
 
         final var boneDefs = skeleton.getBones();
-        IkMath.alignAxis(upperWorld, boneDefs[lower].getOffset(), ikResult.upperDirection,
-            IkMath.uprightTwist(ikResult.upperDirection, poleWorld, twistWorld), ikScratch);
-        IkMath.alignAxis(lowerWorld, boneDefs[end].getOffset(), ikResult.lowerDirection,
-            IkMath.uprightTwist(ikResult.lowerDirection, poleWorld, twistWorld), ikScratch);
+        if (preserveFacing) {
+            rootMatrix.transformDirection(twistWorld.set(LOCAL_RIGHT)).normalize();
+            IkMath.alignAxis(upperWorld, boneDefs[lower].getOffset(), ikResult.upperDirection,
+                LOCAL_RIGHT, twistWorld, ikScratch);
+            IkMath.alignAxis(lowerWorld, boneDefs[end].getOffset(), ikResult.lowerDirection,
+                LOCAL_RIGHT, twistWorld, ikScratch);
+        } else {
+            IkMath.alignAxis(upperWorld, boneDefs[lower].getOffset(), ikResult.upperDirection,
+                IkMath.uprightTwist(ikResult.upperDirection, poleWorld, twistWorld), ikScratch);
+            IkMath.alignAxis(lowerWorld, boneDefs[end].getOffset(), ikResult.lowerDirection,
+                IkMath.uprightTwist(ikResult.lowerDirection, poleWorld, twistWorld), ikScratch);
+        }
 
         worldRotationOfParent(pose, skeleton, upper, parentRotation);
         blendLocal(pose, upper, parentRotation, upperWorld, weight);

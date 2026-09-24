@@ -111,12 +111,12 @@ public final class DunewyrmTuning {
     public static final float POISON_LINGER = 7f;
     public static final float POISON_PARTICLE_SCALE = 2.4f;
     public static final float POISON_CONE_SCALE = 2.8f;
-    public static final String POISON_EFFECT = "Poison";
+    public static final String POISON_EFFECT = "Dunewyrm_Poison";
     /** Vanilla combat poison — known-visible bubble burst. */
     public static final String POISON_PARTICLE = "Impact_Poison";
     public static final String POISON_CONE_PARTICLE = "Impact_Poison";
-    /** Status-effect cloud for the linger puddle. */
-    public static final String POISON_CLOUD_PARTICLE = "Effect_Poison";
+    /** Finite ground puff. Status-effect particles loop until their owner removes them. */
+    public static final String POISON_CLOUD_PARTICLE = "Dunewyrm_Poison_Cloud";
     public static final String POISON_MIST_PARTICLE = "Dunewyrm_Poison_Breath";
 
     public static final float CONTACT_KNOCKBACK = 0.22f;
@@ -133,14 +133,10 @@ public final class DunewyrmTuning {
     public static final float RAM_KNOCKBACK = 0.95f;
     public static final float RAM_LIFT = 0.3f;
     public static final float MAX_TURN_RATE = 0.95f;
-    /** Max blocks the head may climb in one move — pillars must be smashed or walked around. */
+    /** Max blocks the head may climb in one move — tall obstacles must be walked around. */
     public static final float MAX_CLIMB = 1.0f;
     /** How fast the head may drop toward the neighbourhood floor (getting off pillars). */
     public static final float MAX_DROP = 2.75f;
-    /** Local column this far above the neighbourhood floor is treated as a pillar, not a ramp. */
-    public static final float PILLAR_CLEARANCE = 2.0f;
-    /** Neighbourhood radius (blocks) used to find the surrounding floor under pillars/structures. */
-    public static final int FLOOR_SAMPLE_RADIUS = 2;
     /** How steeply the body may drape between neighbouring segments. */
     public static final float SEGMENT_GROUND_STEP = 3.0f;
 
@@ -161,6 +157,7 @@ public final class DunewyrmTuning {
     public static final float TONGUE_INTERVAL_MAX = 5.5f;
     public static final float TONGUE_DURATION = 0.35f;
     public static final float TONGUE_EXTEND = 2.4f;
+    public static final float TONGUE_HEIGHT = 1.0f;
     public static final float TONGUE_MOUTH = 2.8f;
     /** Prefab faces the wrong way relative to head forward — flip so the fork leads. */
     public static final float TONGUE_YAW_OFFSET = (float) Math.PI;
@@ -173,13 +170,7 @@ public final class DunewyrmTuning {
     public static final float SLITHER_DUST_INTERVAL = 0.28f;
     public static final float SLITHER_DUST_SCALE = 2.4f;
     /** Vanilla sand impact — reliably visible; custom dig FX layered on top. */
-    public static final String SLITHER_PARTICLE = "Block_Land_Hard_Sand";
-
-    public static final float SMASH_COOLDOWN = 0.2f;
-    public static final int SMASH_RADIUS = 2;
-    public static final int SMASH_HEIGHT = 5;
-    /** Never smash below the feet — that was carving trenches the snake then fell into. */
-    public static final int SMASH_DEPTH = 0;
+    public static final String SLITHER_PARTICLE = "Block_Land_Sand_Hard";
 
     public static final int PATH_CAPACITY = 512;
 
@@ -235,7 +226,7 @@ public final class DunewyrmTuning {
     public static final float SITE_KEEP_RADIUS = 96f;
     /** How often uncleared sites check for a missing / broken snake. */
     public static final float SITE_MAINTAIN_INTERVAL = 2.5f;
-    public static final String BREAK_PARTICLE = "Block_Land_Hard_Sand";
+    public static final String BREAK_PARTICLE = "Block_Land_Sand_Hard";
     public static final String CHARGE_SOUND = "SFX_Snake_Alerted";
     public static final String COBRA_SOUND = "SFX_Snake_Alerted";
     public static final String DIG_SOUND = "SFX_Golem_Earth_Alerted";

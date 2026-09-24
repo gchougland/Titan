@@ -178,6 +178,15 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
         final Scratch scratch = SCRATCH.get();
 
         if (titan.getState() == TitanState.DYING) {
+            if (part.isCollisionOnly()) {
+                commandBuffer.removeEntity(archetypeChunk.getReferenceTo(index), RemoveReason.REMOVE);
+                return;
+            }
+            if (part.hasDebrisVoxels()) {
+                splitDebris(part, titan, store, commandBuffer);
+                commandBuffer.removeEntity(archetypeChunk.getReferenceTo(index), RemoveReason.REMOVE);
+                return;
+            }
             detach(scratch, part, titan, transform);
             return;
         }
@@ -255,6 +264,29 @@ public final class TitanPartSyncSystem extends EntityTickingSystem<EntityStore> 
 
     private static boolean isFinite(@Nonnull final Rotation3f r) {
         return Float.isFinite(r.pitch()) && Float.isFinite(r.yaw()) && Float.isFinite(r.roll());
+    }
+
+    /** Replace a combined mesh with its original blocks only for the short death effect. */
+    private static void splitDebris(TitanPartComponent parent, TitanComponent titan, Store<EntityStore> store,
+                                   CommandBuffer<EntityStore> commandBuffer) {
+        var pose = titan.getPose();
+        var scratch = SCRATCH.get();
+        var rotation = new Rotation3f();
+        pose.getWorldRotation(parent.getBoneIndex(), rotation);
+        @SuppressWarnings("unchecked")
+        com.hypixel.hytale.component.Holder<EntityStore>[] holders = new com.hypixel.hytale.component.Holder[parent.getDebrisVoxels().size()];
+        int index = 0;
+        for (var voxel : parent.getDebrisVoxels()) {
+            var local = new Vector3d(voxel.x(), voxel.y(), voxel.z());
+            var position = new Vector3d();
+            pose.transformLocal(parent.getBoneIndex(), local, position);
+            var holder = com.hexvane.titan.spawn.TitanPartBuilder.buildVoxel(store, parent.getOwner(), voxel.block(),
+                position, rotation, voxel.rotation(), voxel.scale(), parent.getBoneIndex(), local, false, null);
+            var child = holder.getComponent(TitanPartComponent.getComponentType());
+            detach(scratch, child, titan, holder.getComponent(TransformComponent.getComponentType()));
+            holders[index++] = holder;
+        }
+        commandBuffer.addEntities(holders, com.hypixel.hytale.component.AddReason.SPAWN);
     }
 
     /**

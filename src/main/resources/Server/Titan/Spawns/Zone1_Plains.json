@@ -1,7 +1,7 @@
 {
   "$Comment": [
-    "The zone 1 plains, split out of Talus_Zone1 so the Roaming Temple can spawn here and nowhere else. An environment is owned by exactly one rule and a second rule naming it is ignored, so the plains needs a rule of its own. Chance and the two talus weights match Talus_Zone1, so a talus is no rarer here than in the forest next door.",
-    "The temple is fifteen of the forty-five weight, so one roll in three of the cells the seed occupies, or about one plains cell in nine once Chance is applied. Two further multipliers sit under that: only a fraction of zone 1 is plains, and the temple has to find ground its legs can stand on across a twenty-eight block footprint against the four a talus asks for."
+    "The zone 1 plains, split out of Talus_Zone1 so the Roaming Temple can spawn here and nowhere else. An environment is owned by exactly one rule and a second rule naming it is ignored, so the plains needs a rule of its own. The two talus variants retain equal weight.",
+    "The temple is two of the thirty-two weight, or about one plains cell in forty-six once Chance is applied. Terrain checks can reject additional sites."
   ],
 
   "Environments": [
@@ -13,6 +13,6 @@
   "Variants": [
     { "Variant": "Stone_Talus_Copper", "Weight": 15 },
     { "Variant": "Stone_Talus_Iron", "Weight": 15 },
-    { "Variant": "Roaming_Temple", "Weight": 15 }
+    { "Variant": "Roaming_Temple", "Weight": 7 }
   ]
 }

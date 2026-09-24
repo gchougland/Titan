@@ -7,7 +7,7 @@
     "Slower and heavier than the hatchling. CrouchDepth of six takes the hips from eleven down to five, which is about as far as an eleven-block leg folds.",
     "RestSink of seven is the rest of the way down, and the reason resting a house is worth doing. Folded legs alone leave its floor eight blocks up, which is a wall rather than a step: past the fold the whole creature settles instead, legs and all, until the mound it stands on is bedded in the earth and the floor is a block off the ground. The two happen one after the other rather than together — legs first, then the settle — so the feet are tucked under the body by the time they go below the surface instead of being dragged through it at full stretch.",
     "AboardRadius of seven is half the width of the house and a little over, so an owner anywhere on the floor counts as being carried and it stops trying to walk to them.",
-    "WandSpeed of four is twice the amble it follows at. Being directed somewhere is the one time a player is watching it cross ground rather than waiting for it to catch up with them, and at two it looks like it is thinking about it.",
+    "WandSpeed is twice the following speed.",
     "WandTurnSpeed of a little over two radians a second is most of a half turn in a second: quick enough that swinging the wand across the horizon feels answered, slow enough that a seventeen-block house is not pirouetting.",
     "LeapHeight of six clears a stump, a fence or a low ledge with the legs to spare without the house hanging in the air; LeapSpeed of nine carries it about ten blocks while it is up there, which is far enough to be worth pressing for and short enough to aim.",
     "BattleMusic is explicitly empty for the reason set out in Yaga_Egg.json: the field defaults to a real fight theme.",
@@ -30,9 +30,10 @@
   "FollowDistance": 12.0,
   "CrouchDepth": 6.0,
   "RestSink": 7.0,
+  "FloatPlatformHeight": 14.0,
   "AboardRadius": 7.0,
 
-  "WandSpeed": 4.0,
+  "WandSpeed": 6.25,
   "WandTurnSpeed": 2.2,
   "LeapHeight": 6.0,
   "LeapSpeed": 9.0,
@@ -42,7 +43,7 @@
   "SpawnHeadroom": 30,
   "SpawnLevelToLowest": true,
 
-  "MoveSpeed": 2.0,
+  "MoveSpeed": 3.125,
   "TurnSpeed": 1.1,
   "WakeRadius": 0,
   "LoseTargetRadius": 0,
@@ -57,10 +58,10 @@
 
   "Fixtures": [
     {
-      "$Comment": "Seven rows each, and there are two of them. Rows are not a server-side concept — the client lays a container out nine slots wide — so seven rows is sixty-three.",
+      "$Comment": "Four rows of nine slots in each of the two chests.",
       "Block": "Furniture_Human_Ruins_Chest_Large",
       "Kind": "Chest",
-      "Capacity": 63,
+      "Capacity": 36,
       "InventoryIndex": 0,
       "Hint": "titan_yaga.yaga.hint.chest"
     },

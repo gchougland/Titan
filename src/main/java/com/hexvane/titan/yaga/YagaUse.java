@@ -81,6 +81,8 @@ public final class YagaUse {
 
         if (!claim(store, player, yaga)) return;
 
+        if (YagaInventory.refillRecovered(yaga.getInventories(), yaga.getStage() == YagaComponent.Stage.BABA ? 2 : 1))
+            tell(store, player, "titan_yaga.yaga.chest.recovered");
         final var container = yaga.inventory(inventoryIndex);
         if (container == null) return;
 

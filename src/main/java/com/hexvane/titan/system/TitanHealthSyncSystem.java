@@ -32,10 +32,11 @@ public final class TitanHealthSyncSystem extends EntityTickingSystem<EntityStore
         TransformComponent.getComponentType(),
         EntityStatMap.getComponentType());
 
-    @Nonnull
-    private final List<Ref<EntityStore>> nodes = new ArrayList<>();
-    @Nonnull
-    private float[] healths = new float[16];
+    private static final class Scratch {
+        final List<Ref<EntityStore>> nodes = new ArrayList<>();
+        float[] healths = new float[16];
+    }
+    private static final ThreadLocal<Scratch> SCRATCH = ThreadLocal.withInitial(Scratch::new);
 
     @Nonnull
     @Override
@@ -59,14 +60,21 @@ public final class TitanHealthSyncSystem extends EntityTickingSystem<EntityStore
         final var variant = titan.getVariant();
         if (variant != null && variant.isPet()) return;
 
-        titan.copyWeakpoints(nodes);
-        syncPooledHealth(store, titan, stats, nodes);
+        final var scratch = SCRATCH.get();
+        try {
+            titan.copyWeakpoints(scratch.nodes);
+            syncPooledHealth(store, titan, stats, scratch);
+        } finally {
+            scratch.nodes.clear();
+        }
     }
 
     private void syncPooledHealth(@Nonnull final Store<EntityStore> store,
                                   @Nonnull final TitanComponent titan,
                                   @Nonnull final EntityStatMap stats,
-                                  @Nonnull final List<Ref<EntityStore>> nodes) {
+                                  @Nonnull final Scratch scratch) {
+
+        final var nodes = scratch.nodes;
 
         final int healthIndex = DefaultEntityStatTypes.getHealth();
         final float floor = Math.min(1f, titan.getTotalHealth());
@@ -76,7 +84,8 @@ public final class TitanHealthSyncSystem extends EntityTickingSystem<EntityStore
             return;
         }
 
-        if (healths.length < nodes.size()) healths = new float[nodes.size()];
+        if (scratch.healths.length < nodes.size()) scratch.healths = new float[nodes.size()];
+        final var healths = scratch.healths;
 
         int found = 0;
         for (final Ref<EntityStore> node : nodes) {

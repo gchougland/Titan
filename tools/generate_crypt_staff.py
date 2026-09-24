@@ -194,7 +194,8 @@ for fps in (False,True):
 
 orb_anim={'duration':120,'holdLastKeyframe':False,'formatVersion':1,'nodeAnimations':{}}
 for name in ['Orb','Orb_Facet_A','Orb_Facet_B','Soul_Core','Soul_Glint']:
-    orb_anim['nodeAnimations'][name]={'shapeStretch':keys([(0,xyz((1,1,1))),(60,xyz((1.05,1.05,1.05))),(120,xyz((1,1,1)))])}
+    orb_anim['nodeAnimations'][name]={k:[] for k in ('position','orientation','shapeStretch','shapeVisible','shapeUvOffset')}
+    orb_anim['nodeAnimations'][name]['shapeStretch']=keys([(0,xyz((1,1,1))),(60,xyz((1.05,1.05,1.05))),(120,xyz((1,1,1)))])
 write(OUT/'Animations/Orb_Pulse.blockyanim',orb_anim)
 
 animations=json.loads((ASSETS/'Server/Item/Animations/Staff.json').read_text())

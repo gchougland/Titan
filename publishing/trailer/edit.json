@@ -1,0 +1,197 @@
+{
+  "title": "Titan | Think Bigger | Gameplay Trailer",
+  "source_dir": "C:/Users/gchou/Videos/TitanGameplay",
+  "logo": "C:/Users/gchou/Documents/HytaleModding/Titan/publishing/trailer/graphics/titan_logo.png",
+  "music": "C:/Users/gchou/Documents/HytaleModding/Titan/src/main/resources/Common/Music/Titan/Crypt_Keeper_Battle.ogg",
+  "fps": 60,
+  "music_bpm": 96,
+  "transition_seconds": 0.25,
+  "sections": [
+    {
+      "id": "intro",
+      "logo": "intro",
+      "shots": [
+        {
+          "file": "Roaming_Temple.mp4",
+          "start": 0,
+          "duration": 5,
+          "note": "Walking giant reveal beneath animated logo"
+        }
+      ]
+    },
+    {
+      "id": "stone_talus",
+      "title": "title_stone_talus.png",
+      "shots": [
+        {
+          "file": "Stone_Talus.mp4",
+          "start": 7.25,
+          "duration": 3.75,
+          "note": "Approach into towering block giant"
+        },
+        {
+          "file": "Stone_Talus.mp4",
+          "start": 12.75,
+          "duration": 3.75,
+          "note": "Climb and attack copper weakpoint"
+        },
+        {
+          "file": "Stone_Talus.mp4",
+          "start": 24.5,
+          "duration": 2.5,
+          "note": "Final strikes and giant falls"
+        }
+      ]
+    },
+    {
+      "id": "roaming_temple",
+      "title": "title_roaming_temple.png",
+      "transition": "smoothleft",
+      "shots": [
+        {
+          "file": "Roaming_Temple.mp4",
+          "start": 19.65,
+          "duration": 3.75,
+          "note": "Green impact and stone stomp"
+        },
+        {
+          "file": "Roaming_Temple.mp4",
+          "start": 51.8,
+          "duration": 3.75,
+          "note": "Cyan and yellow beam attack"
+        },
+        {
+          "file": "Roaming_Temple.mp4",
+          "start": 65.75,
+          "duration": 5,
+          "note": "Repeated weakpoint hits and giant advances"
+        }
+      ]
+    },
+    {
+      "id": "baby_yaga",
+      "title": "title_baby_yaga_transform.png",
+      "hold_title": true,
+      "shots": [
+        {
+          "file": "Baby_Yaga.mp4",
+          "start": 18.1,
+          "duration": 5,
+          "note": "Block shell bursts into walking companion; title masks transient notification"
+        }
+      ]
+    },
+    {
+      "id": "baba_yaga",
+      "title": "title_baba_yaga_transform.png",
+      "hold_title": true,
+      "transition": "smoothleft",
+      "shots": [
+        {
+          "file": "Baba_Yaga.mp4",
+          "start": 2.2,
+          "duration": 5,
+          "note": "Companion grows into enormous walking house"
+        }
+      ]
+    },
+    {
+      "id": "dunewyrm",
+      "title": "title_dunewyrm.png",
+      "transition": "wipeleft",
+      "shots": [
+        {
+          "file": "Dunewyrm Fight.mp4",
+          "start": 63.5,
+          "duration": 5,
+          "note": "Desert giant head and golden slash"
+        },
+        {
+          "file": "Dunewyrm Fight.mp4",
+          "start": 79.5,
+          "duration": 5,
+          "note": "Dodge poison blast and leap across body"
+        },
+        {
+          "file": "Dunewyrm Fight.mp4",
+          "start": 175,
+          "duration": 5,
+          "note": "Final blows and collapse into individual blocks"
+        }
+      ]
+    },
+    {
+      "id": "crypt_keeper",
+      "title": "title_crypt_keeper.png",
+      "transition": "fadeblack",
+      "shots": [
+        {
+          "file": "Crypt_Keeper.mp4",
+          "start": 27,
+          "duration": 5,
+          "note": "Boss rises from purple vortex"
+        },
+        {
+          "file": "Crypt_Keeper.mp4",
+          "start": 43.5,
+          "duration": 5,
+          "note": "Purple arena shockwave and dodge"
+        },
+        {
+          "file": "Crypt_Keeper.mp4",
+          "start": 56.5,
+          "duration": 5,
+          "note": "Golden blade and purple sweep"
+        },
+        {
+          "file": "Crypt_Keeper.mp4",
+          "start": 79,
+          "duration": 2.5,
+          "note": "Summoned skeletons rush the camera"
+        }
+      ]
+    },
+    {
+      "id": "finale",
+      "shots": [
+        {
+          "file": "Stone_Talus.mp4",
+          "start": 18.8,
+          "duration": 1.25,
+          "note": "Weakpoint impact"
+        },
+        {
+          "file": "Roaming_Temple.mp4",
+          "start": 37,
+          "duration": 1.25,
+          "note": "Towering legs and attack telegraph"
+        },
+        {
+          "file": "Dunewyrm Fight.mp4",
+          "start": 157.1,
+          "duration": 1.25,
+          "note": "Aerial vault over the enormous desert giant"
+        },
+        {
+          "file": "Crypt_Keeper.mp4",
+          "start": 86.5,
+          "duration": 1.25,
+          "note": "Frontal boss and hands"
+        }
+      ]
+    },
+    {
+      "id": "outro",
+      "logo": "end",
+      "shots": [
+        {
+          "file": "Roaming_Temple.mp4",
+          "start": 81,
+          "duration": 5,
+          "note": "Moving giant beneath logo, Think Bigger and creator credit"
+        }
+      ]
+    }
+  ],
+  "original_logo": "C:/Users/gchou/Downloads/titan_logo_transparent-png.png"
+}

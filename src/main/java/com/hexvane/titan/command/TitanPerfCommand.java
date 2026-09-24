@@ -18,9 +18,8 @@ import java.util.logging.Level;
 /**
  * {@code /titan perf}
  *
- * <p>Development aid reporting how much of the last tick went out to clients as part transforms, the number
- * behind a large titan flickering as it walks. Each reading also goes to the server log on one line, so a
- * series taken while adjusting the tolerances it prints can be compared.
+ * <p>Development aid reporting transform traffic, memory, and server visibility.
+ * Server visibility and sent counts distinguish tracker exclusions from client-only rendering issues.
  *
  * <p>This only covers the server side. The engine's {@code /entity tracker <player>} covers the rest: its
  * {@code visibleCount} is how many of those parts a client is actually being sent, and a non-zero removed
@@ -42,6 +41,53 @@ public final class TitanPerfCommand extends AbstractPlayerCommand {
                            @Nonnull final Ref<EntityStore> ref,
                            @Nonnull final PlayerRef playerRef,
                            @Nonnull final World world) {
+
+        // Read only: never force a collection or change the player's heap settings.
+        var heap = java.lang.management.ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
+        long used = heap.getUsed()/1048576, reserved = heap.getCommitted()/1048576, limit = heap.getMax()/1048576;
+        int[] counts = new int[3];
+        var viewer = store.getComponent(ref, com.hypixel.hytale.server.core.modules.entity.tracker.EntityTrackerSystems.EntityViewer.getComponentType());
+        var playerTransform = store.getComponent(ref, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+        var visibility = new java.util.HashMap<Ref<EntityStore>, Visibility>();
+        store.forEachChunk(com.hypixel.hytale.component.query.Query.or(
+            com.hexvane.titan.entity.TitanComponent.getComponentType(), com.hexvane.titan.entity.TitanPartComponent.getComponentType()), (chunk, buffer) -> {
+            for (int i=0; i<chunk.size(); i++) {
+                if (chunk.getComponent(i, com.hexvane.titan.entity.TitanComponent.getComponentType()) != null) counts[0]++;
+                var part = chunk.getComponent(i, com.hexvane.titan.entity.TitanPartComponent.getComponentType());
+                if (part != null) counts[part.isDetached() ? 2 : 1]++;
+                if (part == null || part.isDetached() || viewer == null || playerTransform == null || part.getOwner() == null) continue;
+                var target = chunk.getComponent(i, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+                if (target == null) continue;
+                var sample = visibility.computeIfAbsent(part.getOwner(), ignored -> new Visibility());
+                double distance = target.getPosition().distanceSquared(playerTransform.getPosition());
+                sample.parts++;
+                sample.nearest = Math.min(sample.nearest, Math.sqrt(distance));
+                sample.farthest = Math.max(sample.farthest, Math.sqrt(distance));
+                var targetRef = chunk.getReferenceTo(i);
+                if (viewer.visible.contains(targetRef)) sample.visible++;
+                if (viewer.sent.containsKey(targetRef)) sample.sent++;
+                if (part.isCollisionOnly()) sample.collisionOnly++;
+                else if (chunk.getComponent(i, com.hypixel.hytale.server.core.modules.entity.component.ModelComponent.getComponentType()) != null) sample.models++;
+                var box = chunk.getComponent(i, com.hypixel.hytale.server.core.modules.entity.component.BoundingBox.getComponentType());
+                if (distance <= (double)viewer.viewRadiusBlocks*viewer.viewRadiusBlocks && (box == null || box.getBoundingBox().getMaximumThickness()
+                    >= com.hypixel.hytale.server.core.modules.entity.tracker.EntityTrackerSystems.LODCull.ENTITY_LOD_RATIO*distance)) sample.inRange++;
+            }
+        });
+        context.sendMessage(Message.translation("titan_commands.commands.titan.perf.memory")
+            .param("used", used).param("reserved", reserved).param("limit", limit));
+        context.sendMessage(Message.translation("titan_commands.commands.titan.perf.entities")
+            .param("titans", counts[0]).param("pieces", counts[1]).param("debris", counts[2]));
+        LOGGER.at(Level.INFO).log("titan perf memory: Java heap used=%d MiB committed=%d MiB max=%d MiB; world=%s titans=%d parts=%d debris=%d",
+            used, reserved, limit, world.getName(), counts[0], counts[1], counts[2]);
+        for (var entry : visibility.entrySet()) {
+            var owner = entry.getKey();
+            var titan = owner.isValid() ? store.getComponent(owner, com.hexvane.titan.entity.TitanComponent.getComponentType()) : null;
+            var sample = entry.getValue();
+            LOGGER.at(Level.INFO).log("titan perf visibility: variant=%s parts=%d visible=%d sent=%d inServerRange=%d entityModels=%d collisionOnly=%d nearest=%.1f farthest=%.1f blocks; viewRadius=%d lodRatio=%.8f",
+                titan == null ? "removed" : titan.getVariantId(), sample.parts,sample.visible,sample.sent,sample.inRange,sample.models,sample.collisionOnly,
+                sample.nearest,sample.farthest,viewer.viewRadiusBlocks,
+                com.hypixel.hytale.server.core.modules.entity.tracker.EntityTrackerSystems.LODCull.ENTITY_LOD_RATIO);
+        }
 
         final TitanSyncStats.Snapshot snapshot = TitanSyncStats.lastTick();
         if (snapshot.considered() == 0) {
@@ -81,5 +127,10 @@ public final class TitanPerfCommand extends AbstractPlayerCommand {
             .param("epsilon", (float) config.getPartSyncEpsilon())
             .param("rotation", (float) Math.toDegrees(config.getPartSyncRotationEpsilon()))
             .param("interval", (float) config.getPartSyncInterval()));
+    }
+
+    private static final class Visibility {
+        int parts, visible, sent, inRange, models, collisionOnly;
+        double nearest = Double.POSITIVE_INFINITY, farthest;
     }
 }

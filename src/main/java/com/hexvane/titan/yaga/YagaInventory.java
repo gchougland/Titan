@@ -2,6 +2,9 @@ package com.hexvane.titan.yaga;
 
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
+import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.annotation.Nonnull;
 
@@ -14,6 +17,54 @@ import javax.annotation.Nonnull;
 public final class YagaInventory {
 
     private YagaInventory() {
+    }
+
+    /** Restore smaller chests without discarding excess items. Extra containers are saved recovery storage. */
+    public static SimpleItemContainer[] restore(
+        ItemContainer[] saved,
+        SimpleItemContainer[] chests) {
+        var pending = new ArrayList<ItemStack>();
+        for (int i = 0; i < saved.length; i++) {
+            for (short slot = 0; slot < saved[i].getCapacity(); slot++) {
+                var stack = saved[i].getItemStack(slot);
+                if (ItemStack.isEmpty(stack)) continue;
+                if (i < chests.length && slot < chests[i].getCapacity()
+                    && ItemStack.isEmpty(chests[i].getItemStack(slot))) chests[i].setItemStackForSlot(slot, stack);
+                else pending.add(stack);
+            }
+        }
+        var overflow = new ArrayList<ItemStack>();
+        for (var stack : pending) {
+            for (var chest : chests) {
+                stack = chest.addItemStack(stack).getRemainder();
+                if (ItemStack.isEmpty(stack)) break;
+            }
+            if (!ItemStack.isEmpty(stack)) overflow.add(stack);
+        }
+        if (overflow.isEmpty()) return chests;
+        var result = Arrays.copyOf(chests, chests.length + 1);
+        var recovery = new SimpleItemContainer((short) overflow.size());
+        for (short i = 0; i < overflow.size(); i++) recovery.setItemStackForSlot(i, overflow.get(i));
+        result[chests.length] = recovery;
+        return result;
+    }
+
+    /** Opening a chest makes any recovered items available as space is freed. Returns whether any remain. */
+    public static boolean refillRecovered(ItemContainer[] containers, int chestCount) {
+        boolean remaining = false;
+        for (int i = chestCount; i < containers.length; i++) {
+            for (short slot = 0; slot < containers[i].getCapacity(); slot++) {
+                var stack = containers[i].getItemStack(slot);
+                if (ItemStack.isEmpty(stack)) continue;
+                for (int chest = 0; chest < chestCount; chest++) {
+                    stack = containers[chest].addItemStack(stack).getRemainder();
+                    if (ItemStack.isEmpty(stack)) break;
+                }
+                containers[i].setItemStackForSlot(slot, stack);
+                remaining |= !ItemStack.isEmpty(stack);
+            }
+        }
+        return remaining;
     }
 
     /**

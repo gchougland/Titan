@@ -76,9 +76,13 @@ for name, spec in footprints.items():
     assert len(positions) == spec["tileCount"] and (0,0) in positions
     assert all(math.hypot(x,z) <= spec["radius"] for x,z in positions)
     assert max(math.hypot(x,z) for x,z in positions) >= spec["radius"]*.839
-    floor = spawners[spec["floorSpawner"]]["Particle"]
-    assert floor["Texture"].endswith("Crypt_Field.png")
-    assert abs(floor["InitialAnimationFrame"]["Scale"]["X"]["Min"]*.965-spec["radius"]) < 1e-8
+    if spec["floorSpawner"]:
+        floor = spawners[spec["floorSpawner"]]["Particle"]
+        assert floor["Texture"].endswith("Crypt_Field.png")
+        assert abs(floor["InitialAnimationFrame"]["Scale"]["X"]["Min"]*.965-spec["radius"]) < 1e-8
+    else:
+        assert name == "Crypt_Poison_Cloud"
+        assert all(not spawners[g["SpawnerId"]]["SpawnBurst"] for g in groups)
     budget = sum(spawners[group["SpawnerId"]]["TotalParticles"]["Max"] for group in groups)
     assert budget <= 150, (name,"excessive area burst",budget)
 for name in ("Crypt_Coffin_Stream","Crypt_Soul_Stream_Close","Crypt_Soul_Stream_End","Crypt_Loot_Form"):

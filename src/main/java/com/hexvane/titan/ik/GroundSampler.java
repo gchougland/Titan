@@ -4,6 +4,7 @@ import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.protocol.Opacity;
+import com.hypixel.hytale.math.util.ChunkUtil;
 
 import javax.annotation.Nonnull;
 
@@ -68,11 +69,11 @@ public final class GroundSampler {
 
         final int bx = (int) Math.floor(x);
         final int bz = (int) Math.floor(z);
-        final int top = (int) Math.floor(startY) + above;
-        final int bottom = (int) Math.floor(startY) - below;
+        final int top = Math.min(ChunkUtil.HEIGHT_MINUS_1, (int) Math.floor(startY) + above);
+        final int bottom = Math.max(ChunkUtil.MIN_Y, (int) Math.floor(startY) - below);
 
         for (int y = top; y >= bottom; y--) {
-            if (isSolid(chunkStore, bx, y, bz)) {
+            if (isGround(chunkStore, bx, y, bz)) {
                 return y + 1.0;
             }
         }
@@ -92,8 +93,17 @@ public final class GroundSampler {
         return type.getOpacity() != Opacity.Transparent;
     }
 
+    /** Trees can obstruct movement, but must never raise the body or plant a foot on their canopy. */
+    public static boolean isGround(@Nonnull final ChunkStore chunks, int x, int y, int z) {
+        final int id = blockId(chunks, x, y, z);
+        if (id == BlockType.EMPTY_ID || id == BlockType.UNKNOWN_ID) return false;
+        final var type = BlockType.getAssetMap().getAsset(id);
+        return type != null && type.getOpacity() != Opacity.Transparent && !TitanTrees.isTree(type.getId());
+    }
+
     /** @return the block id at the given world position, or {@code UNKNOWN_ID} if the section is not loaded. */
     public static int blockId(@Nonnull final ChunkStore chunkStore, final int x, final int y, final int z) {
+        if (y < ChunkUtil.MIN_Y || y > ChunkUtil.HEIGHT_MINUS_1) return BlockType.UNKNOWN_ID;
         final var ref = chunkStore.getChunkSectionReferenceAtBlock(x, y, z);
         if (ref == null) return BlockType.UNKNOWN_ID;
 

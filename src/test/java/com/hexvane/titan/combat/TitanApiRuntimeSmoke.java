@@ -1,6 +1,6 @@
 package com.hexvane.titan.combat;
 
-import com.hexvane.titan.dunewyrm.DunewyrmTerrainSmash;
+import com.hexvane.titan.dunewyrm.DunewyrmTerrain;
 import com.hexvane.titan.ik.GroundSampler;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -63,7 +63,7 @@ public final class TitanApiRuntimeSmoke {
         packets.clear();
 
         terrain(store, ground);
-        System.out.println("[TITAN API SMOKE] independent impulses / client packet speeds / one-shot delivery / smash caps / section-boundary terrain clearing / floor preserved PASS");
+        System.out.println("[TITAN API SMOKE] independent impulses / client packet speeds / one-shot delivery / smash caps / section-boundary surface sampling / terrain preserved PASS");
     }
 
     private static void deliver(Store<EntityStore> store, Ref<EntityStore> player) {
@@ -87,19 +87,10 @@ public final class TitanApiRuntimeSmoke {
             place(chunks, saved, x, y, z - 4, stone);
             place(chunks, saved, x, y, z - 5, stone);
             var head = new Vector3d(x + .5, y, z + .5);
-            DunewyrmTerrainSmash.clearHeadPocket(store, head);
-            for (int dy = 0; dy <= 2; dy++)
-                check(GroundSampler.blockId(chunks, x, y + dy, z) == BlockType.EMPTY_ID,
-                    "head pocket cleared across vertical section boundary");
-            check(GroundSampler.blockId(chunks, x, y - 1, z) == stone, "floor stays solid");
-            check(GroundSampler.blockId(chunks, x, y + 3, z) == stone, "pocket leaves ceiling beyond its height");
-            check(GroundSampler.blockId(chunks, x + 2, y, z) == stone, "pocket leaves blocks beyond its width");
-            DunewyrmTerrainSmash.smashAhead(store, head, 0);
-            check(GroundSampler.blockId(chunks, x, y, z - 4) == BlockType.EMPTY_ID, "forward column clears obstruction");
-            check(GroundSampler.blockId(chunks, x, y, z - 5) == stone, "smash stays inside its reach");
-            check(GroundSampler.blockId(chunks, x, y - 1, z) == stone, "smash preserves the floor");
-            // No load or generation is needed when the head is outside the loaded region.
-            DunewyrmTerrainSmash.clearHeadPocket(store, new Vector3d(1000000, y, 1000000));
+            check(DunewyrmTerrain.surface(chunks,head.x,head.z)>=y+4,"surface probe chooses roof above cave");
+            check(!DunewyrmTerrain.clearHead(chunks,head.x,head.y,head.z),"solid wall prevents movement");
+            for (int dy=-1;dy<=3;dy++) check(GroundSampler.blockId(chunks,x,y+dy,z)==stone,"terrain remains intact");
+            check(!GroundSampler.isValid(DunewyrmTerrain.surface(chunks,1000000,1000000)),"unloaded columns do not trigger generation");
         } finally {
             for (var b : saved) BlockOperations.setBlock(chunks,
                 chunks.getChunkSectionReferenceAtBlock(b.x, b.y, b.z), b.x, b.y, b.z, b.id,

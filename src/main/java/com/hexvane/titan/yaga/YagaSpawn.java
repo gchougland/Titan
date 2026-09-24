@@ -156,9 +156,7 @@ public final class YagaSpawn {
 
         final SimpleItemContainer[] saved = record.getInventories();
         final SimpleItemContainer[] live = yaga.getInventories();
-        for (int i = 0; i < saved.length && i < live.length; i++) {
-            YagaInventory.transfer(saved[i], live[i]);
-        }
+        yaga.setInventories(YagaInventory.restore(saved, live));
 
         return result;
     }

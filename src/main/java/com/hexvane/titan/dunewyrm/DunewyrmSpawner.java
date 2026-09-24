@@ -237,8 +237,14 @@ public final class DunewyrmSpawner {
         final var scratchQ = new Quaterniond();
         final var scratchE = new Vector3d();
 
+        final float visualVoxelScale=switch (segment.getRole()) {
+            case HEAD,JAW,TONGUE -> DunewyrmTuning.HEAD_SCALE;
+            default -> 1f;
+        };
+        var partModels=com.hexvane.titan.config.TitanConfig.get().isCombinePartModels()
+            ? com.hexvane.titan.spawn.TitanPartModels.find(voxels,segment.isMirrored(),true,visualVoxelScale) : null;
         @SuppressWarnings("unchecked")
-        final Holder<EntityStore>[] holders = new Holder[voxels.size() + 1];
+        final Holder<EntityStore>[] holders = new Holder[voxels.size() + 1 + (partModels==null?0:partModels.groups().size())];
         int holderCount = 0;
         int colliderCandidate = -1;
 
@@ -291,7 +297,26 @@ public final class DunewyrmSpawner {
                 TitanPartBuilder.applyHealth(hitStats, segment.getMaxHealth());
             }
 
+            if (partModels!=null && partModels.cells().contains(com.hexvane.titan.spawn.TitanPartModels.cell(voxel))) {
+                holder.getComponent(DunewyrmPartComponent.getComponentType()).setOriginalBlock(voxel.blockKey());
+                TitanPartBuilder.hideBlockVisual(holder);
+            }
             holders[holderCount++] = holder;
+        }
+
+        if (partModels!=null) {
+            final double cos=Math.cos(yaw),sin=Math.sin(yaw);
+            for (var group:partModels.groups()) {
+                var local=group.localOffset(pivot,mirror,1);
+                worldPos.set(segment.getPosition().x+local.x*cos+local.z*sin,segment.getPosition().y+local.y,
+                    segment.getPosition().z-local.x*sin+local.z*cos);
+                var visual=TitanPartBuilder.buildCombinedVisual(store,root,worldPos,rotation,1f,segmentIndex,local,group.model());
+                visual.removeComponent(TitanPartComponent.getComponentType());
+                var component=new DunewyrmPartComponent(root,segmentIndex,local,0,1f,false);
+                component.setCombinedVisual(true);
+                visual.addComponent(DunewyrmPartComponent.getComponentType(),component);
+                holders[holderCount++]=visual;
+            }
         }
 
         if (colliderConfig != null && segment.getRole() != DunewyrmSegmentRole.TONGUE) {
@@ -392,6 +417,20 @@ public final class DunewyrmSpawner {
             if (part == null || transform == null) {
                 store.removeEntity(ref, RemoveReason.REMOVE);
                 continue;
+            }
+
+            if (part.isCombinedVisual()) {
+                store.removeEntity(ref,RemoveReason.REMOVE);
+                continue;
+            }
+            if (part.getOriginalBlock()!=null) {
+                var originalBounds=(BoundingBox)store.getComponent(ref,BoundingBox.getComponentType()).clone();
+                store.tryRemoveComponent(ref,com.hypixel.hytale.server.core.modules.entity.component.ModelComponent.getComponentType());
+                store.putComponent(ref,com.hypixel.hytale.server.core.entity.entities.BlockEntity.getComponentType(),
+                    new com.hypixel.hytale.server.core.entity.entities.BlockEntity(part.getOriginalBlock()));
+                store.putComponent(ref,com.hypixel.hytale.server.core.modules.entity.component.EntityScaleComponent.getComponentType(),
+                    new com.hypixel.hytale.server.core.modules.entity.component.EntityScaleComponent(part.getScale()));
+                store.putComponent(ref,BoundingBox.getComponentType(),originalBounds);
             }
 
             offset.set(transform.getPosition()).sub(centre);
@@ -618,9 +657,9 @@ public final class DunewyrmSpawner {
                 final float reach = DunewyrmTuning.TONGUE_MOUTH + flick;
                 // Mouth axis only — fork midpoint is the pivot, so no lateral shove.
                 tongue.getPosition().set(
-                    headSeg.getPosition().x + hfx * reach * cosP,
-                    headSeg.getPosition().y + reach * sinP,
-                    headSeg.getPosition().z + hfz * reach * cosP);
+                    headSeg.getPosition().x + hfx * (reach * cosP - DunewyrmTuning.TONGUE_HEIGHT * sinP),
+                    headSeg.getPosition().y + reach * sinP + DunewyrmTuning.TONGUE_HEIGHT * cosP,
+                    headSeg.getPosition().z + hfz * (reach * cosP - DunewyrmTuning.TONGUE_HEIGHT * sinP));
                 // Prefab's fork faces the rear of the model; flip so the fork leads out of the mouth.
                 tongue.setYaw(hy + DunewyrmTuning.TONGUE_YAW_OFFSET);
                 tongue.setPitch(0f);
@@ -732,15 +771,7 @@ public final class DunewyrmSpawner {
                                             final double x,
                                             final double z,
                                             final double nearY) {
-        final double local = GroundSampler.sample(chunks, x, nearY + 2.0, z, 4, 16);
-        if (!GroundSampler.isValid(local)) return nearY;
-
-        final double floor = GroundSampler.sampleLowestInRadius(
-            chunks, x, nearY + 2.0, z,
-            DunewyrmTuning.FLOOR_SAMPLE_RADIUS, 4, 16);
-        if (GroundSampler.isValid(floor) && local > floor + DunewyrmTuning.PILLAR_CLEARANCE) {
-            return floor;
-        }
-        return local;
+        double surface = DunewyrmTerrain.surface(chunks, x, z);
+        return GroundSampler.isValid(surface) ? surface : nearY;
     }
 }

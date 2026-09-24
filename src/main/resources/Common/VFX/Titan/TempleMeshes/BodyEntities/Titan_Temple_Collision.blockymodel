@@ -1,0 +1,1 @@
+{"format":"character","lod":"off","nodes":[{"id":"1","name":"Solid","position":{"x":0,"y":0,"z":0},"orientation":{"x":0,"y":0,"z":0,"w":1},"children":[],"shape":{"type":"none","offset":{"x":0,"y":0,"z":0},"stretch":{"x":1,"y":1,"z":1},"settings":{},"textureLayout":{},"visible":true,"doubleSided":false,"shadingMode":"standard","unwrapMode":"custom"}}]}

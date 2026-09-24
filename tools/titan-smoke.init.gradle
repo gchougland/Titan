@@ -1,0 +1,19 @@
+// Disposable offline server for geometry, terrain, buoyancy and pooled health checks.
+gradle.projectsEvaluated {
+    allprojects {
+        def original = tasks.findByName('runServerNoSync')
+        if (original != null) {
+            tasks.register('titanImprovementsSmoke', JavaExec) {
+                dependsOn tasks.named('testClasses')
+                classpath = original.classpath + sourceSets.test.runtimeClasspath
+                mainClass = 'com.hexvane.titan.yaga.TitanImprovementsRuntimeSmoke'
+                jvmArgs = original.jvmArgs.findAll { it && !it.startsWith('-XX:AOTCache=') }
+                javaLauncher = original.javaLauncher
+                systemProperty 'titan.memoryProfile', project.findProperty('titanMemoryProfile') ?: 'false'
+                workingDir = layout.buildDirectory.dir('titan-smoke').get().asFile
+                args = original.args.findAll { !it.startsWith('--auth-mode') && !it.startsWith('--bind') && it != '--disable-sentry' } + ['--auth-mode=offline', '--bind=127.0.0.1:25589', '--disable-sentry']
+                doFirst { workingDir.mkdirs() }
+            }
+        }
+    }
+}

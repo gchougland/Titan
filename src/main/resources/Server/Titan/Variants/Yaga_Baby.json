@@ -12,6 +12,7 @@
     "Fixtures are matched by block key. The prefab holds one anchor block per piece of furniture and the spawner only ever builds the anchor, so each entry resolves to exactly one usable block. There is no door: swinging one on a moving hut never landed right, so the doorway is left open."
   ],
   "Skeleton": "Yaga_Baby",
+  "FloatPlatformHeight": 6.5,
   "DisplayName": "Baby Yaga",
   "BodyScale": 1.0,
 
@@ -30,7 +31,7 @@
   "RestSink": 2.5,
   "AboardRadius": 4.0,
 
-  "WandSpeed": 4.5,
+  "WandSpeed": 5.625,
   "WandTurnSpeed": 2.6,
   "LeapHeight": 4.0,
   "LeapSpeed": 8.0,
@@ -40,7 +41,7 @@
   "SpawnHeadroom": 14,
   "SpawnLevelToLowest": false,
 
-  "MoveSpeed": 2.4,
+  "MoveSpeed": 3.0,
   "TurnSpeed": 1.6,
   "WakeRadius": 0,
   "LoseTargetRadius": 0,

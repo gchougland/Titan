@@ -65,6 +65,11 @@ public final class TitanIkChainDef {
             o -> o.side
         ).add()
         .append(
+            new KeyedCodec<>("PreserveFacing", Codec.BOOLEAN),
+            (o, v) -> o.preserveFacing = v,
+            o -> o.preserveFacing
+        ).add()
+        .append(
             new KeyedCodec<>("StrideLength", Codec.FLOAT),
             (o, v) -> o.strideLength = v,
             o -> o.strideLength
@@ -95,6 +100,8 @@ public final class TitanIkChainDef {
     @Nonnull
     private final Vector3d poleDirection = new Vector3d(0, 0, -1);
     private float side = 1f;
+    private boolean preserveFacing;
+    public boolean isPreserveFacing() { return preserveFacing; }
     private float strideLength = 3f;
     private float stepHeight = 1.5f;
     private float gaitPhase;

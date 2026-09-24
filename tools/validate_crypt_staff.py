@@ -80,7 +80,7 @@ for custom,native in [('SoulCharge','CastSummonCharging'),('SoulVolley','CastSum
         assert clip==reference, f'{custom} {view} no longer uses the coordinated native staff pose'
 orb_animation=read(COMMON/item['Animation'])['nodeAnimations']
 assert set(orb_animation)<= {'Orb','Orb_Facet_A','Orb_Facet_B','Soul_Core','Soul_Glint'}
-assert all(set(channels)<= {'shapeStretch','shapeVisible','shapeUvOffset'} for channels in orb_animation.values()), \
+assert all(not channels.get('position') and not channels.get('orientation') for channels in orb_animation.values()), \
     'Orb animation must not move the held staff independently of the hand'
 texture=(COMMON/item['Texture']).read_bytes()
 assert texture[:8] == b'\x89PNG\r\n\x1a\n', 'Invalid staff texture PNG'

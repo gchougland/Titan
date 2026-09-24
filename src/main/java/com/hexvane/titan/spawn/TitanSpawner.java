@@ -339,7 +339,37 @@ public final class TitanSpawner {
             // off the raw voxel index would interact with the prefab's shape and could pick none at all.
             int colliderCandidate = -1;
 
-            for (final PrefabVoxels.Voxel voxel : voxels.getVoxels()) {
+            // Preserve individual interactive blocks, shell health and authored part budgets.
+            // Prebaked temple cuboids retain block-sized texture detail and exact occupied volume.
+            // Other prefabs use native cubes; edited temple prefabs fall back automatically.
+            final boolean merge = com.hexvane.titan.config.TitanConfig.get().isMergeSolidVoxels()
+                && !bone.isShell() && (!bone.isUsable() || TitanMeshBatches.isYagaHouse(bone)) && stride == 1
+                && (colliderMode == ColliderMode.NONE || colliderMode == ColliderMode.ALL || !boneWantsColliders
+                    || (colliderMode == ColliderMode.AUTO && bone.isColliderAllFaces())
+                    || (TitanMeshBatches.isTalusBone(bone) && bone.getColliderStride() == 1));
+            var pieces = merge ? TitanMeshBatches.merge(bone, voxels, key -> {
+                final var type = com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType.getAssetMap().getAsset(key);
+                return variant.findFixture(key) == null && type != null && type.isCubeDrawType()
+                    && type.getOpacity() == com.hypixel.hytale.protocol.Opacity.Solid;
+            }) : voxels.getVoxels().stream().map(v -> new TitanMeshBatches.Piece(v, 1, 1, 1, 1)).toList();
+
+            if (boneWantsColliders && (colliderMode == ColliderMode.TOP
+                || (colliderMode == ColliderMode.AUTO && !bone.isColliderAllFaces()))) {
+                // A diagnostic TOP spawn must keep the same footholds even when its
+                // normal all-face mesh combines blocks above and below that surface.
+                pieces = pieces.stream().flatMap(p -> p.originals().stream().anyMatch(v -> v.standable()!=p.voxel().standable())
+                    ? p.originals().stream().map(v -> new TitanMeshBatches.Piece(v,1,1,1,1)) : java.util.stream.Stream.of(p)).toList();
+            }
+
+            final boolean wholeBody = merge && TitanMeshBatches.hasWholeTempleBody(bone, voxels, pieces);
+            var partModels = com.hexvane.titan.config.TitanConfig.get().isCombinePartModels() && stride==1
+                ? TitanPartModels.find(voxels,bone.isMirrorX(),hollow,1f) : null;
+            if (partModels!=null) {
+                for (var voxel:voxels.getVoxels()) if (variant.findFixture(voxel.blockKey())!=null
+                    && partModels.cells().contains(TitanPartModels.cell(voxel))) { partModels=null; break; }
+            }
+            for (final var piece : pieces) {
+                final PrefabVoxels.Voxel voxel = piece.voxel();
                 final var fixture = variant.findFixture(voxel.blockKey());
 
                 // A fixture is the point of the block being there, so it survives both the hollow cull and
@@ -357,9 +387,9 @@ public final class TitanSpawner {
                 // Reflecting after the pivot subtraction mirrors about the bone's axis rather than the
                 // prefab's origin, so a mirrored limb still hangs off its joint in the same place.
                 final var local = new Vector3d(
-                    (voxel.x() + 0.5 - pivot.x) * bone.getScale() * mirror,
-                    (voxel.y() + 0.5 - pivot.y) * bone.getScale(),
-                    (voxel.z() + 0.5 - pivot.z) * bone.getScale()
+                    (voxel.x() + piece.sizeX() * 0.5 - pivot.x) * bone.getScale() * mirror,
+                    (voxel.y() + piece.sizeY() * 0.5 - pivot.y) * bone.getScale(),
+                    (voxel.z() + piece.sizeZ() * 0.5 - pivot.z) * bone.getScale()
                 );
                 pose.transformLocal(bone.getIndex(), local, worldPos);
 
@@ -369,9 +399,29 @@ public final class TitanSpawner {
                     collider = colliderCandidate % bone.getColliderStride() == 0;
                 }
 
+                final boolean bodyCollision = wholeBody && voxel.blockKey().startsWith("Titan_Temple_Body_");
+                if (bodyCollision && !collider) continue;
                 final Holder<EntityStore> holder = TitanPartBuilder.buildVoxel(
-                    store, root, voxel.blockKey(), worldPos, rotation, voxel.rotation(), boneScale,
+                    store, root, voxel.blockKey(), worldPos, rotation, voxel.rotation(), boneScale * piece.renderScale(),
                     bone.getIndex(), local, collider, colliderConfig);
+                if (bodyCollision) TitanPartBuilder.useTempleBodyCollision(holder, piece.sizeX(), piece.sizeY(), piece.sizeZ(), boneScale);
+                if (!bodyCollision && !piece.originals().isEmpty()) {
+                    holder.getComponent(TitanPartComponent.getComponentType()).setDebrisSource(
+                        piece.originals(), pivot, bone.getScale(), mirror, boneScale, hollow);
+                }
+                if (piece.renderScale() > 1) {
+                    // These must agree with the generated BlockBoundingBoxes sent to the client.
+                    // A server BoundingBox alone is not replicated by BlockUpdate/HitboxCollisionUpdate.
+                    final var bounds = holder.getComponent(BoundingBox.getComponentType());
+                    if (bounds != null) {
+                        final double hx = piece.sizeX() * boneScale * .5;
+                        final double hy = piece.sizeY() * boneScale * .5;
+                        final double hz = piece.sizeZ() * boneScale * .5;
+                        final var box = new com.hypixel.hytale.math.shape.Box(-hx, -hy, -hz, hx, hy, hz);
+                        bounds.setBoundingBox(box);
+                        bounds.setBaseModelBox(box);
+                    }
+                }
 
                 final boolean usable;
                 if (fixture != null) {
@@ -400,6 +450,7 @@ public final class TitanSpawner {
                         variant.getSpawnFxDuration(), variant.getSpawnFxStagger());
                 }
 
+                if (partModels!=null && fixture==null && partModels.covers(piece)) TitanPartBuilder.hideBlockVisual(holder);
                 counts.parts++;
                 if (collider) counts.colliders++;
 
@@ -418,6 +469,37 @@ public final class TitanSpawner {
                 }
 
                 holders[holderCount++] = holder;
+            }
+
+            if (wholeBody) {
+                var local = new Vector3d(pivot).mul(-bone.getScale());
+                pose.transformLocal(bone.getIndex(), local, worldPos);
+                for (var group : TitanMeshBatches.templeBodyVisuals()) {
+                    var visual = TitanPartBuilder.buildTempleBodyVisual(store, root, worldPos, rotation, boneScale, bone.getIndex(), local, group.model());
+                    var originals = pieces.stream().filter(p -> group.batches().contains(p.voxel().blockKey()))
+                        .flatMap(p -> p.originals().stream()).toList();
+                    visual.getComponent(TitanPartComponent.getComponentType()).setDebrisSource(originals,pivot,bone.getScale(),mirror,boneScale,hollow);
+                    holders[holderCount++] = visual;
+                    counts.parts++;
+                }
+            }
+
+            if (partModels!=null) {
+                for (var group:partModels.groups()) {
+                    var local=group.localOffset(pivot,mirror,bone.getScale());
+                    pose.transformLocal(bone.getIndex(),local,worldPos);
+                    var visual=bone.isUsable() && group.block()!=null
+                        ? TitanPartBuilder.buildCombinedUsableBlock(store,root,worldPos,rotation,boneScale,bone.getIndex(),local,group)
+                        : TitanPartBuilder.buildCombinedVisual(store,root,worldPos,rotation,boneScale,bone.getIndex(),local,group.model());
+                    if (bone.isUsable()) {
+                        TitanPartBuilder.makeUsable(visual,bone.getUseHint());
+                    }
+                    var originals=voxels.getVoxels().stream().filter(v -> group.cells().contains(TitanPartModels.cell(v))).toList();
+                    visual.getComponent(TitanPartComponent.getComponentType()).setDebrisSource(originals,pivot,bone.getScale(),mirror,boneScale,hollow);
+                    if (fxRadius>0) TitanPartBuilder.attachSpawnFx(visual,worldPos,rootPosition,fxRadius,variant.getSpawnFxDuration(),variant.getSpawnFxStagger());
+                    holders[holderCount++]=visual;
+                    counts.parts++;
+                }
             }
 
             // Houses retain a thin underside seal. Solid limbs follow each step in the prefab's taper.

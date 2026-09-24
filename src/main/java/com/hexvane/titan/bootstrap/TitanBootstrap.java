@@ -218,6 +218,7 @@ public final class TitanBootstrap {
         registry.registerSystem(new TitanAiSystem(siteMemoryType));
         registry.registerSystem(new TitanAnimationSystem());
         registry.registerSystem(new TitanPartSyncSystem());
+        registry.registerSystem(new com.hexvane.titan.system.TitanHiddenCollisionSystem());
         // After part sync, despite running before it: a system's declared dependencies are validated as it
         // is registered, so anything it names has to be registered already. This one sits between the
         // animation and the sync, and names both.
@@ -246,6 +247,7 @@ public final class TitanBootstrap {
         registry.registerSystem(new YagaPetSystem());
         registry.registerSystem(new YagaFurnaceSystem());
         registry.registerSystem(new YagaInteractSystem());
+        registry.registerSystem(new com.hexvane.titan.yaga.YagaInteractionPromptSystem());
         registry.registerSystem(new YagaRespawnSystem(yagaMemoryType));
 
         registry.registerSystem(new TitanLedgeInteractSystem());

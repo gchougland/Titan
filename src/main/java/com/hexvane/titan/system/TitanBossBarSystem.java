@@ -17,14 +17,12 @@ import com.hypixel.hytale.component.system.HolderSystem;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.protocol.packets.interface_.UpdateBossBar;
 import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.core.util.TargetUtil;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
@@ -60,13 +58,14 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
         TitanComponent.getComponentType(),
         TransformComponent.getComponentType());
 
-    @Nonnull
-    private final List<Ref<EntityStore>> engaged = new ArrayList<>();
-    @Nonnull
-    private final List<Ref<EntityStore>> nodes = new ArrayList<>();
-    /** Node healths for one titan, sorted, reused between ticks so the bar costs no allocations. */
-    @Nonnull
-    private float[] healths = new float[16];
+    // Systems are shared by worlds. A component lock cannot protect a system's scratch list
+    // from a different world's tick clearing it while syncPooledHealth iterates it.
+    static final class Scratch {
+        final List<Ref<EntityStore>> engaged = new ArrayList<>();
+        final List<Ref<EntityStore>> nodes = new ArrayList<>();
+        float[] healths = new float[16];
+    }
+    static final ThreadLocal<Scratch> SCRATCH = ThreadLocal.withInitial(Scratch::new);
 
     @Nonnull
     @Override
@@ -90,13 +89,20 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
         final var variant = titan.getVariant();
         if (variant != null && variant.isPet()) return;
 
-        titan.copyWeakpoints(nodes);
-        syncPooledHealth(store, archetypeChunk, index, titan, nodes);
-
-        engaged.clear();
-        if (isFighting(titan)) collectNearbyPlayers(store, transform.getPosition(), engaged);
-
-        updateViewers(store, archetypeChunk.getReferenceTo(index), titan, engaged);
+        final Scratch scratch = SCRATCH.get();
+        final var nodes = scratch.nodes;
+        final var engaged = scratch.engaged;
+        try {
+            titan.copyWeakpoints(nodes);
+            syncPooledHealth(store, archetypeChunk, index, titan, scratch);
+            if (isFighting(titan)) collectNearbyPlayers(store, transform.getPosition(), engaged);
+            updateViewers(store, archetypeChunk.getReferenceTo(index), titan, engaged);
+        } finally {
+            // Ref retains its Store even after invalidation. Keep reusable capacity,
+            // but never retain a world/player through a long-lived scratch buffer.
+            nodes.clear();
+            engaged.clear();
+        }
     }
 
     /**
@@ -116,7 +122,9 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
                                   @Nonnull final ArchetypeChunk<EntityStore> archetypeChunk,
                                   final int index,
                                   @Nonnull final TitanComponent titan,
-                                  @Nonnull final List<Ref<EntityStore>> nodes) {
+                                  @Nonnull final Scratch scratch) {
+
+        final var nodes = scratch.nodes;
 
         final var stats = archetypeChunk.getComponent(index, EntityStatMap.getComponentType());
         if (stats == null || titan.getWeakpointsTotal() <= 0) return;
@@ -132,7 +140,8 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        if (healths.length < nodes.size()) healths = new float[nodes.size()];
+        if (scratch.healths.length < nodes.size()) scratch.healths = new float[nodes.size()];
+        final float[] healths = scratch.healths;
 
         int found = 0;
         for (final Ref<EntityStore> node : nodes) {
@@ -159,9 +168,11 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
     private static void collectNearbyPlayers(@Nonnull final Store<EntityStore> store,
                                              @Nonnull final Vector3d position,
                                              @Nonnull final List<Ref<EntityStore>> out) {
-        for (final Ref<EntityStore> candidate : TargetUtil.getAllEntitiesInSphere(position, VIEW_RADIUS, store)) {
-            if (!candidate.isValid()) continue;
-            if (store.getComponent(candidate, Player.getComponentType()) == null) continue;
+        for (final PlayerRef player : store.getExternalData().getWorld().getPlayerRefs()) {
+            final var candidate = player.getReference();
+            if (candidate == null || !candidate.isValid()) continue;
+            final var transform = store.getComponent(candidate, TransformComponent.getComponentType());
+            if (transform == null || transform.getPosition().distanceSquared(position) > VIEW_RADIUS * VIEW_RADIUS) continue;
             out.add(candidate);
         }
     }

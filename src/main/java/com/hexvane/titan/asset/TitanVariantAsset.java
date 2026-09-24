@@ -186,6 +186,11 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
             a -> a.crouchDepth
         ).add()
         .append(
+            new KeyedCodec<>("FloatPlatformHeight", Codec.DOUBLE),
+            (a, v) -> a.floatPlatformHeight = v,
+            a -> a.floatPlatformHeight
+        ).add()
+        .append(
             new KeyedCodec<>("RestSink", Codec.DOUBLE),
             (a, v) -> a.restSink = v,
             a -> a.restSink
@@ -634,6 +639,9 @@ public final class TitanVariantAsset implements JsonAssetWithMap<String, Default
     private double followDistance = 8.0;
     private double crouchDepth = 2.0;
     private double restSink;
+    private double floatPlatformHeight;
+    /** Standing root to the walkable floor, in model units. Zero disables flotation. */
+    public double getFloatPlatformHeight() { return floatPlatformHeight; }
     private double aboardRadius;
     private double wandSpeed = 3.0;
     private float wandTurnSpeed = 2.0f;

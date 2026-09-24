@@ -32,7 +32,11 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "position": [],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Orb_Facet_A": {
       "shapeStretch": [
@@ -63,7 +67,11 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "position": [],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Orb_Facet_B": {
       "shapeStretch": [
@@ -94,7 +102,11 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "position": [],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Soul_Core": {
       "shapeStretch": [
@@ -125,7 +137,11 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "position": [],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     },
     "Soul_Glint": {
       "shapeStretch": [
@@ -156,7 +172,11 @@
           },
           "interpolationType": "smooth"
         }
-      ]
+      ],
+      "position": [],
+      "orientation": [],
+      "shapeVisible": [],
+      "shapeUvOffset": []
     }
   }
 }

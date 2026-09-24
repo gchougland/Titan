@@ -17,6 +17,9 @@ import com.hypixel.hytale.server.core.asset.type.blockhitbox.BlockBoundingBoxes;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.asset.type.model.config.Model;
+import com.hypixel.hytale.server.core.asset.type.model.config.DetailBox;
+import com.hypixel.hytale.server.core.modules.entity.component.Intangible;
+import java.util.Map;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.BlockEntity;
@@ -329,6 +332,11 @@ public final class TitanPartBuilder {
     public static boolean makeUsable(@Nonnull final Holder<EntityStore> holder, @Nullable final String hint) {
         if (RootInteraction.getAssetMap().getIndex(FIXTURE_INTERACTION) == AssetMapWithIndexes.NOT_FOUND) return false;
 
+        // Combined artwork starts as intangible scenery. A usable model must
+        // be a normal interaction target, like the original visible blocks.
+        if (holder.getComponent(Intangible.getComponentType()) != null) {
+            holder.removeComponent(Intangible.getComponentType());
+        }
         holder.addComponent(Interactable.getComponentType(), Interactable.INSTANCE);
 
         final var interactions = holder.ensureAndGetComponent(Interactions.getComponentType());
@@ -374,6 +382,92 @@ public final class TitanPartBuilder {
         holder.ensureComponent(EntityModule.get().getVisibleComponentType());
         holder.ensureComponent(EntityStore.REGISTRY.getNonSerializedComponentType());
 
+        return holder;
+    }
+
+    /** Empty model carries explicit collision bounds to the client without drawing geometry. */
+    public static void useTempleBodyCollision(@Nonnull Holder<EntityStore> holder, int sx, int sy, int sz, float boneScale) {
+        final var asset = ModelAsset.getAssetMap().getAsset("Titan_Temple_Collision");
+        if (asset == null) throw new IllegalStateException("Missing temple collision model");
+        final var model = collisionModel(new Box(-sx*.5*boneScale,-sy*.5*boneScale,-sz*.5*boneScale,
+            sx*.5*boneScale,sy*.5*boneScale,sz*.5*boneScale));
+        holder.removeComponent(BlockEntity.getComponentType());
+        holder.removeComponent(EntityScaleComponent.getComponentType());
+        holder.addComponent(ModelComponent.getComponentType(), new ModelComponent(model));
+        holder.addComponent(HeadRotation.getComponentType(), new HeadRotation(Rotation3f.IDENTITY));
+        final var bounds = new BoundingBox(model.getBoundingBox().clone());
+        bounds.setBaseModelBox(model.getBoundingBox().clone());
+        holder.putComponent(BoundingBox.getComponentType(), bounds);
+        var part=holder.getComponent(TitanPartComponent.getComponentType());
+        part.setCollisionOnly(true);
+        // Client detail boxes must not replace the server's rotating contact bounds.
+        part.preserveCollisionBounds(bounds);
+    }
+
+    public static Holder<EntityStore> buildTempleBodyVisual(Store<EntityStore> store, Ref<EntityStore> owner,
+            Vector3d position, Rotation3f rotation, float scale, int boneIndex, Vector3d local, String modelId) {
+        final var asset = ModelAsset.getAssetMap().getAsset(modelId);
+        if (asset == null) throw new IllegalStateException("Missing combined temple body model");
+        final var model = Model.createStaticScaledModel(asset, scale);
+        final var holder = buildVoxel(store, owner, "Empty", position, rotation, 0, scale, boneIndex, local, false, null);
+        holder.removeComponent(BlockEntity.getComponentType());
+        holder.removeComponent(EntityScaleComponent.getComponentType());
+        holder.removeComponent(RespondToHit.getComponentType());
+        holder.addComponent(Intangible.getComponentType(), Intangible.INSTANCE);
+        holder.addComponent(ModelComponent.getComponentType(), new ModelComponent(model));
+        holder.addComponent(HeadRotation.getComponentType(), new HeadRotation(Rotation3f.IDENTITY));
+        final var bounds = new BoundingBox(model.getBoundingBox().clone());
+        bounds.setBaseModelBox(model.getBoundingBox().clone());
+        holder.putComponent(BoundingBox.getComponentType(), bounds);
+        return holder;
+    }
+
+    /** Replace only drawing; preserve the existing hit, use, collision and bounds components. */
+    public static void hideBlockVisual(Holder<EntityStore> holder) {
+        var bounds=holder.getComponent(BoundingBox.getComponentType());
+        var model=collisionModel(bounds.getBoundingBox());
+        holder.removeComponent(BlockEntity.getComponentType());
+        holder.removeComponent(EntityScaleComponent.getComponentType());
+        holder.putComponent(ModelComponent.getComponentType(),new ModelComponent(model));
+        holder.putComponent(HeadRotation.getComponentType(),new HeadRotation(Rotation3f.IDENTITY));
+        var part=holder.getComponent(TitanPartComponent.getComponentType());
+        if (part!=null) { part.setCollisionOnly(true); part.clearDebrisSource(); part.preserveCollisionBounds(bounds); }
+        var wormPart=holder.getComponent(com.hexvane.titan.dunewyrm.DunewyrmPartComponent.getComponentType());
+        if (wormPart!=null) wormPart.preserveCollisionBounds(bounds);
+    }
+
+    private static Model collisionModel(Box bounds) {
+        var asset=ModelAsset.getAssetMap().getAsset("Titan_Temple_Collision");
+        if(asset==null) throw new IllegalStateException("Missing titan collision model");
+        // Client targeting needs explicit pick boxes: this model has no drawn faces.
+        // Keep boxes on nearby block targets, never on the elevated visual origin.
+        var box=bounds.clone();
+        return new Model(asset.getId(),1,null,null,box,asset.getModel(),asset.getTexture(),null,null,
+            0,0,0,0,null,null,null,null,null,null,
+            Map.of("Solid",new DetailBox[]{new DetailBox(new Vector3d(),box.clone())}),null,null);
+    }
+
+    public static Holder<EntityStore> buildCombinedVisual(Store<EntityStore> store, Ref<EntityStore> owner,
+            Vector3d position, Rotation3f rotation, float scale, int boneIndex, Vector3d local, String modelId) {
+        var holder=buildTempleBodyVisual(store,owner,position,rotation,scale,boneIndex,local,modelId);
+        // Entity models use the same reversed horizontal mesh basis as blocks.
+        // Keep buildVoxel's half turn, as the verified temple island does.
+        holder.getComponent(TitanPartComponent.getComponentType()).setCombinedVisual(true);
+        return holder;
+    }
+
+    /** Combined Yaga artwork using the same BlockUpdate path as its original usable blocks. */
+    public static Holder<EntityStore> buildCombinedUsableBlock(Store<EntityStore> store, Ref<EntityStore> owner,
+            Vector3d position, Rotation3f rotation, float scale, int boneIndex, Vector3d local, TitanPartModels.Group group) {
+        var asset=ModelAsset.getAssetMap().getAsset(group.model());
+        if(asset==null || group.block()==null) throw new IllegalStateException("Missing combined Yaga block asset");
+        var holder=buildVoxel(store,owner,group.block(),position,rotation,0,scale*group.blockScale(),boneIndex,local,false,null);
+        var model=Model.createStaticScaledModel(asset,scale);
+        var bounds=new BoundingBox(model.getBoundingBox().clone());
+        bounds.setBaseModelBox(model.getBoundingBox().clone());
+        bounds.setDetailBoxes(model.getDetailBoxes());
+        holder.putComponent(BoundingBox.getComponentType(),bounds);
+        holder.getComponent(TitanPartComponent.getComponentType()).setCombinedVisual(true);
         return holder;
     }
 

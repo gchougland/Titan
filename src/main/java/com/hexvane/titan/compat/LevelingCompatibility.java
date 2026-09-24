@@ -41,17 +41,31 @@ public final class LevelingCompatibility {
 
     public static Scaling forPlayers(Store<EntityStore> store, List<Ref<EntityStore>> players) {
         var config = TitanConfig.get();
-        double total = 0;
+        double rpgTotal = 0, endlessTotal = 0;
         int count = 0;
         for (var ref : players) {
+            if (ref == null || !ref.isValid()) continue;
             var player = store.getComponent(ref, PlayerRef.getComponentType());
             if (player == null || store.getComponent(ref, DeathComponent.getComponentType()) != null) continue;
             int rpg = config.isRpgLevelingCompatibility() ? RPG.level(player, store) : 0;
             int endless = config.isEndlessLevelingCompatibility() ? ENDLESS.level(player, store) : 0;
-            total += Math.max(1, Math.max(rpg, endless));
+            rpgTotal += Math.max(1, rpg);
+            endlessTotal += Math.max(1, endless);
             count++;
         }
-        return fromLevel(count == 0 ? 1 : total / count, config);
+        return count == 0 ? Scaling.NONE : fromLevels(rpgTotal / count, endlessTotal / count, config);
+    }
+
+    /** Providers have different progression rates. Take the stronger bonus, never multiply them. */
+    public static Scaling fromLevels(double rpgLevel, double endlessLevel, TitanConfig config) {
+        var rpg = fromLevel(config.isRpgLevelingCompatibility() ? rpgLevel : 1, config);
+        double level = config.isEndlessLevelingCompatibility() && Double.isFinite(endlessLevel)
+            ? Math.max(1, endlessLevel) : 1;
+        double extra = Math.max(0, level - config.getLevelScalingBaseline());
+        float health = (float) Math.min(config.getMaxLevelHealthMultiplier(),
+            Math.min(config.getEndlessMaxHealthMultiplier(), 1 + extra * config.getEndlessHealthPerLevel()));
+        float damage = fromLevel(level, config).damage();
+        return new Scaling(Math.max(rpg.health(), health), Math.max(rpg.damage(), damage));
     }
 
     public static Scaling fromLevel(double level, TitanConfig config) {
@@ -70,7 +84,9 @@ public final class LevelingCompatibility {
         titan.levelHealthMultiplier = scale.health(); titan.setLevelDamageMultiplier(scale.damage());
         if (Math.abs(ratio - 1) < .00001) return;
         titan.setNodeHealth(titan.getNodeHealth() * ratio);
-        for (var ref : titan.getWeakpoints()) {
+        var nodes = new ArrayList<Ref<EntityStore>>();
+        titan.copyWeakpoints(nodes);
+        for (var ref : nodes) {
             if (!ref.isValid() || cb.getComponent(ref, DeathComponent.getComponentType()) != null) continue;
             var stats = cb.getComponent(ref, com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
             if (stats == null) continue;

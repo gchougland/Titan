@@ -102,7 +102,10 @@ public final class TitanRagdollSystem extends EntityTickingSystem<EntityStore> {
         next.set(position).fma(dt, velocity);
 
         final var scaleComponent = archetypeChunk.getComponent(index, EntityScaleComponent.getComponentType());
-        final double halfHeight = (scaleComponent == null ? 1f : scaleComponent.getScale()) * 0.5;
+        final var bounds = archetypeChunk.getComponent(index, com.hypixel.hytale.server.core.modules.entity.component.BoundingBox.getComponentType());
+        final double halfHeight = bounds != null
+            ? (bounds.getBoundingBox().max.y - bounds.getBoundingBox().min.y) * .5
+            : (scaleComponent == null ? 1f : scaleComponent.getScale()) * 0.5;
 
         final var chunkStore = store.getExternalData().getWorld().getChunkStore();
         final double ground = GroundSampler.sample(chunkStore, next.x, position.y, next.z, GROUND_ABOVE, GROUND_BELOW);

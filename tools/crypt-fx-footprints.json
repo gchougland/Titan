@@ -24,7 +24,7 @@
     "radius": 8.5,
     "tileCount": 37,
     "bands": 3,
-    "floorSpawner": "Crypt_Poison_Cloud_Field",
+    "floorSpawner": null,
     "tileSpawner": "Crypt_Poison_Fog"
   }
 }

@@ -46,3 +46,4 @@ commands.titan.yaga.forget.success=Forgotten. Its chests went with it.
 commands.titan.yaga.wand.desc=Give yourself a wand for directing your house
 commands.titan.yaga.wand.success=A wand. Hold either mouse button to send your house that way, or press use to make it leap.
 commands.titan.yaga.wand.full=Your pack is full.
+yaga.chest.recovered = Items from your old chests are safe. Make room and reopen a chest to collect more.

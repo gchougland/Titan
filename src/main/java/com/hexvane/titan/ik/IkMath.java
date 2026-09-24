@@ -137,6 +137,16 @@ public final class IkMath {
                                  @Nonnull final Vector3dc worldDir,
                                  @Nonnull final Vector3dc worldTwist,
                                  @Nonnull final Scratch scratch) {
+        alignAxis(dest, localAxis, worldDir, null, worldTwist, scratch);
+    }
+
+    /** Uses an authored side instead of projected up, keeping asymmetric legs facing forward. */
+    public static void alignAxis(@Nonnull final Quaterniond dest,
+                                 @Nonnull final Vector3dc localAxis,
+                                 @Nonnull final Vector3dc worldDir,
+                                 final Vector3dc localSide,
+                                 @Nonnull final Vector3dc worldTwist,
+                                 @Nonnull final Scratch scratch) {
         final Vector3d a = scratch.a.set(localAxis);
         final Vector3d u = scratch.u.set(worldDir);
         if (a.lengthSquared() < EPSILON || u.lengthSquared() < EPSILON) {
@@ -150,7 +160,7 @@ public final class IkMath {
 
         if (!perpendicular(worldTwist, u, scratch.poleP)) return;
 
-        anyPerpendicular(a, scratch.bend);
+        if (localSide == null || !perpendicular(localSide, a, scratch.bend)) anyPerpendicular(a, scratch.bend);
         dest.transform(scratch.bend);
         if (!perpendicular(scratch.bend, u, scratch.bend)) return;
 
