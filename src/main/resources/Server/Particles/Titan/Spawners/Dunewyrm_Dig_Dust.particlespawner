@@ -37,7 +37,7 @@
     "UVOption": "RandomFlipU",
     "SoftParticles": "Enable",
     "InitialAnimationFrame": {
-      "Opacity": 0.0,
+      "Opacity": 1.0,
       "Color": "#c9b896",
       "FrameIndex": { "Min": 0, "Max": 2 },
       "Scale": {

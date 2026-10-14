@@ -236,7 +236,7 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
 
             if (viewers.contains(player)) continue;
             if (networkId != NO_ENTITY) {
-                write(accessor, player, new UpdateBossBar(networkId, Message.raw(name).getFormattedMessage(), false));
+                write(accessor, player, new UpdateBossBar(networkId, Message.raw(name).getFormattedMessage(), false, false));
             }
             viewers.add(player);
         }
@@ -252,7 +252,7 @@ public final class TitanBossBarSystem extends EntityTickingSystem<EntityStore> {
     private static void hide(@Nonnull final ComponentAccessor<EntityStore> accessor,
                              @Nonnull final Ref<EntityStore> playerRef,
                              final int networkId) {
-        write(accessor, playerRef, new UpdateBossBar(networkId, null, true));
+        write(accessor, playerRef, new UpdateBossBar(networkId, null, true, false));
     }
 
     private static boolean write(@Nonnull final ComponentAccessor<EntityStore> accessor,

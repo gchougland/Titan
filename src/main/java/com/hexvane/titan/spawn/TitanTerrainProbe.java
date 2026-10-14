@@ -5,8 +5,8 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.server.core.asset.type.environment.config.Environment;
 import com.hypixel.hytale.server.core.asset.type.fluid.Fluid;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
-import com.hypixel.hytale.server.core.universe.world.chunk.environment.EnvironmentChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.heightmap.HeightmapColumn;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.EnvironmentSection;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.FluidSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 
@@ -56,10 +56,12 @@ public final class TitanTerrainProbe {
      * A titan's feet stand one above this. Only already loaded sections are read.
      */
     public static int surfaceY(@Nonnull final ChunkStore chunkStore, final int x, final int z) {
-        final WorldChunk chunk = columnAt(chunkStore, x, z);
-        if (chunk == null) return NO_SURFACE;
+        final HeightmapColumn heightmap =
+            chunkStore.getChunkComponent(ChunkUtil.indexChunkFromBlock(x, z), HeightmapColumn.getComponentType());
+        if (heightmap == null) return NO_SURFACE;
 
-        final short height = chunk.getHeight(x, z);
+        // An empty column reports HeightmapColumn.NO_HEIGHT, which is also below MIN_Y.
+        final int height = heightmap.getHeight(x, z);
         if (height < ChunkUtil.MIN_Y) return NO_SURFACE;
         final double ground = GroundSampler.sample(chunkStore, x, height, z, 0, height - ChunkUtil.MIN_Y);
         return GroundSampler.isValid(ground) ? (int) ground - 1 : NO_SURFACE;
@@ -74,14 +76,8 @@ public final class TitanTerrainProbe {
      */
     @Nullable
     public static String environmentAt(@Nonnull final ChunkStore chunkStore, final int x, final int surfaceY, final int z) {
-        final Ref<ChunkStore> columnRef = chunkStore.getChunkReference(ChunkUtil.indexChunkFromBlock(x, z));
-        if (columnRef == null) return null;
-
-        final EnvironmentChunk environments = chunkStore.getStore().getComponent(columnRef, EnvironmentChunk.getComponentType());
-        if (environments == null) return null;
-
-        final String standing = environmentId(environments, x, surfaceY + 1, z);
-        return standing != null ? standing : environmentId(environments, x, surfaceY, z);
+        final String standing = environmentId(chunkStore, x, surfaceY + 1, z);
+        return standing != null ? standing : environmentId(chunkStore, x, surfaceY, z);
     }
 
     /** Why a spot will or will not hold a titan. */
@@ -182,16 +178,16 @@ public final class TitanTerrainProbe {
         return fluids != null && fluids.getFluidId(x, y, z) != Fluid.EMPTY_ID;
     }
 
+    /** Environments are stored per section; a section that is not loaded, or above the world, has none. */
     @Nullable
-    private static WorldChunk columnAt(@Nonnull final ChunkStore chunkStore, final int x, final int z) {
-        final Ref<ChunkStore> columnRef = chunkStore.getChunkReference(ChunkUtil.indexChunkFromBlock(x, z));
-        return columnRef == null ? null : chunkStore.getStore().getComponent(columnRef, WorldChunk.getComponentType());
-    }
+    private static String environmentId(@Nonnull final ChunkStore chunkStore, final int x, final int y, final int z) {
+        final Ref<ChunkStore> sectionRef = chunkStore.getChunkSectionReferenceAtBlock(x, y, z);
+        if (sectionRef == null) return null;
 
-    @Nullable
-    private static String environmentId(@Nonnull final EnvironmentChunk environments, final int x, final int y, final int z) {
-        final int clamped = Math.max(ChunkUtil.MIN_Y, Math.min(ChunkUtil.HEIGHT_MINUS_1, y));
-        final Environment environment = Environment.getAssetMap().getAsset(environments.get(x, clamped, z));
+        final EnvironmentSection environments = chunkStore.getStore().getComponent(sectionRef, EnvironmentSection.getComponentType());
+        if (environments == null) return null;
+
+        final Environment environment = Environment.getAssetMap().getAsset(environments.get(x, y, z));
         return environment == null ? null : environment.getId();
     }
 }

@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.0] - 10/12/2026
+
+### Changed
+
+- **Hytale Update 7** Titan now runs on Hytale Update 7 (0.7.0).
+
+### Fixed
+
+- **Block-built bosses** Baba Yaga and the other block-built bosses no longer show scrambled textures.
+
 ## [1.0.1] - 9/22/2026
 
 ### Added

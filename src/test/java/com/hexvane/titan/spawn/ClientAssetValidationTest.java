@@ -133,6 +133,7 @@ class ClientAssetValidationTest {
 
     @Test void bodyModelsFitClientNodeBudgetAndCollisionModelsDrawNothing() throws Exception {
         var batches = new HashSet<String>();
+        var cells = new HashSet<String>();
         for (var row : Files.readAllLines(RES.resolve("TitanMeshes/BodyVisuals.tsv"))) {
         var fields=row.split("\t");
         for (int i=1;i<fields.length;i++) assertTrue(batches.add(fields[i]),"Each original cuboid has exactly one death owner");
@@ -149,37 +150,46 @@ class ClientAssetValidationTest {
         for (var child : root.getArray("children")) {
             var node=child.asDocument(); var shape=node.getDocument("shape");
             assertTrue(ids.add(node.getString("id").getValue()),"unique static node IDs");
-            assertEquals("quad",shape.getString("type").getValue());
+            // A face cannot repeat a tile, so every source block is its own box and
+            // the atlas holds each block texture once.
+            assertEquals("box",shape.getString("type").getValue());
             assertTrue(node.getArray("children").isEmpty());
-            String normal=shape.getDocument("settings").getString("normal").getValue();
-            assertEquals("+Z",normal,"All surfaces must have nonzero local XY area before node rotation");
-            var size=shape.getDocument("settings").getDocument("size");
-            double w=size.getNumber("x").doubleValue()/32, h=size.getNumber("y").doubleValue()/32;
-            assertTrue(w>=1 && h>=1 && w==Math.rint(w) && h==Math.rint(h));
             var rotation=node.getDocument("orientation");
             var q=new Quaterniond(rotation.getNumber("x").doubleValue(),rotation.getNumber("y").doubleValue(),
                 rotation.getNumber("z").doubleValue(),rotation.getNumber("w").doubleValue());
             assertEquals(1,q.lengthSquared(),1e-9);
-            var corners=new ArrayList<Vector3d>();
-            for (double[] corner : new double[][]{{-w/2,h/2,0},{w/2,h/2,0},{w/2,-h/2,0},{-w/2,-h/2,0}})
-                corners.add(q.transform(new Vector3d(corner[0],corner[1],corner[2])));
-            double area=new Vector3d(corners.get(1)).sub(corners.get(0))
-                .cross(new Vector3d(corners.get(3)).sub(corners.get(0))).length();
-            assertEquals(w*h,area,1e-8,"No surface may collapse when transformed from its local plane");
-            for (int axis=0;axis<3;axis++) {
-                String lower="xyz".substring(axis,axis+1), upper=lower.toUpperCase(java.util.Locale.ROOT);
-                assertEquals(2,shape.getDocument("stretch").getNumber(lower).doubleValue());
-                double centre=node.getDocument("position").getNumber(lower).doubleValue()/64;
-                for (var corner : corners) {
-                    double coordinate=centre+corner.get(axis);
-                    assertEquals(Math.rint(coordinate),coordinate,1e-8,"Rotated vertices stay on source block corners");
+            var cell=new StringBuilder();
+            for (double[] corner : new double[][]{{-.5,-.5,-.5},{.5,-.5,-.5},{-.5,.5,-.5},{.5,.5,-.5},
+                    {-.5,-.5,.5},{.5,-.5,.5},{-.5,.5,.5},{.5,.5,.5}}) {
+                var local=new Vector3d();
+                for (int axis=0;axis<3;axis++) {
+                    String lower="xyz".substring(axis,axis+1);
+                    assertEquals(32,shape.getDocument("settings").getDocument("size").getNumber(lower).doubleValue());
+                    assertEquals(2,shape.getDocument("stretch").getNumber(lower).doubleValue());
+                    assertEquals(0,shape.getDocument("offset").getNumber(lower).doubleValue());
+                    local.setComponent(axis,corner[axis]);
+                }
+                q.transform(local);
+                for (int axis=0;axis<3;axis++) {
+                    String lower="xyz".substring(axis,axis+1), upper=lower.toUpperCase(java.util.Locale.ROOT);
+                    double coordinate=node.getDocument("position").getNumber(lower).doubleValue()/64+local.get(axis);
+                    assertEquals(Math.rint(coordinate),coordinate,1e-8,"Vertices stay on source block corners");
                     assertTrue(coordinate>=asset.getDocument("HitBox").getDocument("Min").getNumber(upper).doubleValue()-1e-8);
                     assertTrue(coordinate<=asset.getDocument("HitBox").getDocument("Max").getNumber(upper).doubleValue()+1e-8);
                 }
             }
-            var uv=shape.getDocument("textureLayout").getDocument("front").getDocument("offset");
-            assertTrue(uv.getNumber("x").intValue()+w*32<=texture.getWidth());
-            assertTrue(uv.getNumber("y").intValue()+h*32<=texture.getHeight());
+            for (String lower : new String[]{"x","y","z"})
+                cell.append(node.getDocument("position").getNumber(lower).doubleValue()).append(',');
+            assertTrue(cells.add(cell.toString()),"No source block is drawn twice");
+            var layout=shape.getDocument("textureLayout");
+            assertFalse(layout.isEmpty(),"Every box draws at least one open face");
+            for (var face : layout.entrySet()) {
+                var uv=face.getValue().asDocument().getDocument("offset");
+                int u=uv.getNumber("x").intValue(), v=uv.getNumber("y").intValue();
+                assertEquals(0,face.getValue().asDocument().getNumber("angle").intValue(),"Island blocks are not rotated");
+                assertTrue(u%32==0 && v%32==0 && u>=0 && v>=0 && u+32<=texture.getWidth() && v+32<=texture.getHeight(),
+                    "Each face shows exactly one atlas tile");
+            }
         }
         }
         var expected=Files.readAllLines(RES.resolve("TitanMeshes/Body.tsv")).stream().skip(1)
@@ -235,44 +245,80 @@ class ClientAssetValidationTest {
                 var bounds = boxes.getFirst().asDocument();
                 var model = BsonDocument.parse(Files.readString(RES.resolve("Common/"+item.getString("CustomModel").getValue())));
                 assertEquals("off", model.getString("lod").getValue());
-                assertEquals(1, model.getArray("nodes").size(), "one box, no internal cube faces");
-                var node = model.getArray("nodes").getFirst().asDocument();
-                var shape = node.getDocument("shape");
+                assertEquals(1, model.getArray("nodes").size());
+                var root = model.getArray("nodes").getFirst().asDocument();
+                assertEquals("none", root.getDocument("shape").getString("type").getValue());
+                var children = root.getArray("children");
+                assertTrue(!children.isEmpty() && children.size()+1 <= 256, f[6]+" exceeds client node budget");
                 boolean body = section.equals("Body") || yaga || section.startsWith("Talus_");
-                assertEquals(body, shape.getBoolean("doubleSided").getValue(), "body surfaces remain visible from below");
                 assertEquals(body ? "Transparent" : "Solid", item.getString("Opacity").getValue(),
                     "body patches must not act as full opaque cells");
-                var dimensions = new int[]{sx,sy,sz};
-                for (int axis = 0; axis < 3; axis++) {
-                    String lower = "xyz".substring(axis,axis+1), upper = lower.toUpperCase(java.util.Locale.ROOT);
-                    double size = shape.getDocument("settings").getDocument("size").getNumber(lower).doubleValue()
-                        * shape.getDocument("stretch").getNumber(lower).doubleValue()/32;
-                    double position = node.getDocument("position").getNumber(lower).doubleValue()/32;
-                    double min = bounds.getDocument("Min").getNumber(upper).doubleValue();
-                    double max = bounds.getDocument("Max").getNumber(upper).doubleValue();
-                    assertTrue(min >= 0 && max <= 1, "client hitbox must fit unit bounds");
-                    assertEquals(dimensions[axis], size*scale, 1e-8, "world geometry size");
-                    assertEquals(dimensions[axis], (max-min)*scale, 1e-8, "client collision size");
-                    double originOffset = axis == 1 ? 0 : .5;
-                    assertEquals(min, position-size*.5+originOffset, 1e-8, "mesh minimum matches client bounds");
-                    assertEquals(max, position+size*.5+originOffset, 1e-8, "mesh maximum matches client bounds");
-                }
                 var texture = RES.resolve("Common/"+item.getArray("CustomModelTexture").getFirst().asDocument().getString("Texture").getValue());
                 var image = atlases.get(texture);
                 if (image == null) {
                     image = javax.imageio.ImageIO.read(texture.toFile());
                     atlases.put(texture, image);
                 }
-                for (var face : shape.getDocument("textureLayout").entrySet()) {
-                    var uv = face.getValue().asDocument().getDocument("offset");
-                    int u = uv.getNumber("x").intValue(), v = uv.getNumber("y").intValue();
-                    int width = (face.getKey().equals("left") || face.getKey().equals("right") ? sz : sx)*32;
-                    int height = (face.getKey().equals("top") || face.getKey().equals("bottom") ? sz : sy)*32;
-                    assertTrue(u >= 2 && v >= 2 && u+width+2 <= image.getWidth() && v+height+2 <= image.getHeight());
-                    // Atlas bleed/empty UVs look like missing geometry; every face is opaque, including its gutter.
-                    for (int py = v-2; py < v+height+2; py++) for (int px = u-2; px < u+width+2; px++)
-                        if (image.getRGB(px, py) >>> 24 != 255) fail(f[6]+" has transparent face pixels");
+                var dimensions = new int[]{sx,sy,sz};
+                for (int axis = 0; axis < 3; axis++) {
+                    String upper = "XYZ".substring(axis,axis+1);
+                    double min = bounds.getDocument("Min").getNumber(upper).doubleValue();
+                    double max = bounds.getDocument("Max").getNumber(upper).doubleValue();
+                    assertTrue(min >= 0 && max <= 1, "client hitbox must fit unit bounds");
+                    assertEquals(dimensions[axis], (max-min)*scale, 1e-8, "client collision size");
                 }
+                // A face cannot repeat a tile, so the cuboid is drawn as one box per
+                // source block, each inside the client hitbox and on its cell grid.
+                var drawn = new HashSet<String>();
+                var touched = new boolean[3][2];
+                for (var child : children) {
+                    var node = child.asDocument();
+                    var shape = node.getDocument("shape");
+                    assertEquals("box", shape.getString("type").getValue());
+                    assertTrue(node.getArray("children").isEmpty());
+                    assertEquals(body, shape.getBoolean("doubleSided").getValue(), "body surfaces remain visible from below");
+                    var cell = new int[3];
+                    for (int axis = 0; axis < 3; axis++) {
+                        String lower = "xyz".substring(axis,axis+1), upper = lower.toUpperCase(java.util.Locale.ROOT);
+                        double size = shape.getDocument("settings").getDocument("size").getNumber(lower).doubleValue()
+                            * shape.getDocument("stretch").getNumber(lower).doubleValue()/32;
+                        double position = (root.getDocument("position").getNumber(lower).doubleValue()
+                            + node.getDocument("position").getNumber(lower).doubleValue())/32;
+                        double min = bounds.getDocument("Min").getNumber(upper).doubleValue();
+                        double max = bounds.getDocument("Max").getNumber(upper).doubleValue();
+                        assertEquals(1, size*scale, 1e-8, "each box is one source block");
+                        double originOffset = axis == 1 ? 0 : .5;
+                        double index = (position-size*.5+originOffset-min)*scale;
+                        assertEquals(Math.rint(index), index, 1e-8, "boxes sit on the cuboid's cell grid");
+                        cell[axis] = (int)Math.rint(index);
+                        assertTrue(cell[axis] >= 0 && cell[axis] < dimensions[axis], "mesh stays inside client bounds");
+                        touched[axis][0] |= cell[axis] == 0;
+                        touched[axis][1] |= cell[axis] == dimensions[axis]-1;
+                    }
+                    assertTrue(drawn.add(cell[0]+","+cell[1]+","+cell[2]), "no source block is drawn twice");
+                    assertFalse(shape.getDocument("textureLayout").isEmpty());
+                    for (var face : shape.getDocument("textureLayout").entrySet()) {
+                        boolean outside = switch (face.getKey()) {
+                            case "left" -> cell[0] == 0; case "right" -> cell[0] == sx-1;
+                            case "bottom" -> cell[1] == 0; case "top" -> cell[1] == sy-1;
+                            case "back" -> cell[2] == 0; default -> cell[2] == sz-1; };
+                        assertTrue(outside, "no internal cube faces");
+                        var uv = face.getValue().asDocument().getDocument("offset");
+                        int angle = face.getValue().asDocument().getNumber("angle").intValue();
+                        // The offset is the face's top-left corner; a turned face starts at another corner of its tile.
+                        int u = uv.getNumber("x").intValue() - (angle == 90 || angle == 180 ? 32 : 0);
+                        int v = uv.getNumber("y").intValue() - (angle == 180 || angle == 270 ? 32 : 0);
+                        assertTrue(u % 32 == 0 && v % 32 == 0 && u >= 0 && v >= 0
+                            && u+32 <= image.getWidth() && v+32 <= image.getHeight(), "each face shows exactly one atlas tile");
+                        // Empty UVs look like missing geometry; every face is opaque.
+                        for (int py = v; py < v+32; py++) for (int px = u; px < u+32; px++)
+                            if (image.getRGB(px, py) >>> 24 != 255) fail(f[6]+" has transparent face pixels");
+                    }
+                }
+                // Faces are drawn whole, so the mesh reaches every side of the client bounds that draws anything.
+                assertTrue(drawn.size() <= sx*sy*sz);
+                for (int axis = 0; axis < 3; axis++)
+                    assertTrue(touched[axis][0] || touched[axis][1] || dimensions[axis] == 1, "mesh matches client bounds");
             }
         }
     }

@@ -139,7 +139,7 @@ public final class DunewyrmHealthSyncSystem extends EntityTickingSystem<EntitySt
             TitanBattleWeather.apply(accessor, player, weather);
             if (viewers.contains(player)) continue;
             if (networkId != NO_ENTITY) {
-                write(accessor, player, new UpdateBossBar(networkId, Message.raw(name).getFormattedMessage(), false));
+                write(accessor, player, new UpdateBossBar(networkId, Message.raw(name).getFormattedMessage(), false, false));
             }
             viewers.add(player);
         }
@@ -155,7 +155,7 @@ public final class DunewyrmHealthSyncSystem extends EntityTickingSystem<EntitySt
     private static void hide(@Nonnull final ComponentAccessor<EntityStore> accessor,
                              @Nonnull final Ref<EntityStore> playerRef,
                              final int networkId) {
-        write(accessor, playerRef, new UpdateBossBar(networkId, null, true));
+        write(accessor, playerRef, new UpdateBossBar(networkId, null, true, false));
     }
 
     private static void promoteIfNeeded(@Nonnull final Store<EntityStore> store,

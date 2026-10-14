@@ -2,8 +2,9 @@ package com.hexvane.titan.spawn;
 
 import com.google.common.flogger.FluentLogger;
 import com.hypixel.hytale.math.util.ChunkUtil;
+import com.hypixel.hytale.math.util.MathUtil;
 import com.hypixel.hytale.server.core.asset.type.environment.config.Environment;
-import com.hypixel.hytale.server.core.universe.world.chunk.BlockChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.EnvironmentSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import org.joml.Vector3d;
 
@@ -67,14 +68,20 @@ public final class TitanEnvironment {
      * loaded.
      */
     public static int environmentAt(@Nonnull final ChunkStore chunkStore, @Nonnull final Vector3d position) {
-        final long chunkIndex = ChunkUtil.indexChunkFromBlock(position.x, position.z);
-        final var chunkRef = chunkStore.getChunkReference(chunkIndex);
+        final int x = MathUtil.floor(position.x);
+        final int y = MathUtil.floor(position.y);
+        final int z = MathUtil.floor(position.z);
+
+        final var chunkRef = chunkStore.getChunkReference(ChunkUtil.indexChunkFromBlock(x, z));
         if (chunkRef == null || !chunkRef.isValid()) return -1;
 
-        final var blockChunk = chunkStore.getStore().getComponent(chunkRef, BlockChunk.getComponentType());
-        if (blockChunk == null) return -1;
+        // Environments are stored per section. A loaded column with no section at this height (above or
+        // below the world) has no environment there.
+        final var sectionRef = chunkStore.getChunkSectionReferenceAtBlock(x, y, z);
+        if (sectionRef == null || !sectionRef.isValid()) return Environment.UNKNOWN_ID;
 
-        return blockChunk.getEnvironment(position);
+        final var environments = chunkStore.getStore().getComponent(sectionRef, EnvironmentSection.getComponentType());
+        return environments == null ? Environment.UNKNOWN_ID : environments.get(x, y, z);
     }
 
     /** @return environment id at {@code position} for command output, or {@code null} if the chunk is not loaded. */

@@ -74,7 +74,7 @@ public final class TitanImprovementsRuntimeSmoke {
         var world = universe.makeWorld(name, universe.validateWorldPath(name), config).get(20, TimeUnit.SECONDS);
         var loads = new ArrayList<CompletableFuture<?>>();
         for (int x = -2; x <= 2; x++) for (int z = -2; z <= 2; z++)
-            loads.add(world.getChunkAsync(ChunkUtil.indexChunk(x,z)));
+            loads.add(world.getChunkStore().getChunkReferenceAsync(ChunkUtil.indexChunk(x,z), GetChunkFlags.SET_TICKING));
         CompletableFuture.allOf(loads.toArray(CompletableFuture[]::new)).get(20,TimeUnit.SECONDS);
         CompletableFuture.runAsync(() -> exercise(world), world).get(30,TimeUnit.SECONDS);
         CompletableFuture.runAsync(() -> exerciseTalus(world), world).get(30,TimeUnit.SECONDS);

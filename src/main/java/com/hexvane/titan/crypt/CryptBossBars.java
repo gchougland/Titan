@@ -22,7 +22,7 @@ final class CryptBossBars {
 
     static void show(PlayerRef player, int entityId, FormattedMessage title) {
         synchronized (SHOWN) {
-            player.getPacketHandler().writeNoCache(new UpdateBossBar(entityId, title, false));
+            player.getPacketHandler().writeNoCache(new UpdateBossBar(entityId, title, false, false));
             SHOWN.computeIfAbsent(player, ignored -> new HashSet<>()).add(entityId);
         }
     }
@@ -32,7 +32,7 @@ final class CryptBossBars {
             var owned = SHOWN.get(player);
             if (owned == null || !owned.remove(entityId)) return;
             if (owned.isEmpty()) SHOWN.remove(player);
-            player.getPacketHandler().writeNoCache(new UpdateBossBar(entityId, null, true));
+            player.getPacketHandler().writeNoCache(new UpdateBossBar(entityId, null, true, false));
         }
     }
 
@@ -42,7 +42,7 @@ final class CryptBossBars {
         synchronized (SHOWN) {
             var owned = SHOWN.remove(player);
             if (owned == null) return;
-            for (int entityId : owned) player.getPacketHandler().writeNoCache(new UpdateBossBar(entityId, null, true));
+            for (int entityId : owned) player.getPacketHandler().writeNoCache(new UpdateBossBar(entityId, null, true, false));
         }
     }
 

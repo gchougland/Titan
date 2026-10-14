@@ -69,7 +69,7 @@ public final class GroundSampler {
 
         final int bx = (int) Math.floor(x);
         final int bz = (int) Math.floor(z);
-        final int top = Math.min(ChunkUtil.HEIGHT_MINUS_1, (int) Math.floor(startY) + above);
+        final int top = (int) Math.floor(startY) + above;
         final int bottom = Math.max(ChunkUtil.MIN_Y, (int) Math.floor(startY) - below);
 
         for (int y = top; y >= bottom; y--) {
@@ -101,9 +101,12 @@ public final class GroundSampler {
         return type != null && type.getOpacity() != Opacity.Transparent && !TitanTrees.isTree(type.getId());
     }
 
-    /** @return the block id at the given world position, or {@code UNKNOWN_ID} if the section is not loaded. */
+    /**
+     * @return the block id at the given world position, or {@code UNKNOWN_ID} if the section is not loaded.
+     *         A position above the top of the world has no section, so it reports the same.
+     */
     public static int blockId(@Nonnull final ChunkStore chunkStore, final int x, final int y, final int z) {
-        if (y < ChunkUtil.MIN_Y || y > ChunkUtil.HEIGHT_MINUS_1) return BlockType.UNKNOWN_ID;
+        if (y < ChunkUtil.MIN_Y) return BlockType.UNKNOWN_ID;
         final var ref = chunkStore.getChunkSectionReferenceAtBlock(x, y, z);
         if (ref == null) return BlockType.UNKNOWN_ID;
 

@@ -50,13 +50,14 @@ public final class YagaBuoyancy {
     private static double waterSurface(ChunkStore chunks, Vector3d p, double height) {
         int x = (int) Math.floor(p.x), z = (int) Math.floor(p.z);
         int start = Math.max(ChunkUtil.MIN_Y, (int) Math.floor(p.y));
-        int end = Math.min(ChunkUtil.HEIGHT_MINUS_1, (int) Math.ceil(p.y + height));
+        int end = (int) Math.ceil(p.y + height);
         double surface = Double.NaN;
         boolean found = false;
-        for (int y = start; y <= ChunkUtil.HEIGHT_MINUS_1; y++) {
+        for (int y = start; ; y++) {
             if (!found && y > end) break;
             var ref = chunks.getChunkSectionReferenceAtBlock(x, y, z);
-            if (ref == null) return Double.NaN;
+            // No section: unloaded, or water that reaches the top of the world.
+            if (ref == null) return found ? surface : Double.NaN;
             var section = chunks.getStore().getComponent(ref, FluidSection.getComponentType());
             var fluid = section == null ? null : section.getFluid(x, y, z);
             boolean water = fluid != null && isWater(fluid.getId()) && section.getFluidLevel(x, y, z) > 0;
